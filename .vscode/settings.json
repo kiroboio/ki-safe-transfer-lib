@@ -8,5 +8,6 @@
         "titleBar.inactiveForeground": "#000000CC",
         "titleBar.activeBackground": "#6be667",
         "titleBar.inactiveBackground": "#4dab49"
-    }
+    },
+    "files.autoSave": "off"
 }

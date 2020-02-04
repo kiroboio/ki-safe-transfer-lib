@@ -1,36 +1,43 @@
-import Service, { DebugLevels, Currencies, Networks } from '../src/'
+import Service, { DebugLevels, Currencies, Networks, Responses, Event } from '../src/'
 
-// TODO: remove
-// test('', () => {
-//   console.log(new Service({}))
-// })
-
-const defaultSettings = {
-  version: 'v1',
-  debug: DebugLevels.MUTE,
-  currency: Currencies.Bitcoin,
-  network: Networks.Testnet,
+function eventBus(event: Event) {
+  console.log('event fired: ', event)
 }
-
-const customSettings = { ...defaultSettings, debug: DebugLevels.QUIET }
-
-// TODO: extract
-const compareObjects = (object1: any, object2: any) => {
-  if (Object.keys(object1).length !== Object.keys(object2).length) return false
-  let result = true
-  Object.keys(object1).forEach(key => {
-    if (object1[key] !== object2[key]) {
-      result = false
-    }
-  })
-  return result
-}
-
 
 const service = new Service({})
 
-console.log(service.getSettings())
+// const service = new Service({
+//   debug: DebugLevels.QUIET,
+//   network: Networks.Testnet,
+//   currency: Currencies.Bitcoin,
+//   respond: Responses.Direct,
+//   eventBus,
+// })
+// const service = new Service({})
+// console.log(Object.keys(service))
+// const result = service.getSettings()
+// console.log(result)
 
-console.log(service)
 
-service.getRetrievable('6a7acf1cdd7d35f3d86aa005c09cd27ac71bc1fc0c71454f3d9938fb88250edd0000')
+// console.log(service.getStatus())
+// console.log(service)
+// async function run() {
+// const res = await service.getCollectables('mrqQsrjG65QiE1xMTbKNBnX7qKgthy2XCp')
+// const res = await service.getRetrievable('6a7acf1cdd7d35f3d86aa005c09cd27ac71bc1fc0c71454f3d9938fb88250edd0000')
+// const res = await service.send({
+//   to: 'string',
+//   from: 'string',
+//   hint: 'string',
+//   collect: 'string',
+//   deposit: 'string',
+//   amount: 1,
+//   key: 'string',
+// })
+// async function run() {
+//   const result = await service.getStatus()
+//   console.log(result)
+// }
+
+// run()
+
+// service.getCollectables('mrqQsrjG65QiE1xMTbKNBnX7qKgthy2XCp')
