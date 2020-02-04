@@ -30,7 +30,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/kiroboio/ki-safe-transfer-lib"
   },
   "devDependencies": {
     "@types/jest": "^25.1.1",
