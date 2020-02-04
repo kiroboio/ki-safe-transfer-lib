@@ -1,0 +1,48 @@
+{
+  "name": "@kirobo/safe-transfer-lib",
+  "version": "0.0.1",
+  "description": "Safe Transfer library",
+  "author": "Dmitry Melnikov <d.dash.mv@gmail.com>",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test && npm run lint",
+    "preversion": "npm run lint",
+    "version": "npm run test && npm run format && git add -A src",
+    "postversion": "git push && git push --tags",
+    "test": "jest --coverage",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+    "lint": "tslint -p tsconfig.json"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run format && npm run lint",
+      "pre-push": "npm run test"
+    }
+  },
+  "files": [
+    "/dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "devDependencies": {
+    "@types/jest": "^25.1.1",
+    "eslint-plugin-async-await": "0.0.0",
+    "eslint-plugin-eslint-comments": "^3.1.2",
+    "eslint-plugin-jest": "^23.6.0",
+    "eslint-plugin-json": "^2.0.1",
+    "eslint-plugin-markdown": "^1.0.1",
+    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-react-hooks": "^2.3.0",
+    "husky": "^4.2.1",
+    "jest": "^25.1.0",
+    "ts-jest": "^25.2.0",
+    "typescript": "^3.7.5"
+  }
+}

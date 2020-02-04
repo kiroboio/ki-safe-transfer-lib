@@ -1,0 +1,42 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "outDir": "./dist",
+    "strict": true,
+    "allowJs": true,
+    "checkJs": false,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "maxNodeModuleJsDepth": 15,
+    "baseUrl": "./",
+    "paths": {
+      "@src/*": [
+        "src/*"
+      ]
+    },
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "moduleResolution": "node",
+    "lib": [
+      "es2017",
+      "es7",
+      "es6",
+      "dom"
+    ],
+    "noImplicitAny": true,
+    "declaration": true
+  },
+  "typedocOptions": {
+    "mode": "modules",
+    "out": "docs"
+  },
+  "include": [
+    "src/**/*",
+    "test/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}
