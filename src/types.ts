@@ -22,6 +22,77 @@ export type Settings = {
   currency: Currencies
   network: Networks
   version: string
+  respond?: Responses
+}
+
+export enum Endpoints {
+  Collect = 'collect',
+  Inbox = 'inbox',
+  Transfers = 'transfers',
+  Networks = 'networks',
+}
+
+// TODO: fix response type
+export interface ApiService {
+  find: (arg0?: any) => any
+  get: (arg0: any) => any
+  create: (arg0: {}) => any
+  on: (arg0: string, arg1: (arg2: any) => any) => any
+}
+
+export interface ApiResponseError {
+  className: string
+  code: number
+  data: []
+  errors: {}
+  message: string
+  name: string
+  type: string
+}
+
+export interface NetworkTip {
+  height: number
+  online: boolean
+  netId: string
+  timestamp: number
+}
+
+export type Retrievable = {
+  amount: number
+  collect: {
+    broadcasted: number
+    confirmed: number
+    txid: string
+  }
+  createdAt: string
+  deposit: {
+    txid: string
+    vout: number
+  }
+  expires: { at: string }
+  id: string
+  state: string
+  to: string
+  updatedAt: string
+}
+
+export type Collectable = {
+  amount: number
+  collect: { broadcasted: number; confirmed: number; txid: string }
+  createdAt: string
+  expires: { at: string }
+  id: string
+  salt: string
+  state: string
+  to: string
+  updatedAt: string
+}
+
+export type ResponseCollectable = {
+  total: number
+  limit: number
+  skip: number
+  data: Collectable[]
 }
 
 export interface ConfigProps {
@@ -30,4 +101,69 @@ export interface ConfigProps {
   network?: Networks
 }
 
-export interface ServiceProps extends ConfigProps {}
+// who the service should respond from methods:
+// - callback - use provided callback
+// - direct - respond directly
+export enum Responses {
+  Callback = 'callback',
+  Direct = 'direct',
+}
+
+export enum Logger {
+  Error = 0,
+  Info = 1,
+  Warning = 2
+}
+
+export interface LoggerProps {
+  type: Logger
+  payload?: Status | Retrievable | Collectable[]
+  message: string
+}
+
+export enum EventTypes {
+  GET_RETRIEVABLE = 'service_get_retrievable',
+  GET_COLLECTABLES = 'service_get_collectables',
+  UPDATE_STATUS = 'service_update_status',
+  SEND_TRANSACTION = 'service_send_transaction',
+  COLLECT_TRANSACTION = 'service_collect_transaction',
+}
+
+export type Status = {
+  height: number //block height of the blockchain
+  online: boolean // status of server connection to blockchain
+}
+
+export type Event = {
+  type: EventTypes
+  payload: Status | Retrievable | Collectable[]
+}
+
+export type EventBus = {
+  (arg0: Event): void
+}
+
+//
+export interface ServiceProps extends ConfigProps {
+  respond?: Responses
+  eventBus: EventBus
+}
+
+export type Sendable = {
+  to: string
+  from?: string
+  hint?: string
+  collect: string
+  deposit: string
+  amount: number
+  key: string
+}
+
+export type CollectRequest = {
+  id: string
+  key: string
+}
+export type VerifyReport = {
+  message: string
+  errors: { [index: string]: string[] }
+}

@@ -14,6 +14,8 @@
     "version": "npm run test && npm run format && git add -A src",
     "postversion": "git push && git push --tags",
     "test": "jest --coverage",
+    "dev:production": "export NODE_ENV=production && ts-node-dev ./test/run.ts",
+    "dev": "ts-node-dev ./test/run.ts",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
     "lint": "tslint -p tsconfig.json"
   },
@@ -32,6 +34,7 @@
   },
   "devDependencies": {
     "@types/jest": "^25.1.1",
+    "@types/node": "^13.7.0",
     "eslint-plugin-async-await": "0.0.0",
     "eslint-plugin-eslint-comments": "^3.1.2",
     "eslint-plugin-jest": "^23.6.0",
@@ -43,6 +46,12 @@
     "husky": "^4.2.1",
     "jest": "^25.1.0",
     "ts-jest": "^25.2.0",
+    "ts-node-dev": "^1.0.0-pre.44",
     "typescript": "^3.7.5"
+  },
+  "dependencies": {
+    "@feathersjs/feathers": "^4.5.1",
+    "@feathersjs/socketio-client": "^4.5.1",
+    "socket.io-client": "^2.3.0"
   }
 }
