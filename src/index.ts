@@ -20,8 +20,15 @@ import {
   CollectRequest,
   ResponseCollect,
 } from './types'
-import verify from './verify'
+import { validateAddress, validateData } from './validators'
 
+// TODO: add comments
+/**
+ * Kirobo Safe Transfer library class to provide convenient
+ * way to use the service
+ * @class
+ * @name Service
+ */
 class Service {
   private _settings: Settings
   private _eventBus: EventBus
@@ -140,22 +147,27 @@ class Service {
       })
 
   // get all collectables by recipient address
-  public getCollectables = (address: string) =>
-    this._inbox
-      .find({ query: { to: address } })
-      .then((payload: ResponseCollectable) => {
-        this._log({ type: Logger.Info, payload: payload.data, message: 'Service (getCollectables): ' })
-        return this._respond(EventTypes.GET_COLLECTABLES, payload.data)
-      })
-      .catch((e: ApiResponseError) => {
-        if (this._settings.respond === Responses.Direct) throw new Error(e.message)
-        this._log({ type: Logger.Error, message: `Service (getCollectables) got an error: ${e.message}` })
-      })
+  public getCollectables = async (address: string) => {
+    try {
+      if (!validateAddress({ address, currency: this._settings.currency, networkType: this._settings.network }))
+        throw new Error('Malformed address.')
+
+      const payload: ResponseCollectable = await this._inbox.find({ query: { to: address } })
+
+      this._log({ type: Logger.Info, payload: payload.data, message: 'Service (getCollectables): ' })
+
+      return this._respond(EventTypes.GET_COLLECTABLES, payload.data)
+    } catch (e) {
+      if (this._settings.respond === Responses.Direct) throw new Error(e.message)
+      this._log({ type: Logger.Error, message: `Service (getCollectables) got an error: ${e.message}` })
+    }
+  }
 
   // send retrievable/collectable transaction
   public send = async (transaction: Sendable) => {
     try {
-      verify(transaction)
+      validateData(transaction, this._settings.currency, this._settings.network)
+
       const payload = await this._transfers.create(transaction)
       return this._respond(EventTypes.SEND_TRANSACTION, payload)
     } catch (e) {
@@ -170,7 +182,7 @@ class Service {
       .create({ ...request })
       .then((payload: ResponseCollect) => {
         this._log({ type: Logger.Info, payload, message: 'Service (collect): ' })
- return this._respond(EventTypes.SEND_TRANSACTION, payload)
+        return this._respond(EventTypes.SEND_TRANSACTION, payload)
         return payload
       })
       .catch((e: ApiResponseError) => {

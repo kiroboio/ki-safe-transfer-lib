@@ -23,6 +23,7 @@ import {
   Retrievable,
 } from './types'
 
+// TODO: add comments
 class Config {
   // fixed
   protected _VERSION = 'v1'

@@ -52,6 +52,7 @@
   "dependencies": {
     "@feathersjs/feathers": "^4.5.1",
     "@feathersjs/socketio-client": "^4.5.1",
+    "multicoin-address-validator": "^0.4.1",
     "socket.io-client": "^2.3.0"
   }
 }

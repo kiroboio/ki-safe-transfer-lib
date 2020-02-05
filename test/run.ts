@@ -1,5 +1,7 @@
 import Service, { DebugLevels, Currencies, Networks, Responses, Event, Sendable } from '../src/'
 
+// import Service from '../dist/src'
+
 function eventBus(event: Event) {
   console.log('event fired: ', event)
 }
