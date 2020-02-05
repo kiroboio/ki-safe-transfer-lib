@@ -25,6 +25,10 @@ These and other questions are discussed [here](api/how_does_it_work.md)
 
 Detailed API description with examples located [here](api/README.md)
 
+## Addtionals
+
+<!-- check for connect via google.com dns -->
+
 ## Dependencies
 
 Current version (v1) is using the following dependencies:

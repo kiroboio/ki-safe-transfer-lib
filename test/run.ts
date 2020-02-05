@@ -6,6 +6,7 @@ function eventBus(event: Event) {
 
 // const service = new Service({})
 const service = new Service({
+  debug: DebugLevels.QUIET,
   respond: Responses.Callback,
   eventBus,
 })
@@ -76,6 +77,6 @@ const transaction = {
 
 // service.collect(transaction)
 
-// service.getCollectables('mrqQsrjG65QiE1xMTbKNBnX7qKgthy2XCp')\
+service.getCollectables('2MtaNxXTLMqDd7yWVn5tYvyUiWRzgZY5Pm6')
 
 // Service (collect) got an error. Transaction Rejected by the Blockchain

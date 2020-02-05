@@ -95,10 +95,16 @@ export type ResponseCollectable = {
   data: Collectable[]
 }
 
+export type ResponseCollect = {
+  fromNodeTxid: string
+}
+
 export interface ConfigProps {
   debug?: DebugLevels
   currency?: Currencies
   network?: Networks
+  eventBus?: EventBus
+  respond?: Responses
 }
 
 // who the service should respond from methods:
@@ -112,12 +118,12 @@ export enum Responses {
 export enum Logger {
   Error = 0,
   Info = 1,
-  Warning = 2
+  Warning = 2,
 }
 
 export interface LoggerProps {
   type: Logger
-  payload?: Status | Retrievable | Collectable[]
+  payload?: Status | Retrievable | Collectable[] | ResponseCollect
   message: string
 }
 
@@ -127,6 +133,10 @@ export enum EventTypes {
   UPDATE_STATUS = 'service_update_status',
   SEND_TRANSACTION = 'service_send_transaction',
   COLLECT_TRANSACTION = 'service_collect_transaction',
+  UPDATED_RETRIEVABLE = 'service_updated_retrievable',
+  UPDATED_COLLECTABLE = 'service_updated_collectable',
+  REMOVED_COLLECTABLE = 'service_removed_collectable',
+  CREATED_COLLECTABLE = 'service_created_collectable',
 }
 
 export type Status = {
@@ -136,7 +146,7 @@ export type Status = {
 
 export type Event = {
   type: EventTypes
-  payload: Status | Retrievable | Collectable[]
+  payload: Status | Retrievable | Collectable | Collectable[] | ResponseCollect
 }
 
 export type EventBus = {
@@ -144,10 +154,7 @@ export type EventBus = {
 }
 
 //
-export interface ServiceProps extends ConfigProps {
-  respond?: Responses
-  eventBus: EventBus
-}
+export interface ServiceProps extends ConfigProps {}
 
 export type Sendable = {
   amount: number
