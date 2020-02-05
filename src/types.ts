@@ -170,7 +170,7 @@ export type CollectRequest = {
   id: string
   key: string
 }
-export type VerifyReport = {
+export type validateReport = {
   message: string
   errors: { [index: string]: string[] }
 }

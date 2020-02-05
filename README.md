@@ -36,5 +36,6 @@ Current version (v1) is using the following dependencies:
 - `@feathersjs/feathers` v4.5.1
 - `@feathersjs/socketio-client` v4.5.1
 - `socket.io-client` v2.3.0
+- `multicoin-address-validator` v0.4.1
 
-These libraries are need to set up the socket communication with the server.
+These libraries are needed to set up the socket communication with the server and for address validation.
