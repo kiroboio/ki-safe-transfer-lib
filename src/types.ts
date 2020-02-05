@@ -150,13 +150,13 @@ export interface ServiceProps extends ConfigProps {
 }
 
 export type Sendable = {
-  to: string
-  from?: string
-  hint?: string
+  amount: number
   collect: string
   deposit: string
-  amount: number
-  key: string
+  from?: string
+  hint?: string
+  id?: string
+  to: string
 }
 
 export type CollectRequest = {

@@ -55,8 +55,13 @@ class Service {
     // status update
     this._networks.on('patched', (data: NetworkTip) => {
       const { height, online } = data
-      this._eventBus({ type: EventTypes.UPDATE_STATUS, payload: { height, online } })
+      this._eventBus({
+        type: EventTypes.UPDATE_STATUS,
+        payload: { height, online },
+      })
     })
+
+
   }
 
   private _respond = (type: EventTypes, payload: Status | Retrievable | Collectable[]) => {
@@ -85,7 +90,7 @@ class Service {
         return this._respond(EventTypes.UPDATE_STATUS, payload)
       })
       .catch((e: ApiResponseError) => {
-          if (this._settings.respond === Responses.Direct) throw new Error(e.message)
+        if (this._settings.respond === Responses.Direct) throw new Error(e.message)
         this._log({ type: Logger.Error, message: `Service (getStatus) got an error: ${e.message || 'unknown'}` })
       })
 
