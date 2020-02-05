@@ -18,6 +18,7 @@ import {
   Status,
   Sendable,
   CollectRequest,
+  ResponseCollect,
 } from './types'
 import verify from './verify'
 
@@ -33,7 +34,7 @@ class Service {
     const { debug, currency, network, respond, eventBus } = settings as ServiceProps
     this._eventBus = eventBus ? eventBus : event => {}
 
-    const config = new Config({ debug, currency, network })
+    const config = new Config({ debug, currency, network, eventBus, respond })
 
     // store settings
     this._settings = {
@@ -47,9 +48,6 @@ class Service {
     this._inbox = config.getService(Endpoints.Inbox)
     this._collect = config.getService(Endpoints.Collect)
 
-    // choose the currency network
-    this.getStatus()
-
     // event listeners
 
     // status update
@@ -61,14 +59,46 @@ class Service {
       })
     })
 
+    // retrievable updated
+    this._transfers.on('patched', (payload: Retrievable) => {
+      this._eventBus({
+        type: EventTypes.UPDATED_RETRIEVABLE,
+        payload,
+      })
+    })
 
+    // new collectable has been created for the previously requested address
+    this._inbox.on('created', (payload: Collectable) => {
+      this._eventBus({
+        type: EventTypes.CREATED_COLLECTABLE,
+        payload,
+      })
+    })
+
+    // collectable updated
+    this._inbox.on('updated', (payload: Collectable) => {
+      this._eventBus({
+        type: EventTypes.UPDATED_COLLECTABLE,
+        payload,
+      })
+    })
+
+    // collectable removed
+    this._inbox.on('removed', (payload: Collectable) => {
+      this._eventBus({
+        type: EventTypes.REMOVED_COLLECTABLE,
+        payload,
+      })
+    })
   }
 
-  private _respond = (type: EventTypes, payload: Status | Retrievable | Collectable[]) => {
+  // responder
+  private _respond = (type: EventTypes, payload: Status | Retrievable | Collectable[] | ResponseCollect) => {
     if (this._settings.respond === Responses.Direct) return payload
     if (this._settings.respond === Responses.Callback) this._eventBus({ type, payload })
   }
 
+  // logger
   private _log = ({ type, payload, message }: LoggerProps) => {
     // if not MUTE mode
     if (this._settings.debug !== DebugLevels.MUTE) {
@@ -79,8 +109,10 @@ class Service {
     }
   }
 
+  // show settings
   public getSettings = () => this._settings
 
+  // get current API status (height and online)
   public getStatus = () =>
     this._networks
       .get(this._settings.network)
@@ -94,6 +126,7 @@ class Service {
         this._log({ type: Logger.Error, message: `Service (getStatus) got an error: ${e.message || 'unknown'}` })
       })
 
+  // get retrievable by ID
   public getRetrievable = (id: string) =>
     this._transfers
       .get(id)
@@ -106,6 +139,7 @@ class Service {
         this._log({ type: Logger.Error, message: `Service (getRetrievable) got an error. ${e.message}` })
       })
 
+  // get all collectables by recipient address
   public getCollectables = (address: string) =>
     this._inbox
       .find({ query: { to: address } })
@@ -118,6 +152,7 @@ class Service {
         this._log({ type: Logger.Error, message: `Service (getCollectables) got an error: ${e.message}` })
       })
 
+  // send retrievable/collectable transaction
   public send = async (transaction: Sendable) => {
     try {
       verify(transaction)
@@ -129,13 +164,13 @@ class Service {
     }
   }
 
-  // TODO: change response type
+  // collect transaction
   public collect = (request: CollectRequest) =>
     this._collect
       .create({ ...request })
-      .then((payload: any) => {
+      .then((payload: ResponseCollect) => {
         this._log({ type: Logger.Info, payload, message: 'Service (collect): ' })
-        // TODO: what to return?
+ return this._respond(EventTypes.SEND_TRANSACTION, payload)
         return payload
       })
       .catch((e: ApiResponseError) => {

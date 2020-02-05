@@ -5,7 +5,23 @@ import socketio from '@feathersjs/socketio-client'
 import os from 'os'
 
 import { ConfigProps } from '.'
-import { DebugLevels, Currencies, Networks, Settings, Endpoints, LoggerProps, Logger } from './types'
+import {
+  DebugLevels,
+  Currencies,
+  Networks,
+  Settings,
+  Endpoints,
+  LoggerProps,
+  Logger,
+  ApiService,
+  NetworkTip,
+  Status,
+  ApiResponseError,
+  EventBus,
+  Responses,
+  EventTypes,
+  Retrievable,
+} from './types'
 
 class Config {
   // fixed
@@ -22,26 +38,35 @@ class Config {
   private _currency: Currencies
   private _network: Networks
   private _connect: Application<any>
+  private _response: Responses
 
-  constructor({ debug, network, currency }: ConfigProps) {
+  private _eventBus: EventBus
+  private _networks: ApiService
+
+  constructor({ debug, network, currency, eventBus, respond }: ConfigProps) {
     const isDev = process.env.NODE_ENV === 'development'
     this._debug = debug ? debug : isDev ? DebugLevels.VERBOSE : DebugLevels.QUIET
     this._currency = currency ? currency : Currencies.Bitcoin
     this._network = network ? network : Networks.Testnet
+    this._eventBus = eventBus ? eventBus : event => {}
+    this._response = respond ? respond : Responses.Direct
 
     // setup
     const socket = io(this._url)
 
     this._connect = feathers().configure(socketio(socket))
 
+    this._networks = this.getService(Endpoints.Networks)
+
     // connect/disconnect
     try {
-      socket.on('connect', (): void =>
+      socket.on('connect', (): void => {
         this._log({
           type: Logger.Info,
           message: 'Service (connect) is ON.',
-        }),
-      )
+        })
+        this.getStatus()
+      })
     } catch (e) {
       this._log({
         type: Logger.Error,
@@ -88,20 +113,16 @@ class Config {
     }
   }
 
-  public getSettings = (): Settings => ({
-    debug: this._debug,
-    currency: this._currency,
-    network: this._network,
-    version: this._VERSION,
-  })
+  private _respond = (type: EventTypes, payload: Status) => {
+    if (this._response === Responses.Direct) return payload
+    if (this._response === Responses.Callback) this._eventBus({ type, payload })
+  }
 
   private _makeEndpointPath = (endpoint: Endpoints) => {
     const path = `/${this._VERSION}/${this._currency}/`
     if (endpoint === Endpoints.Networks) return path + endpoint
     return path + `${this._network}/${this._endpoints[endpoint]}`
   }
-
-  public getService = (endpoint: Endpoints) => this._connect.service(this._makeEndpointPath(endpoint))
 
   private _log = ({ type, payload, message }: LoggerProps) => {
     // if not MUTE mode
@@ -114,6 +135,29 @@ class Config {
         payload ? console.log(message, payload) : console.log(message)
     }
   }
+
+  public getService = (endpoint: Endpoints) => this._connect.service(this._makeEndpointPath(endpoint))
+
+  public getSettings = (): Settings => ({
+    debug: this._debug,
+    currency: this._currency,
+    network: this._network,
+    version: this._VERSION,
+  })
+
+  // used on connect/reconnect
+  public getStatus = () =>
+    this._networks
+      .get(this._network)
+      .then((response: NetworkTip) => {
+        const payload: Status = { height: response.height, online: response.online }
+        this._log({ type: Logger.Info, payload, message: 'Service (getStatus): ' })
+        return this._respond(EventTypes.UPDATE_STATUS, payload)
+      })
+      .catch((e: ApiResponseError) => {
+        if (this._response === Responses.Direct) throw new Error(e.message)
+        this._log({ type: Logger.Error, message: `Service (getStatus) got an error: ${e.message || 'unknown'}` })
+      })
 }
 
 export default Config
