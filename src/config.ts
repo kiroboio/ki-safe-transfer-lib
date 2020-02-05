@@ -2,6 +2,8 @@ import feathers, { Application } from '@feathersjs/feathers'
 import io from 'socket.io-client'
 import socketio from '@feathersjs/socketio-client'
 
+import os from 'os'
+
 import { ConfigProps } from '.'
 import { DebugLevels, Currencies, Networks, Settings, Endpoints, LoggerProps, Logger } from './types'
 
@@ -59,6 +61,29 @@ class Config {
       this._log({
         type: Logger.Error,
         message: `Service (disconnect) got an error. ${e.message || ''}`,
+      })
+    }
+
+    // set internet connection check
+    if (typeof window === 'undefined') {
+      // this is backend
+      setInterval(() => {
+        require('dns')
+          .promises.lookup('google.com')
+          .then(() => {
+            if (!socket.connected) socket.connect()
+          })
+          .catch(() => {
+            if (socket.connected) socket.disconnect()
+          })
+      }, 3000)
+    } else {
+      //  this is web
+      window.addEventListener('offline', () => {
+        if (socket.connected) socket.disconnect()
+      })
+      window.addEventListener('online', () => {
+        if (!socket.connected) socket.connect()
       })
     }
   }

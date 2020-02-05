@@ -4,6 +4,7 @@
 
 - [Purpose](#Purpose)
 - [What this library can do?](#What-this-library-can-do?)
+- [How does it work?](#How-does-it-work?)
 - [API](#API)
 - [Dependencies](#Dependencies)
 
@@ -11,6 +12,14 @@
 
 ## What this library can do?
 
+## How does it work?
+
+- How does Safe Transfer work?
+- What are the inputs?
+- How to prepare them?
+- Why this format?
+
+These and other questions are discussed [here](api/how_does_it_work.md)
 
 ## API
 

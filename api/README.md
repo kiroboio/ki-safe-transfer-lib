@@ -8,13 +8,13 @@
   - [Default settings](#Default-settings)
   - [Options for settings](#Options-for-settings)
     - [Debug](#Debug)
-- [API Endpoints](./endpoints.md#API-Endpoints)
-  - [_getSettings()_](./endpoints.md#___getSettings()___)
-  - [async _getCollectables()_](./endpoints.md#async-___getCollectables()___)
-  - [async _getRetrievable()_](./endpoints.md#async-___getRetrievable()___)
-  - [async _send()_](./endpoints.md#async-___send()___)
-  - [async _collect()_](./endpoints.md#async-___collect()___)
-  - [async _getStatus()_](./endpoints.md#async-___getStatus()___)
+- [API Endpoints](endpoints.md#API-Endpoints)
+  - [_getSettings()_](endpoints.md#___getSettings()___)
+  - [async _getCollectables()_](endpoints.md#async-___getCollectables()___)
+  - [async _getRetrievable()_](endpoints.md#async-___getRetrievable()___)
+  - [async _send()_](endpoints.md#async-___send()___)
+  - [async _collect()_](endpoints.md#async-___collect()___)
+  - [async _getStatus()_](endpoints.md#async-___getStatus()___)
 
 ## Terminology
 
@@ -44,6 +44,9 @@ function eventBus(event: Event) {
 const service = new Service({ eventBus })
  ```
 
+> More about eventBus requirements and format is discussed [here](event_bus.md).
+
+
  or
 
  ```javascript
@@ -64,9 +67,9 @@ const serviceOptions = {
 const service = new Service(serviceOptions)
  ```
 
-### Why `eventBus` is always required?
+### Why [eventBus](event_bus.md) is always required?
 
-Or almost always. `eventBus` is used for event updates from the Kirobo server. Without it the functionality of the library is limited to one-way client-to-server actions without on-time updates.
+Or almost always. [eventBus](event_bus.md) is used for event updates from the Kirobo server. Without it the functionality of the library is limited to one-way client-to-server actions without on-time updates.
 
 The library can work in two modes - _direct reply_ and _use callback_:
 - in _direct reply_ mode each function reply directly with answer or Error:
@@ -88,9 +91,9 @@ The library can work in two modes - _direct reply_ and _use callback_:
    run()
    ```
 
-- _use callback_ is when all data responses go through `eventBus`, using Redux-friendly syntax (type/payload):
+- _use callback_ is when all data responses go through [eventBus](event_bus.md), using Redux-friendly syntax (type/payload):
 
-  > Please note, that for this mode `eventBus` is required!
+  > Please note, that for this mode [eventBus](event_bus.md) is required!
 
    ```javascript
    ...
