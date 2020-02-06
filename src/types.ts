@@ -137,6 +137,13 @@ export enum EventTypes {
   UPDATED_COLLECTABLE = 'service_updated_collectable',
   REMOVED_COLLECTABLE = 'service_removed_collectable',
   CREATED_COLLECTABLE = 'service_created_collectable',
+  SEND_MESSAGE = 'service_message',
+}
+
+export type Message = {
+  text: string
+  isError: boolean
+  data?: unknown
 }
 
 export type Status = {
@@ -146,7 +153,7 @@ export type Status = {
 
 export type Event = {
   type: EventTypes
-  payload: Status | Retrievable | Collectable | Collectable[] | ResponseCollect
+  payload: Status | Retrievable | Collectable | Collectable[] | ResponseCollect | Message
 }
 
 export type EventBus = {
