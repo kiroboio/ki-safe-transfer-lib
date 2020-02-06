@@ -189,7 +189,7 @@ class Service {
 
         return this._respond(EventTypes.SEND_TRANSACTION, {
           text: 'Request submitted.',
-          isError: true,
+          isError: false,
           data: payload,
         })
       })
