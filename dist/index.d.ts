@@ -18,7 +18,7 @@ declare class Service {
     getSettings: () => Settings;
     getStatus: () => any;
     getRetrievable: (id: string) => any;
-    getCollectables: (address: string) => Promise<Retrievable | Collectable[] | ResponseCollect | Status | Message | undefined>;
+    getCollectables: (addresses: string[]) => Promise<Retrievable | Collectable[] | ResponseCollect | Status | Message | undefined>;
     send: (transaction: Sendable) => Promise<Retrievable | Collectable[] | ResponseCollect | Status | Message | undefined>;
     collect: (request: CollectRequest) => any;
 }
