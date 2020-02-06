@@ -75,6 +75,8 @@ export declare type Collectable = {
     expires: {
         at: string;
     };
+    from?: string;
+    hint?: string;
     id: string;
     salt: string;
     state: string;
