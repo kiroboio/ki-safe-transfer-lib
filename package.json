@@ -15,7 +15,7 @@
     "postversion": "git push && git push --tags",
     "test": "jest --coverage",
     "dev:production": "export NODE_ENV=production && ts-node-dev ./test/run.ts",
-    "dev": "ts-node-dev ./test/run.ts",
+    "dev": "ts-node-dev ./test/client.ts",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
     "lint": "tslint -p tsconfig.json"
   },
