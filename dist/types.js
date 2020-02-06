@@ -51,4 +51,5 @@ var EventTypes;
     EventTypes["UPDATED_COLLECTABLE"] = "service_updated_collectable";
     EventTypes["REMOVED_COLLECTABLE"] = "service_removed_collectable";
     EventTypes["CREATED_COLLECTABLE"] = "service_created_collectable";
+    EventTypes["SEND_MESSAGE"] = "service_message";
 })(EventTypes = exports.EventTypes || (exports.EventTypes = {}));

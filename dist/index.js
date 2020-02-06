@@ -169,13 +169,21 @@ var Service = /** @class */ (function () {
                 .create(__assign({}, request))
                 .then(function (payload) {
                 _this._log({ type: types_1.Logger.Info, payload: payload, message: 'Service (collect): ' });
-                return _this._respond(types_1.EventTypes.SEND_TRANSACTION, payload);
-                return payload;
+                return _this._respond(types_1.EventTypes.SEND_TRANSACTION, {
+                    text: 'Request submitted.',
+                    isError: true,
+                    data: payload,
+                });
             })
                 .catch(function (e) {
                 if (_this._settings.respond === types_1.Responses.Direct)
                     throw new Error(e.message);
                 _this._log({ type: types_1.Logger.Error, message: "Service (collect) got an error. " + e.message });
+                var isWrongPasscode = e.message === 'Transaction Rejected by the Blockchain';
+                return _this._respond(types_1.EventTypes.SEND_MESSAGE, {
+                    text: isWrongPasscode ? 'Wrong passcode.' : 'Request or network error.',
+                    isError: true,
+                });
             });
         };
         var _a = settings, debug = _a.debug, currency = _a.currency, network = _a.network, respond = _a.respond, eventBus = _a.eventBus;
