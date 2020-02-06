@@ -98,6 +98,7 @@ export interface ConfigProps {
     network?: Networks;
     eventBus?: EventBus;
     respond?: Responses;
+    refreshInbox?: () => void;
 }
 export declare enum Responses {
     Callback = "callback",

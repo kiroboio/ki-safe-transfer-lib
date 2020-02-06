@@ -12,9 +12,12 @@ declare class Service {
     private _transfers;
     private _inbox;
     private _collect;
+    private _lastAddresses;
     constructor(settings: ServiceProps | {});
     private _respond;
     private _log;
+    private _refreshInbox;
+    clearLastAddresses: () => never[];
     getSettings: () => Settings;
     getStatus: () => any;
     getRetrievable: (id: string) => any;
