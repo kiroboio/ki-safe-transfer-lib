@@ -118,15 +118,20 @@ var Service = /** @class */ (function () {
             });
         };
         // get all collectables by recipient address
-        this.getCollectables = function (address) { return __awaiter(_this, void 0, void 0, function () {
+        this.getCollectables = function (addresses) { return __awaiter(_this, void 0, void 0, function () {
             var payload, e_1;
+            var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 2, , 3]);
-                        if (!validators_1.validateAddress({ address: address, currency: this._settings.currency, networkType: this._settings.network }))
-                            throw new Error('Malformed address.');
-                        return [4 /*yield*/, this._inbox.find({ query: { to: address } })];
+                        if (!Array.isArray(addresses))
+                            throw new Error('Malformed request. Not an array.');
+                        addresses.forEach(function (address) {
+                            if (!validators_1.validateAddress({ address: address, currency: _this._settings.currency, networkType: _this._settings.network }))
+                                throw new Error("Malformed address: " + address);
+                        });
+                        return [4 /*yield*/, this._inbox.find({ query: { to: { $in: addresses } } })];
                     case 1:
                         payload = _a.sent();
                         this._log({ type: types_1.Logger.Info, payload: payload.data, message: 'Service (getCollectables): ' });
