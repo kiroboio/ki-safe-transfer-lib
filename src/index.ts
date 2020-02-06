@@ -148,12 +148,15 @@ class Service {
       })
 
   // get all collectables by recipient address
-  public getCollectables = async (address: string) => {
+  public getCollectables = async (addresses: string[]) => {
     try {
-      if (!validateAddress({ address, currency: this._settings.currency, networkType: this._settings.network }))
-        throw new Error('Malformed address.')
+      if (!Array.isArray(addresses)) throw new Error('Malformed request. Not an array.')
+      addresses.forEach(address => {
+        if (!validateAddress({ address, currency: this._settings.currency, networkType: this._settings.network }))
+          throw new Error(`Malformed address: ${address}`)
+      })
 
-      const payload: ResponseCollectable = await this._inbox.find({ query: { to: address } })
+      const payload: ResponseCollectable = await this._inbox.find({ query: { to: { $in: addresses } } })
 
       this._log({ type: Logger.Info, payload: payload.data, message: 'Service (getCollectables): ' })
 
