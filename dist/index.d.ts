@@ -1,4 +1,4 @@
-import { ServiceProps, Settings, Retrievable, Collectable, Status, Sendable, CollectRequest, ResponseCollect } from './types';
+import { ServiceProps, Settings, Retrievable, Collectable, Status, Sendable, CollectRequest, ResponseCollect, Message } from './types';
 /**
  * Kirobo Safe Transfer library class to provide convenient
  * way to use the service
@@ -18,8 +18,8 @@ declare class Service {
     getSettings: () => Settings;
     getStatus: () => any;
     getRetrievable: (id: string) => any;
-    getCollectables: (address: string) => Promise<Retrievable | Collectable[] | ResponseCollect | Status | undefined>;
-    send: (transaction: Sendable) => Promise<Retrievable | Collectable[] | ResponseCollect | Status | undefined>;
+    getCollectables: (address: string) => Promise<Retrievable | Collectable[] | ResponseCollect | Status | Message | undefined>;
+    send: (transaction: Sendable) => Promise<Retrievable | Collectable[] | ResponseCollect | Status | Message | undefined>;
     collect: (request: CollectRequest) => any;
 }
 export * from './types';

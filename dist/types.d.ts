@@ -120,15 +120,21 @@ export declare enum EventTypes {
     UPDATED_RETRIEVABLE = "service_updated_retrievable",
     UPDATED_COLLECTABLE = "service_updated_collectable",
     REMOVED_COLLECTABLE = "service_removed_collectable",
-    CREATED_COLLECTABLE = "service_created_collectable"
+    CREATED_COLLECTABLE = "service_created_collectable",
+    SEND_MESSAGE = "service_message"
 }
+export declare type Message = {
+    text: string;
+    isError: boolean;
+    data?: unknown;
+};
 export declare type Status = {
     height: number;
     online: boolean;
 };
 export declare type Event = {
     type: EventTypes;
-    payload: Status | Retrievable | Collectable | Collectable[] | ResponseCollect;
+    payload: Status | Retrievable | Collectable | Collectable[] | ResponseCollect | Message;
 };
 export declare type EventBus = {
     (arg0: Event): void;
