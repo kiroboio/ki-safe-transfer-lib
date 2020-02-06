@@ -21,6 +21,7 @@ import {
   Responses,
   EventTypes,
   Retrievable,
+  ResponseCollectable,
 } from './types'
 
 // TODO: add comments
@@ -44,7 +45,7 @@ class Config {
   private _eventBus: EventBus
   private _networks: ApiService
 
-  constructor({ debug, network, currency, eventBus, respond }: ConfigProps) {
+  constructor({ debug, network, currency, eventBus, respond, refreshInbox }: ConfigProps) {
     const isDev = process.env.NODE_ENV === 'development'
     this._debug = debug ? debug : isDev ? DebugLevels.VERBOSE : DebugLevels.QUIET
     this._currency = currency ? currency : Currencies.Bitcoin
@@ -54,6 +55,8 @@ class Config {
 
     // setup
     const socket = io(this._url)
+
+    console.log(refreshInbox)
 
     this._connect = feathers().configure(socketio(socket))
 
@@ -67,6 +70,7 @@ class Config {
           message: 'Service (connect) is ON.',
         })
         this.getStatus()
+        if (refreshInbox) refreshInbox()
       })
     } catch (e) {
       this._log({

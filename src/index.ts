@@ -37,12 +37,13 @@ class Service {
   private _transfers: ApiService
   private _inbox: ApiService
   private _collect: ApiService
+  private _lastAddresses: string[] = [] // caching last addresses request
 
   constructor(settings: ServiceProps | {}) {
     const { debug, currency, network, respond, eventBus } = settings as ServiceProps
     this._eventBus = eventBus ? eventBus : event => {}
 
-    const config = new Config({ debug, currency, network, eventBus, respond })
+    const config = new Config({ debug, currency, network, eventBus, respond, refreshInbox: this._refreshInbox })
 
     // store settings
     this._settings = {
@@ -117,6 +118,24 @@ class Service {
     }
   }
 
+  private _refreshInbox = () => {
+    if (this._lastAddresses.length)
+      return this._inbox
+        .find({ query: { to: this._lastAddresses.join(';') } })
+        .then((payload: ResponseCollectable) => {
+          console.log(payload)
+          this._eventBus({ type: EventTypes.GET_COLLECTABLES, payload: payload.data })
+        })
+        .catch((e: ApiResponseError) => {
+          this._log({
+            type: Logger.Error,
+            message: `Service (getCollectables) got an error: ${e.message || 'unknown'}`,
+          })
+        })
+  }
+
+  public clearLastAddresses = () => (this._lastAddresses = [])
+
   // show settings
   public getSettings = () => this._settings
 
@@ -156,7 +175,9 @@ class Service {
           throw new Error(`Malformed address: ${address}`)
       })
 
-      const payload: ResponseCollectable = await this._inbox.find({ query: { to: { $in: addresses } } })
+      const payload: ResponseCollectable = await this._inbox.find({ query: { to: addresses.join(';') } })
+
+      this._lastAddresses = addresses
 
       this._log({ type: Logger.Info, payload: payload.data, message: 'Service (getCollectables): ' })
 
