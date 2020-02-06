@@ -11,7 +11,7 @@ var types_1 = require("./types");
 var Config = /** @class */ (function () {
     function Config(_a) {
         var _this = this;
-        var debug = _a.debug, network = _a.network, currency = _a.currency, eventBus = _a.eventBus, respond = _a.respond;
+        var debug = _a.debug, network = _a.network, currency = _a.currency, eventBus = _a.eventBus, respond = _a.respond, refreshInbox = _a.refreshInbox;
         // fixed
         this._VERSION = 'v1';
         this._url = 'http://3.92.123.183';
@@ -76,6 +76,7 @@ var Config = /** @class */ (function () {
         this._response = respond ? respond : types_1.Responses.Direct;
         // setup
         var socket = socket_io_client_1.default(this._url);
+        console.log(refreshInbox);
         this._connect = feathers_1.default().configure(socketio_client_1.default(socket));
         this._networks = this.getService(types_1.Endpoints.Networks);
         // connect/disconnect
@@ -86,6 +87,8 @@ var Config = /** @class */ (function () {
                     message: 'Service (connect) is ON.',
                 });
                 _this.getStatus();
+                if (refreshInbox)
+                    refreshInbox();
             });
         }
         catch (e) {

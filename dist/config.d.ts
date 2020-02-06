@@ -15,7 +15,7 @@ declare class Config {
     private _response;
     private _eventBus;
     private _networks;
-    constructor({ debug, network, currency, eventBus, respond }: ConfigProps);
+    constructor({ debug, network, currency, eventBus, respond, refreshInbox }: ConfigProps);
     private _respond;
     private _makeEndpointPath;
     private _log;

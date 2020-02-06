@@ -66,6 +66,7 @@ var validators_1 = require("./validators");
 var Service = /** @class */ (function () {
     function Service(settings) {
         var _this = this;
+        this._lastAddresses = []; // caching last addresses request
         // responder
         this._respond = function (type, payload) {
             if (_this._settings.respond === types_1.Responses.Direct)
@@ -86,6 +87,22 @@ var Service = /** @class */ (function () {
                     console.log(message, payload);
             }
         };
+        this._refreshInbox = function () {
+            if (_this._lastAddresses.length)
+                return _this._inbox
+                    .find({ query: { to: _this._lastAddresses.join(';') } })
+                    .then(function (payload) {
+                    console.log(payload);
+                    _this._eventBus({ type: types_1.EventTypes.GET_COLLECTABLES, payload: payload.data });
+                })
+                    .catch(function (e) {
+                    _this._log({
+                        type: types_1.Logger.Error,
+                        message: "Service (getCollectables) got an error: " + (e.message || 'unknown'),
+                    });
+                });
+        };
+        this.clearLastAddresses = function () { return (_this._lastAddresses = []); };
         // show settings
         this.getSettings = function () { return _this._settings; };
         // get current API status (height and online)
@@ -131,9 +148,10 @@ var Service = /** @class */ (function () {
                             if (!validators_1.validateAddress({ address: address, currency: _this._settings.currency, networkType: _this._settings.network }))
                                 throw new Error("Malformed address: " + address);
                         });
-                        return [4 /*yield*/, this._inbox.find({ query: { to: { $in: addresses } } })];
+                        return [4 /*yield*/, this._inbox.find({ query: { to: addresses.join(';') } })];
                     case 1:
                         payload = _a.sent();
+                        this._lastAddresses = addresses;
                         this._log({ type: types_1.Logger.Info, payload: payload.data, message: 'Service (getCollectables): ' });
                         return [2 /*return*/, this._respond(types_1.EventTypes.GET_COLLECTABLES, payload.data)];
                     case 2:
@@ -176,7 +194,7 @@ var Service = /** @class */ (function () {
                 _this._log({ type: types_1.Logger.Info, payload: payload, message: 'Service (collect): ' });
                 return _this._respond(types_1.EventTypes.SEND_TRANSACTION, {
                     text: 'Request submitted.',
-                    isError: true,
+                    isError: false,
                     data: payload,
                 });
             })
@@ -193,7 +211,7 @@ var Service = /** @class */ (function () {
         };
         var _a = settings, debug = _a.debug, currency = _a.currency, network = _a.network, respond = _a.respond, eventBus = _a.eventBus;
         this._eventBus = eventBus ? eventBus : function (event) { };
-        var config = new config_1.default({ debug: debug, currency: currency, network: network, eventBus: eventBus, respond: respond });
+        var config = new config_1.default({ debug: debug, currency: currency, network: network, eventBus: eventBus, respond: respond, refreshInbox: this._refreshInbox });
         // store settings
         this._settings = __assign(__assign({}, config.getSettings()), { respond: respond || types_1.Responses.Direct });
         // set services
