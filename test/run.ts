@@ -79,6 +79,10 @@ const transaction = {
 
 // service.collect(transaction)
 
-service.getCollectables('2MtaNxXTLMqDd7yWVn5tYvyUiWRzgZY5Pm6')
+// service.getCollectables('2MtaNxXTLMqDd7yWVn5tYvyUiWRzgZY5Pm6')
 
+service.collect({
+  id: '3b8fb659206af1a3086c42c7ee8ddd097066b8547b2721e23d8cbf760c790d63',
+  key: '00015ba6acc6509572823fff21b2e1b874942407abe118863517c01b2b75bef854cc',
+})
 // Service (collect) got an error. Transaction Rejected by the Blockchain

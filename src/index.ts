@@ -19,6 +19,7 @@ import {
   Sendable,
   CollectRequest,
   ResponseCollect,
+  Message,
 } from './types'
 import { validateAddress, validateData } from './validators'
 
@@ -100,7 +101,7 @@ class Service {
   }
 
   // responder
-  private _respond = (type: EventTypes, payload: Status | Retrievable | Collectable[] | ResponseCollect) => {
+  private _respond = (type: EventTypes, payload: Status | Retrievable | Collectable[] | ResponseCollect | Message) => {
     if (this._settings.respond === Responses.Direct) return payload
     if (this._settings.respond === Responses.Callback) this._eventBus({ type, payload })
   }
@@ -182,12 +183,23 @@ class Service {
       .create({ ...request })
       .then((payload: ResponseCollect) => {
         this._log({ type: Logger.Info, payload, message: 'Service (collect): ' })
-        return this._respond(EventTypes.SEND_TRANSACTION, payload)
-        return payload
+
+        return this._respond(EventTypes.SEND_TRANSACTION, {
+          text: 'Request submitted.',
+          isError: true,
+          data: payload,
+        })
       })
       .catch((e: ApiResponseError) => {
         if (this._settings.respond === Responses.Direct) throw new Error(e.message)
         this._log({ type: Logger.Error, message: `Service (collect) got an error. ${e.message}` })
+
+        const isWrongPasscode = e.message === 'Transaction Rejected by the Blockchain'
+
+        return this._respond(EventTypes.SEND_MESSAGE, {
+          text: isWrongPasscode ? 'Wrong passcode.' : 'Request or network error.',
+          isError: true,
+        })
       })
 }
 
