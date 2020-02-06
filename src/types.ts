@@ -81,6 +81,8 @@ export type Collectable = {
   collect: { broadcasted: number; confirmed: number; txid: string }
   createdAt: string
   expires: { at: string }
+  from?: string;
+  hint?: string;
   id: string
   salt: string
   state: string
