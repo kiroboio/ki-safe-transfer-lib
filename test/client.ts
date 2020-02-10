@@ -8,7 +8,7 @@ function eventBus(event: Event) {
 
 // const service = new Service({})
 const service = new Service({
-  debug: DebugLevels.QUIET,
+  // debug: DebugLevels.QUIET,
   respond: Responses.Callback,
   eventBus,
 })
@@ -73,16 +73,22 @@ const transaction = {
   key: '0001e1427f025796fbc9e64219937accbf61bb1ed19037fdae15eedfe4c4373bd1e3',
 }
 
+// service.clearLastAddresses()
+
 // Service (collect):  {
 //   fromNodeTxid: '3792c7051d0f914264057b400bc2649ddaec1b671a6c953a39838cf8a7940595'
 // }
 
 // service.collect(transaction)
 
-service.getCollectables(['mrqQsrjG65QiE1xMTbKNBnX7qKgthy2XCp'])
+// service.getCollectables(['mrqQsrjG65QiE1xMTbKNBnX7qKgthy2XCp'])
 
 // service.collect({
-//   id: '3b8fb659206af1a3086c42c7ee8ddd097066b8547b2721e23d8cbf760c790d63',
-//   key: '00015ba6acc6509572823fff21b2e1b874942407abe118863517c01b2b75bef854cc',
+//  id
+// :
+// "557d94f69eed58b3ce0d389fbd98cb11d67f53a7ef14abaef9d6fb1ba22b162d",
+// key
+// :
+// "00010a78c256e798e241872b0d5f8c5abee17a1eca1b6ad0f6f8831e9b0cae491ac9"
 // })
 // Service (collect) got an error. Transaction Rejected by the Blockchain
