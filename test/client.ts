@@ -4,12 +4,13 @@ import Service, { DebugLevels, Currencies, Networks, Responses, Event, Sendable 
 
 function eventBus(event: Event) {
   console.log('event fired: ', event)
+  // throw new Error ('test123')
 }
 
 // const service = new Service({})
 const service = new Service({
-  // debug: DebugLevels.QUIET,
-  respond: Responses.Callback,
+  debug: DebugLevels.QUIET,
+  respondAs: Responses.Callback,
   eventBus,
 })
 
@@ -61,17 +62,17 @@ const service = new Service({
 // run()
 // service.getRetrievable('7c17d7b6d7c3f1ee910f5438125bac30a2ea6db145b91b7bd5359a31f9ad0e3c0000')
 
-// service.getCollectables('2MtaNxXTLMqDd7yWVn5tYvyUiWRzgZY5Pm6')
+service.getCollectables(['2MtaNxXTLMqDd7yWVn5tYvyUiWRzgZY5Pm6'])
 
 // const transaction = {
 //   id: 'dec962629088b1ae2fa9ecd72a6f74a8a8016f91e1239988fd9701069837d3cb',
 //   key: '0001e1427f025796fbc9e64219937accbf61bb1ed19037fdae15eedfe4c4373bd1e3',
 // }
 
-const transaction = {
-  id: 'dec962629088b1ae2fa9ecd72a6f74a8a8016f91e1239988fd9701069837d3cb',
-  key: '0001e1427f025796fbc9e64219937accbf61bb1ed19037fdae15eedfe4c4373bd1e3',
-}
+// const transaction = {
+//   id: 'dec962629088b1ae2fa9ecd72a6f74a8a8016f91e1239988fd9701069837d3cb',
+//   key: '0001e1427f025796fbc9e64219937accbf61bb1ed19037fdae15eedfe4c4373bd1e3',
+// }
 
 // service.clearLastAddresses()
 
