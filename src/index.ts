@@ -208,7 +208,7 @@ class Service {
       .then((payload: ResponseCollect) => {
         this._log({ type: Logger.Info, payload, message: 'Service (collect): ' })
 
-        return this._respond(EventTypes.SEND_TRANSACTION, {
+        return this._respond(EventTypes.COLLECT_TRANSACTION, {
           text: 'Request submitted.',
           isError: false,
           data: payload,

@@ -56,8 +56,6 @@ class Config {
     // setup
     const socket = io(this._url)
 
-    console.log(refreshInbox)
-
     this._connect = feathers().configure(socketio(socket))
 
     this._networks = this.getService(Endpoints.Networks)
