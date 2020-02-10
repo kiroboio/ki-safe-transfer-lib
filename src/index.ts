@@ -40,15 +40,22 @@ class Service {
   private _lastAddresses: string[] = [] // caching last addresses request
 
   constructor(settings: ServiceProps | {}) {
-    const { debug, currency, network, respond, eventBus } = settings as ServiceProps
+    const { debug, currency, network, respondAs, eventBus } = settings as ServiceProps
     this._eventBus = eventBus ? eventBus : event => {}
 
-    const config = new Config({ debug, currency, network, eventBus, respond, refreshInbox: this._refreshInbox })
+    const config = new Config({
+      debug,
+      currency,
+      network,
+      logger: this._logger,
+      getStatus: this.getStatus,
+      refreshInbox: this._refreshInbox,
+    })
 
     // store settings
     this._settings = {
       ...config.getSettings(),
-      respond: respond || Responses.Direct,
+      respondAs: respondAs || Responses.Direct,
     }
 
     // set services
@@ -102,13 +109,21 @@ class Service {
   }
 
   // responder
-  private _respond = (type: EventTypes, payload: Status | Retrievable | Collectable[] | ResponseCollect | Message) => {
-    if (this._settings.respond === Responses.Direct) return payload
-    if (this._settings.respond === Responses.Callback) this._eventBus({ type, payload })
+  private _responder = (
+    type: EventTypes,
+    payload: Status | Retrievable | Collectable[] | ResponseCollect | Message,
+  ) => {
+    if (this._settings.respondAs === Responses.Direct) return payload
+    // calling provided function as eventBus might result in error
+    try {
+      if (this._settings.respondAs === Responses.Callback) this._eventBus({ type, payload })
+    } catch (e) {
+      this._logger({ type: Logger.Error, message: `eventBus got an error. ${e}` })
+    }
   }
 
   // logger
-  private _log = ({ type, payload, message }: LoggerProps) => {
+  private _logger = ({ type, payload, message }: LoggerProps) => {
     // if not MUTE mode
     if (this._settings.debug !== DebugLevels.MUTE) {
       // errors are shown in all other modes
@@ -117,6 +132,10 @@ class Service {
       else if (type && this._settings.debug === DebugLevels.VERBOSE) console.log(message, payload)
     }
   }
+
+  // send error
+  private _errLogger = (message: string, error: string) =>
+    this._logger({ type: Logger.Error, message: `${message}${error ? ' ' + error : ''}` })
 
   private _refreshInbox = () => {
     if (this._lastAddresses.length)
@@ -127,13 +146,17 @@ class Service {
           this._eventBus({ type: EventTypes.GET_COLLECTABLES, payload: payload.data })
         })
         .catch((e: ApiResponseError) => {
-          this._log({
+          this._logger({
             type: Logger.Error,
             message: `Service (getCollectables) got an error: ${e.message || 'unknown'}`,
           })
         })
   }
 
+  // get last addresses
+  public getLastAddresses = () => this._lastAddresses
+
+  // clear cached addresses
   public clearLastAddresses = () => (this._lastAddresses = [])
 
   // show settings
@@ -145,12 +168,12 @@ class Service {
       .get(this._settings.network)
       .then((response: NetworkTip) => {
         const payload: Status = { height: response.height, online: response.online }
-        this._log({ type: Logger.Info, payload, message: 'Service (getStatus): ' })
-        return this._respond(EventTypes.UPDATE_STATUS, payload)
+        this._logger({ type: Logger.Info, payload, message: 'Service (getStatus): ' })
+        return this._responder(EventTypes.UPDATE_STATUS, payload)
       })
       .catch((e: ApiResponseError) => {
-        if (this._settings.respond === Responses.Direct) throw new Error(e.message)
-        this._log({ type: Logger.Error, message: `Service (getStatus) got an error: ${e.message || 'unknown'}` })
+        if (this._settings.respondAs === Responses.Direct) throw new Error(e.message)
+        this._errLogger(`Service (getStatus) got an error.`, e.message)
       })
 
   // get retrievable by ID
@@ -158,12 +181,12 @@ class Service {
     this._transfers
       .get(id)
       .then((payload: Retrievable) => {
-        this._log({ type: Logger.Info, payload, message: 'Service (getRetrievable): ' })
-        return this._respond(EventTypes.GET_RETRIEVABLE, payload)
+        this._logger({ type: Logger.Info, payload, message: 'Service (getRetrievable): ' })
+        return this._responder(EventTypes.GET_RETRIEVABLE, payload)
       })
       .catch((e: ApiResponseError) => {
-        if (this._settings.respond === Responses.Direct) throw new Error(e.message)
-        this._log({ type: Logger.Error, message: `Service (getRetrievable) got an error. ${e.message}` })
+        if (this._settings.respondAs === Responses.Direct) throw new Error(e.message)
+        this._errLogger(`Service (getRetrievable) got an error.`, e.message)
       })
 
   // get all collectables by recipient address
@@ -179,12 +202,12 @@ class Service {
 
       this._lastAddresses = addresses
 
-      this._log({ type: Logger.Info, payload: payload.data, message: 'Service (getCollectables): ' })
+      this._logger({ type: Logger.Info, payload: payload.data, message: 'Service (getCollectables): ' })
 
-      return this._respond(EventTypes.GET_COLLECTABLES, payload.data)
+      return this._responder(EventTypes.GET_COLLECTABLES, payload.data)
     } catch (e) {
-      if (this._settings.respond === Responses.Direct) throw new Error(e.message)
-      this._log({ type: Logger.Error, message: `Service (getCollectables) got an error: ${e.message}` })
+      if (this._settings.respondAs === Responses.Direct) throw new Error(e.message)
+      this._errLogger(`Service (getCollectables) got an error.`, e.message)
     }
   }
 
@@ -194,10 +217,10 @@ class Service {
       validateData(transaction, this._settings.currency, this._settings.network)
 
       const payload = await this._transfers.create(transaction)
-      return this._respond(EventTypes.SEND_TRANSACTION, payload)
+      return this._responder(EventTypes.SEND_TRANSACTION, payload)
     } catch (e) {
-      if (this._settings.respond === Responses.Direct) throw new Error(e.message)
-      this._log({ type: Logger.Error, message: `Service (send) got an error. ${e.message}` })
+      if (this._settings.respondAs === Responses.Direct) throw new Error(e.message)
+      this._errLogger(`Service (send) got an error.`, e.message)
     }
   }
 
@@ -206,22 +229,20 @@ class Service {
     this._collect
       .create({ ...request })
       .then((payload: ResponseCollect) => {
-        this._log({ type: Logger.Info, payload, message: 'Service (collect): ' })
+        this._logger({ type: Logger.Info, payload, message: 'Service (collect): ' })
 
-        return this._respond(EventTypes.COLLECT_TRANSACTION, {
+        return this._responder(EventTypes.COLLECT_TRANSACTION, {
           text: 'Request submitted.',
           isError: false,
           data: payload,
         })
       })
       .catch((e: ApiResponseError) => {
-        if (this._settings.respond === Responses.Direct) throw new Error(e.message)
-        this._log({ type: Logger.Error, message: `Service (collect) got an error. ${e.message}` })
+        if (this._settings.respondAs === Responses.Direct) throw new Error(e.message)
+        this._errLogger(`Service (collect) got an error. ${e.message}`, e.message)
 
-        const isWrongPasscode = e.message === 'Transaction Rejected by the Blockchain'
-
-        return this._respond(EventTypes.SEND_MESSAGE, {
-          text: isWrongPasscode ? 'Wrong passcode.' : 'Request or network error.',
+        return this._responder(EventTypes.SEND_MESSAGE, {
+          text: e.message,
           isError: true,
         })
       })

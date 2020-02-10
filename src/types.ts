@@ -22,7 +22,7 @@ export type Settings = {
   currency: Currencies
   network: Networks
   version: string
-  respond?: Responses
+  respondAs?: Responses
 }
 
 export enum Endpoints {
@@ -101,13 +101,29 @@ export type ResponseCollect = {
   fromNodeTxid: string
 }
 
-export interface ConfigProps {
+export interface LoggerFunction {
+  ({ type, payload, message }: LoggerProps): void
+}
+
+export interface ResponderFunction {
+  (type: EventTypes, payload: Status | Retrievable | Collectable[] | ResponseCollect | Message): any
+}
+
+interface LibraryBlockProps {
   debug?: DebugLevels
   currency?: Currencies
   network?: Networks
+}
+
+export interface ServiceProps extends LibraryBlockProps {
   eventBus?: EventBus
-  respond?: Responses
-  refreshInbox?: () => void
+  respondAs?: Responses
+}
+
+export interface ConfigProps extends LibraryBlockProps {
+  getStatus: () => any
+  logger: LoggerFunction
+  refreshInbox: () => void
 }
 
 // who the service should respond from methods:
@@ -162,9 +178,6 @@ export type Event = {
 export type EventBus = {
   (arg0: Event): void
 }
-
-//
-export interface ServiceProps extends ConfigProps {}
 
 export type Sendable = {
   amount: number
