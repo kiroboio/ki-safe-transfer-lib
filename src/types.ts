@@ -55,6 +55,7 @@ export interface NetworkTip {
   online: boolean
   netId: string
   timestamp: number
+  fee: number
 }
 
 export type Retrievable = {
@@ -167,6 +168,7 @@ export type Message = {
 
 export type Status = {
   height: number //block height of the blockchain
+  fee: number // current transaction fees (per Kilobyte)
   online: boolean // status of server connection to blockchain
 }
 
