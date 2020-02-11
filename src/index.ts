@@ -39,8 +39,9 @@ class Service {
   private _collect: ApiService
   private _lastAddresses: string[] = [] // caching last addresses request
 
-  constructor(settings?: ServiceProps ) {
-    const { debug, currency, network, respondAs, eventBus } = settings as ServiceProps
+  constructor(settings?: ServiceProps) {
+
+    const { debug, currency, network, respondAs, eventBus } = settings || {}
     this._eventBus = eventBus ? eventBus : event => {}
 
     const config = new Config({

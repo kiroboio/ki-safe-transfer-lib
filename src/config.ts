@@ -2,8 +2,6 @@ import feathers, { Application } from '@feathersjs/feathers'
 import io from 'socket.io-client'
 import socketio from '@feathersjs/socketio-client'
 
-import os from 'os'
-
 import { ConfigProps } from '.'
 import {
   DebugLevels,
@@ -39,6 +37,9 @@ class Config {
     transfers: 'transfers',
   }
 
+  private _isDev = process.env.NODE_ENV === 'development'
+  private _isTest = process.env.NODE_ENV === 'test'
+
   // settings
   private _debug: DebugLevels
   private _currency: Currencies
@@ -48,12 +49,11 @@ class Config {
   private _logger: LoggerFunction
 
   constructor({ debug, network, currency, logger, getStatus, refreshInbox }: ConfigProps) {
-    const isDev = process.env.NODE_ENV === 'development'
-    this._debug = debug ? debug : isDev ? DebugLevels.VERBOSE : DebugLevels.QUIET
+    this._debug = this._debugLevelSelector(debug)
     this._currency = currency ? currency : Currencies.Bitcoin
     this._network = network ? network : Networks.Testnet
-    this._getStatus = getStatus ? getStatus : () => { }
-    this._logger = logger ? logger : ({})=>{}
+    this._getStatus = getStatus ? getStatus : () => {}
+    this._logger = logger ? logger : ({}) => {}
 
     // setup
     const socket = io(this._url)
@@ -114,6 +114,13 @@ class Config {
         if (!socket.connected) socket.connect()
       })
     }
+  }
+
+  private _debugLevelSelector = (debug: DebugLevels | undefined) => {
+    if (debug) return debug
+    if (this._isTest) return DebugLevels.MUTE
+    if (this._isDev) return DebugLevels.VERBOSE
+    return DebugLevels.QUIET
   }
 
   private _makeEndpointPath = (endpoint: Endpoints) => {
