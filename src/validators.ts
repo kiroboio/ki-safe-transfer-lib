@@ -1,5 +1,7 @@
 import validator from 'multicoin-address-validator'
-import { Sendable, validateReport } from './types'
+import { Sendable, validateReport, Settings, ObjectWithStringKeys } from './types'
+import { listOfSettingsKeys, typeOfSettingsKeys, valuesForSettings, TEXT } from './data'
+import { makeStringFromTemplate } from './tools'
 
 const isString = (data: unknown) => typeof data === 'string'
 
@@ -48,4 +50,32 @@ export const validateData = (data: Sendable, currency: string, networkType: stri
     })
     throw new Error(validate.message)
   }
+}
+
+export const validateSettings = (settings: unknown) => {
+  if (settings !== Object(settings)) throw new TypeError(TEXT.errors.validation.typeOfObject)
+  if (Array.isArray(settings)) throw new TypeError(TEXT.errors.validation.noArray)
+  if (typeof settings === 'function') throw new TypeError(TEXT.errors.validation.noFunction)
+
+  const setObj = settings as ObjectWithStringKeys
+  const objKeys = Object.keys(setObj)
+
+  if (objKeys.length === 0) throw new TypeError(TEXT.errors.validation.emptyObject)
+  if (objKeys.length > listOfSettingsKeys.length) throw new TypeError(TEXT.errors.validation.extraKeys)
+
+  objKeys.forEach((key: string) => {
+    if (!listOfSettingsKeys.includes(key)) throw new TypeError(`${TEXT.errors.validation.unknownKeys}${key}.`)
+
+    const type = typeOfSettingsKeys[key] as string
+    const value = setObj[key] as string | [] | any
+
+    if (typeof value !== type)
+      throw new TypeError(makeStringFromTemplate(TEXT.errors.validation.wrongValueType, [key, type]))
+
+    const values = valuesForSettings[key] as string[] | number[] | undefined
+
+    // @ts-ignore - some issue, where .includes requires 'never'
+    if (values && !values.includes(value))
+      throw new TypeError(makeStringFromTemplate(TEXT.errors.validation.wrongValue, [value, key, values.join(', ')]))
+  })
 }

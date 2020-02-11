@@ -15,7 +15,7 @@ export declare type Settings = {
     currency: Currencies;
     network: Networks;
     version: string;
-    respond?: Responses;
+    respondAs?: Responses;
 };
 export declare enum Endpoints {
     Collect = "collect",
@@ -92,13 +92,25 @@ export declare type ResponseCollectable = {
 export declare type ResponseCollect = {
     fromNodeTxid: string;
 };
-export interface ConfigProps {
+export interface LoggerFunction {
+    ({ type, payload, message }: LoggerProps): void;
+}
+export interface ResponderFunction {
+    (type: EventTypes, payload: Status | Retrievable | Collectable[] | ResponseCollect | Message): any;
+}
+interface LibraryBlockProps {
     debug?: DebugLevels;
     currency?: Currencies;
     network?: Networks;
+}
+export interface ServiceProps extends LibraryBlockProps {
     eventBus?: EventBus;
-    respond?: Responses;
-    refreshInbox?: () => void;
+    respondAs?: Responses;
+}
+export interface ConfigProps extends LibraryBlockProps {
+    getStatus: () => any;
+    logger: LoggerFunction;
+    refreshInbox: () => void;
 }
 export declare enum Responses {
     Callback = "callback",
@@ -111,7 +123,7 @@ export declare enum Logger {
 }
 export interface LoggerProps {
     type: Logger;
-    payload?: Status | Retrievable | Collectable[] | ResponseCollect;
+    payload?: Status | Retrievable | Collectable[] | ResponseCollect | string;
     message: string;
 }
 export declare enum EventTypes {
@@ -142,8 +154,6 @@ export declare type Event = {
 export declare type EventBus = {
     (arg0: Event): void;
 };
-export interface ServiceProps extends ConfigProps {
-}
 export declare type Sendable = {
     amount: number;
     collect: string;
@@ -163,3 +173,7 @@ export declare type validateReport = {
         [index: string]: string[];
     };
 };
+export declare type ObjectWithStringKeys = {
+    [index: string]: string[] | number[] | string;
+};
+export {};

@@ -2,28 +2,17 @@ import feathers, { Application } from '@feathersjs/feathers'
 import io from 'socket.io-client'
 import socketio from '@feathersjs/socketio-client'
 
-import { ConfigProps } from '.'
+import {capitalize} from './tools'
+
 import {
-  DebugLevels,
+  ConfigProps,
   Currencies,
+  DebugLevels,
+  Endpoints,
+  Logger,
+  LoggerFunction,
   Networks,
   Settings,
-  Endpoints,
-  LoggerProps,
-  Logger,
-  ApiService,
-  NetworkTip,
-  Status,
-  ApiResponseError,
-  EventBus,
-  Responses,
-  EventTypes,
-  Retrievable,
-  ResponseCollectable,
-  Collectable,
-  ResponseCollect,
-  Message,
-  LoggerFunction,
 } from './types'
 
 // TODO: add comments
@@ -82,7 +71,7 @@ class Config {
         this._logger({
           type: Logger.Warning,
           message: 'Service (disconnect) is OFF.',
-          payload,
+          payload: capitalize(payload),
         }),
       )
     } catch (e) {

@@ -64,18 +64,36 @@ var validators_1 = require("./validators");
  * @name Service
  */
 var Service = /** @class */ (function () {
+    // TODO: remove any
     function Service(settings) {
         var _this = this;
         this._lastAddresses = []; // caching last addresses request
+        this._isTest = process.env.NODE_ENV === 'test';
+        this._validateProps = function (settings) {
+            try {
+                validators_1.validateSettings(settings);
+            }
+            catch (e) {
+                if (!_this._isTest)
+                    console.log("Service (validateProps) got an error. " + e.message);
+                throw new TypeError(e.message);
+            }
+        };
         // responder
-        this._respond = function (type, payload) {
-            if (_this._settings.respond === types_1.Responses.Direct)
+        this._responder = function (type, payload) {
+            if (_this._settings.respondAs === types_1.Responses.Direct)
                 return payload;
-            if (_this._settings.respond === types_1.Responses.Callback)
-                _this._eventBus({ type: type, payload: payload });
+            // calling provided function as eventBus might result in error
+            try {
+                if (_this._settings.respondAs === types_1.Responses.Callback)
+                    _this._eventBus({ type: type, payload: payload });
+            }
+            catch (e) {
+                _this._logger({ type: types_1.Logger.Error, message: "eventBus got an error. " + e });
+            }
         };
         // logger
-        this._log = function (_a) {
+        this._logger = function (_a) {
             var type = _a.type, payload = _a.payload, message = _a.message;
             // if not MUTE mode
             if (_this._settings.debug !== types_1.DebugLevels.MUTE) {
@@ -83,9 +101,17 @@ var Service = /** @class */ (function () {
                 if (!type)
                     console.error(message);
                 // info is shown only in verbose mode
-                else if (type && _this._settings.debug === types_1.DebugLevels.VERBOSE)
-                    console.log(message, payload);
+                else if (type && _this._settings.debug === types_1.DebugLevels.VERBOSE) {
+                    if (payload)
+                        console.log(message, payload);
+                    else
+                        console.log(message);
+                }
             }
+        };
+        // send error
+        this._errLogger = function (message, error) {
+            return _this._logger({ type: types_1.Logger.Error, message: "" + message + (error ? ' ' + error : '') });
         };
         this._refreshInbox = function () {
             if (_this._lastAddresses.length)
@@ -96,12 +122,15 @@ var Service = /** @class */ (function () {
                     _this._eventBus({ type: types_1.EventTypes.GET_COLLECTABLES, payload: payload.data });
                 })
                     .catch(function (e) {
-                    _this._log({
+                    _this._logger({
                         type: types_1.Logger.Error,
                         message: "Service (getCollectables) got an error: " + (e.message || 'unknown'),
                     });
                 });
         };
+        // get last addresses
+        this.getLastAddresses = function () { return _this._lastAddresses; };
+        // clear cached addresses
         this.clearLastAddresses = function () { return (_this._lastAddresses = []); };
         // show settings
         this.getSettings = function () { return _this._settings; };
@@ -111,13 +140,13 @@ var Service = /** @class */ (function () {
                 .get(_this._settings.network)
                 .then(function (response) {
                 var payload = { height: response.height, online: response.online };
-                _this._log({ type: types_1.Logger.Info, payload: payload, message: 'Service (getStatus): ' });
-                return _this._respond(types_1.EventTypes.UPDATE_STATUS, payload);
+                _this._logger({ type: types_1.Logger.Info, payload: payload, message: 'Service (getStatus): ' });
+                return _this._responder(types_1.EventTypes.UPDATE_STATUS, payload);
             })
                 .catch(function (e) {
-                if (_this._settings.respond === types_1.Responses.Direct)
+                if (_this._settings.respondAs === types_1.Responses.Direct)
                     throw new Error(e.message);
-                _this._log({ type: types_1.Logger.Error, message: "Service (getStatus) got an error: " + (e.message || 'unknown') });
+                _this._errLogger("Service (getStatus) got an error.", e.message);
             });
         };
         // get retrievable by ID
@@ -125,13 +154,13 @@ var Service = /** @class */ (function () {
             return _this._transfers
                 .get(id)
                 .then(function (payload) {
-                _this._log({ type: types_1.Logger.Info, payload: payload, message: 'Service (getRetrievable): ' });
-                return _this._respond(types_1.EventTypes.GET_RETRIEVABLE, payload);
+                _this._logger({ type: types_1.Logger.Info, payload: payload, message: 'Service (getRetrievable): ' });
+                return _this._responder(types_1.EventTypes.GET_RETRIEVABLE, payload);
             })
                 .catch(function (e) {
-                if (_this._settings.respond === types_1.Responses.Direct)
+                if (_this._settings.respondAs === types_1.Responses.Direct)
                     throw new Error(e.message);
-                _this._log({ type: types_1.Logger.Error, message: "Service (getRetrievable) got an error. " + e.message });
+                _this._errLogger("Service (getRetrievable) got an error.", e.message);
             });
         };
         // get all collectables by recipient address
@@ -152,13 +181,13 @@ var Service = /** @class */ (function () {
                     case 1:
                         payload = _a.sent();
                         this._lastAddresses = addresses;
-                        this._log({ type: types_1.Logger.Info, payload: payload.data, message: 'Service (getCollectables): ' });
-                        return [2 /*return*/, this._respond(types_1.EventTypes.GET_COLLECTABLES, payload.data)];
+                        this._logger({ type: types_1.Logger.Info, payload: payload.data, message: 'Service (getCollectables): ' });
+                        return [2 /*return*/, this._responder(types_1.EventTypes.GET_COLLECTABLES, payload.data)];
                     case 2:
                         e_1 = _a.sent();
-                        if (this._settings.respond === types_1.Responses.Direct)
+                        if (this._settings.respondAs === types_1.Responses.Direct)
                             throw new Error(e_1.message);
-                        this._log({ type: types_1.Logger.Error, message: "Service (getCollectables) got an error: " + e_1.message });
+                        this._errLogger("Service (getCollectables) got an error.", e_1.message);
                         return [3 /*break*/, 3];
                     case 3: return [2 /*return*/];
                 }
@@ -175,12 +204,12 @@ var Service = /** @class */ (function () {
                         return [4 /*yield*/, this._transfers.create(transaction)];
                     case 1:
                         payload = _a.sent();
-                        return [2 /*return*/, this._respond(types_1.EventTypes.SEND_TRANSACTION, payload)];
+                        return [2 /*return*/, this._responder(types_1.EventTypes.SEND_TRANSACTION, payload)];
                     case 2:
                         e_2 = _a.sent();
-                        if (this._settings.respond === types_1.Responses.Direct)
+                        if (this._settings.respondAs === types_1.Responses.Direct)
                             throw new Error(e_2.message);
-                        this._log({ type: types_1.Logger.Error, message: "Service (send) got an error. " + e_2.message });
+                        this._errLogger("Service (send) got an error.", e_2.message);
                         return [3 /*break*/, 3];
                     case 3: return [2 /*return*/];
                 }
@@ -191,29 +220,37 @@ var Service = /** @class */ (function () {
             return _this._collect
                 .create(__assign({}, request))
                 .then(function (payload) {
-                _this._log({ type: types_1.Logger.Info, payload: payload, message: 'Service (collect): ' });
-                return _this._respond(types_1.EventTypes.SEND_TRANSACTION, {
+                _this._logger({ type: types_1.Logger.Info, payload: payload, message: 'Service (collect): ' });
+                return _this._responder(types_1.EventTypes.COLLECT_TRANSACTION, {
                     text: 'Request submitted.',
                     isError: false,
                     data: payload,
                 });
             })
                 .catch(function (e) {
-                if (_this._settings.respond === types_1.Responses.Direct)
+                if (_this._settings.respondAs === types_1.Responses.Direct)
                     throw new Error(e.message);
-                _this._log({ type: types_1.Logger.Error, message: "Service (collect) got an error. " + e.message });
-                var isWrongPasscode = e.message === 'Transaction Rejected by the Blockchain';
-                return _this._respond(types_1.EventTypes.SEND_MESSAGE, {
-                    text: isWrongPasscode ? 'Wrong passcode.' : 'Request or network error.',
+                _this._errLogger("Service (collect) got an error. " + e.message, e.message);
+                return _this._responder(types_1.EventTypes.SEND_MESSAGE, {
+                    text: e.message,
                     isError: true,
                 });
             });
         };
-        var _a = settings, debug = _a.debug, currency = _a.currency, network = _a.network, respond = _a.respond, eventBus = _a.eventBus;
+        if (settings)
+            this._validateProps(settings);
+        var _a = settings || {}, debug = _a.debug, currency = _a.currency, network = _a.network, respondAs = _a.respondAs, eventBus = _a.eventBus;
         this._eventBus = eventBus ? eventBus : function (event) { };
-        var config = new config_1.default({ debug: debug, currency: currency, network: network, eventBus: eventBus, respond: respond, refreshInbox: this._refreshInbox });
+        var config = new config_1.default({
+            debug: debug,
+            currency: currency,
+            network: network,
+            logger: this._logger,
+            getStatus: this.getStatus,
+            refreshInbox: this._refreshInbox,
+        });
         // store settings
-        this._settings = __assign(__assign({}, config.getSettings()), { respond: respond || types_1.Responses.Direct });
+        this._settings = __assign(__assign({}, config.getSettings()), { respondAs: respondAs || types_1.Responses.Direct });
         // set services
         this._networks = config.getService(types_1.Endpoints.Networks);
         this._transfers = config.getService(types_1.Endpoints.Transfers);

@@ -1,27 +1,28 @@
 import Config from './config'
+
 import {
-  ServiceProps,
-  Settings,
-  Endpoints,
-  ApiService,
-  NetworkTip,
   ApiResponseError,
-  Responses,
+  ApiService,
+  Collectable,
+  CollectRequest,
   DebugLevels,
-  Logger,
-  LoggerProps,
+  Endpoints,
   EventBus,
   EventTypes,
-  Retrievable,
-  Collectable,
-  ResponseCollectable,
-  Status,
-  Sendable,
-  CollectRequest,
-  ResponseCollect,
+  Logger,
+  LoggerProps,
   Message,
+  NetworkTip,
+  ResponseCollect,
+  ResponseCollectable,
+  Responses,
+  Retrievable,
+  Sendable,
+  ServiceProps,
+  Settings,
+  Status,
 } from './types'
-import { validateAddress, validateData } from './validators'
+import { validateAddress, validateData, validateSettings } from './validators'
 
 // TODO: add comments
 /**
@@ -39,7 +40,11 @@ class Service {
   private _collect: ApiService
   private _lastAddresses: string[] = [] // caching last addresses request
 
-  constructor(settings?: ServiceProps) {
+  private _isTest = process.env.NODE_ENV === 'test'
+
+  // TODO: remove any
+  constructor(settings?: ServiceProps | any) {
+    if (settings) this._validateProps(settings)
 
     const { debug, currency, network, respondAs, eventBus } = settings || {}
     this._eventBus = eventBus ? eventBus : event => {}
@@ -109,6 +114,15 @@ class Service {
     })
   }
 
+  private _validateProps = (settings: unknown) => {
+    try {
+      validateSettings(settings)
+    } catch (e) {
+      if (!this._isTest) console.log(`Service (validateProps) got an error. ${e.message}`)
+      throw new TypeError(e.message)
+    }
+  }
+
   // responder
   private _responder = (
     type: EventTypes,
@@ -130,7 +144,10 @@ class Service {
       // errors are shown in all other modes
       if (!type) console.error(message)
       // info is shown only in verbose mode
-      else if (type && this._settings.debug === DebugLevels.VERBOSE) console.log(message, payload)
+      else if (type && this._settings.debug === DebugLevels.VERBOSE) {
+        if (payload) console.log(message, payload)
+        else console.log(message)
+      }
     }
   }
 

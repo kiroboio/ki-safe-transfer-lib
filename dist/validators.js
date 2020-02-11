@@ -4,6 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var multicoin_address_validator_1 = __importDefault(require("multicoin-address-validator"));
+var data_1 = require("./data");
+var tools_1 = require("./tools");
 var isString = function (data) { return typeof data === 'string'; };
 exports.validateAddress = function (_a) {
     var address = _a.address, currency = _a.currency, networkType = _a.networkType;
@@ -49,4 +51,30 @@ exports.validateData = function (data, currency, networkType) {
         });
         throw new Error(validate.message);
     }
+};
+exports.validateSettings = function (settings) {
+    if (settings !== Object(settings))
+        throw new TypeError(data_1.TEXT.errors.validation.typeOfObject);
+    if (Array.isArray(settings))
+        throw new TypeError(data_1.TEXT.errors.validation.noArray);
+    if (typeof settings === 'function')
+        throw new TypeError(data_1.TEXT.errors.validation.noFunction);
+    var setObj = settings;
+    var objKeys = Object.keys(setObj);
+    if (objKeys.length === 0)
+        throw new TypeError(data_1.TEXT.errors.validation.emptyObject);
+    if (objKeys.length > data_1.listOfSettingsKeys.length)
+        throw new TypeError(data_1.TEXT.errors.validation.extraKeys);
+    objKeys.forEach(function (key) {
+        if (!data_1.listOfSettingsKeys.includes(key))
+            throw new TypeError("" + data_1.TEXT.errors.validation.unknownKeys + key + ".");
+        var type = data_1.typeOfSettingsKeys[key];
+        var value = setObj[key];
+        if (typeof value !== type)
+            throw new TypeError(tools_1.makeStringFromTemplate(data_1.TEXT.errors.validation.wrongValueType, [key, type]));
+        var values = data_1.valuesForSettings[key];
+        // @ts-ignore - some issue, where .includes requires 'never'
+        if (values && !values.includes(value))
+            throw new TypeError(tools_1.makeStringFromTemplate(data_1.TEXT.errors.validation.wrongValue, [value, key, values.join(', ')]));
+    });
 };

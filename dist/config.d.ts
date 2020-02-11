@@ -1,5 +1,4 @@
-import { ConfigProps } from '.';
-import { Settings, Endpoints } from './types';
+import { ConfigProps, Endpoints, Settings } from './types';
 declare class Config {
     protected _VERSION: string;
     protected _url: string;
@@ -8,19 +7,18 @@ declare class Config {
         inbox: string;
         transfers: string;
     };
+    private _isDev;
+    private _isTest;
     private _debug;
     private _currency;
     private _network;
     private _connect;
-    private _response;
-    private _eventBus;
-    private _networks;
-    constructor({ debug, network, currency, eventBus, respond, refreshInbox }: ConfigProps);
-    private _respond;
+    private _getStatus;
+    private _logger;
+    constructor({ debug, network, currency, logger, getStatus, refreshInbox }: ConfigProps);
+    private _debugLevelSelector;
     private _makeEndpointPath;
-    private _log;
     getService: (endpoint: Endpoints) => any;
     getSettings: () => Settings;
-    getStatus: () => any;
 }
 export default Config;

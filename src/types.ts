@@ -142,7 +142,7 @@ export enum Logger {
 
 export interface LoggerProps {
   type: Logger
-  payload?: Status | Retrievable | Collectable[] | ResponseCollect
+  payload?: Status | Retrievable | Collectable[] | ResponseCollect | string
   message: string
 }
 
@@ -196,4 +196,8 @@ export type CollectRequest = {
 export type validateReport = {
   message: string
   errors: { [index: string]: string[] }
+}
+
+export type ObjectWithStringKeys = {
+  [index: string]: string[] | number [] | string
 }

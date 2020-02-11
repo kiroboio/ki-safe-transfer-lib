@@ -1,4 +1,4 @@
-import { ServiceProps, Settings, Retrievable, Collectable, Status, Sendable, CollectRequest, ResponseCollect, Message } from './types';
+import { Collectable, CollectRequest, Message, ResponseCollect, Retrievable, Sendable, ServiceProps, Settings, Status } from './types';
 /**
  * Kirobo Safe Transfer library class to provide convenient
  * way to use the service
@@ -13,10 +13,14 @@ declare class Service {
     private _inbox;
     private _collect;
     private _lastAddresses;
-    constructor(settings: ServiceProps | {});
-    private _respond;
-    private _log;
+    private _isTest;
+    constructor(settings?: ServiceProps | any);
+    private _validateProps;
+    private _responder;
+    private _logger;
+    private _errLogger;
     private _refreshInbox;
+    getLastAddresses: () => string[];
     clearLastAddresses: () => never[];
     getSettings: () => Settings;
     getStatus: () => any;
