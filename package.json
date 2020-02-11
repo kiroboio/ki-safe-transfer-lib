@@ -15,13 +15,14 @@
     "postversion": "git push && git push --tags",
     "test": "jest --coverage",
     "test:watch": "jest --coverage --watchAll --unhandled-rejections=strict",
+    "test:push":"jest --unhandled-rejections=strict",
     "dev:production": "export NODE_ENV=production && ts-node-dev ./tests/client.ts",
     "dev": "ts-node-dev ./tests/client.ts"
   },
   "husky": {
     "hooks": {
       "pre-commit": "",
-      "pre-push": "npm run test"
+      "pre-push": "npm run test:push"
     }
   },
   "files": [
