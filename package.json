@@ -16,13 +16,11 @@
     "test": "jest --coverage",
     "test:watch": "jest --coverage --watchAll --unhandled-rejections=strict",
     "dev:production": "export NODE_ENV=production && ts-node-dev ./tests/client.ts",
-    "dev": "ts-node-dev ./tests/client.ts",
-    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
-    "lint": "tslint -p tsconfig.json"
+    "dev": "ts-node-dev ./tests/client.ts"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run format && npm run lint",
+      "pre-commit": "",
       "pre-push": "npm run test"
     }
   },

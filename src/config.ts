@@ -2,18 +2,9 @@ import feathers, { Application } from '@feathersjs/feathers'
 import io from 'socket.io-client'
 import socketio from '@feathersjs/socketio-client'
 
-import {capitalize} from './tools'
+import { capitalize } from './tools'
 
-import {
-  ConfigProps,
-  Currencies,
-  DebugLevels,
-  Endpoints,
-  Logger,
-  LoggerFunction,
-  Networks,
-  Settings,
-} from './types'
+import { ConfigProps, Currencies, DebugLevels, Endpoints, Logger, LoggerFunction, Networks, Settings } from './types'
 
 // TODO: add comments
 class Config {
