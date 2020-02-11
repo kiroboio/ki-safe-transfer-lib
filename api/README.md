@@ -35,7 +35,7 @@ const service = new Service({})
  or
 
 ```javascript
-import Service, { Event } from '@kirobo/safe-transfer-lib'
+import Service, { Event } from '@kiroboio/safe-transfer-lib'
 
 function eventBus(event: Event) {
   console.log('event fired: ', event)

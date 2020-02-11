@@ -74,10 +74,10 @@ class Service {
 
     // status update
     this._networks.on('patched', (data: NetworkTip) => {
-      const { height, online } = data
+      const { height, online, fee } = data
       this._eventBus({
         type: EventTypes.UPDATE_STATUS,
-        payload: { height, online },
+        payload: { height, online, fee },
       })
     })
 
@@ -185,7 +185,7 @@ class Service {
     this._networks
       .get(this._settings.network)
       .then((response: NetworkTip) => {
-        const payload: Status = { height: response.height, online: response.online }
+        const payload: Status = { height: response.height, online: response.online, fee: response.fee }
         this._logger({ type: Logger.Info, payload, message: 'Service (getStatus): ' })
         return this._responder(EventTypes.UPDATE_STATUS, payload)
       })
