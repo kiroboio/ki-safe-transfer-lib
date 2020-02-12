@@ -43,6 +43,7 @@ export interface NetworkTip {
     online: boolean;
     netId: string;
     timestamp: number;
+    fee: number;
 }
 export declare type Retrievable = {
     amount: number;
@@ -145,6 +146,7 @@ export declare type Message = {
 };
 export declare type Status = {
     height: number;
+    fee: number;
     online: boolean;
 };
 export declare type Event = {

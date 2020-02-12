@@ -56,6 +56,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var config_1 = __importDefault(require("./config"));
 var types_1 = require("./types");
 var validators_1 = require("./validators");
+var data_1 = require("./data");
 // TODO: add comments
 /**
  * Kirobo Safe Transfer library class to provide convenient
@@ -113,6 +114,9 @@ var Service = /** @class */ (function () {
         this._errLogger = function (message, error) {
             return _this._logger({ type: types_1.Logger.Error, message: "" + message + (error ? ' ' + error : '') });
         };
+        this._makeError = function (e) {
+            return e instanceof TypeError ? new TypeError(e.message) : new Error(e.message);
+        };
         this._refreshInbox = function () {
             if (_this._lastAddresses.length)
                 return _this._inbox
@@ -139,7 +143,7 @@ var Service = /** @class */ (function () {
             return _this._networks
                 .get(_this._settings.network)
                 .then(function (response) {
-                var payload = { height: response.height, online: response.online };
+                var payload = { height: response.height, online: response.online, fee: response.fee };
                 _this._logger({ type: types_1.Logger.Info, payload: payload, message: 'Service (getStatus): ' });
                 return _this._responder(types_1.EventTypes.UPDATE_STATUS, payload);
             })
@@ -200,6 +204,10 @@ var Service = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 2, , 3]);
+                        // validate props
+                        if (transaction === undefined || transaction === null)
+                            throw new Error(data_1.TEXT.errors.validation.missingArgument);
+                        validators_1.validateObject(transaction);
                         validators_1.validateData(transaction, this._settings.currency, this._settings.network);
                         return [4 /*yield*/, this._transfers.create(transaction)];
                     case 1:
@@ -208,7 +216,7 @@ var Service = /** @class */ (function () {
                     case 2:
                         e_2 = _a.sent();
                         if (this._settings.respondAs === types_1.Responses.Direct)
-                            throw new Error(e_2.message);
+                            throw this._makeError(e_2);
                         this._errLogger("Service (send) got an error.", e_2.message);
                         return [3 /*break*/, 3];
                     case 3: return [2 /*return*/];
@@ -259,10 +267,10 @@ var Service = /** @class */ (function () {
         // event listeners
         // status update
         this._networks.on('patched', function (data) {
-            var height = data.height, online = data.online;
+            var height = data.height, online = data.online, fee = data.fee;
             _this._eventBus({
                 type: types_1.EventTypes.UPDATE_STATUS,
-                payload: { height: height, online: online },
+                payload: { height: height, online: online, fee: fee },
             });
         });
         // retrievable updated

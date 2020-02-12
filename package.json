@@ -7,7 +7,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc && rm -rf dist/tests && mv dist/src/* dist && rm -rf dist/src",
+    "build": "rm -rf dist && tsc && rm -rf dist/tests && mv dist/src/* dist && rm -rf dist/src",
     "prepare": "npm run build",
     "prepublishOnly": "npm test && npm run lint",
     "preversion": "npm run lint",
@@ -15,7 +15,7 @@
     "postversion": "git push && git push --tags",
     "test": "jest --coverage",
     "test:watch": "jest --coverage --watchAll --unhandled-rejections=strict",
-    "test:push":"jest --unhandled-rejections=strict",
+    "test:push": "jest --unhandled-rejections=strict",
     "dev:production": "export NODE_ENV=production && ts-node-dev ./tests/client.ts",
     "dev": "ts-node-dev ./tests/client.ts"
   },

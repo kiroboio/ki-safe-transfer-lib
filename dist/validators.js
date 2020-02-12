@@ -12,13 +12,14 @@ exports.validateAddress = function (_a) {
     return isString(address) ? multicoin_address_validator_1.default.validate(address, currency, networkType) : false;
 };
 exports.validateData = function (data, currency, networkType) {
+    var _a;
     var validate = {
-        message: 'Data is malformed.',
-        errors: { 'Missing values:': [], 'Malformed values:': [] },
+        message: data_1.TEXT.errors.validation.malformedData,
+        errors: (_a = {}, _a[data_1.TEXT.errors.validation.missingValues] = [], _a[data_1.TEXT.errors.validation.malformedValues] = [], _a),
     };
-    var pushMissing = function (subject) { return validate.errors['Missing values:'].push(subject); };
-    var pushMalformed = function (subject) { return validate.errors['Malformed values:'].push(subject); };
-    // checking for missing values
+    var pushMissing = function (subject) { return validate.errors[data_1.TEXT.errors.validation.missingValues].push(subject); };
+    var pushMalformed = function (subject) { return validate.errors[data_1.TEXT.errors.validation.malformedValues].push(subject); };
+    // checking for missing required values
     if (!data.to)
         pushMissing('to');
     if (!data.amount)
@@ -27,38 +28,49 @@ exports.validateData = function (data, currency, networkType) {
         pushMissing('collect');
     if (!data.deposit)
         pushMissing('deposit');
-    // checking for malformed values
-    // if (data.to && !data.to.match(/^[a-z0-9]+$/i)) validate.errors['Malformed values:'].push('to')
-    if (!exports.validateAddress({ address: data.to, currency: currency, networkType: networkType }))
-        pushMalformed('to');
-    if (typeof data.collect !== 'string')
-        pushMalformed('collect');
-    if (typeof data.deposit !== 'string')
-        pushMalformed('deposit');
-    if (data.from && typeof data.from !== 'string')
-        pushMalformed('from');
-    if (data.hint && typeof data.hint !== 'string')
-        pushMalformed('hint');
+    // if all keys present, check for malformed values
+    if (!validate.errors[data_1.TEXT.errors.validation.missingValues].length) {
+        if (!exports.validateAddress({ address: data.to, currency: currency, networkType: networkType }))
+            pushMalformed('to');
+        if (typeof data.collect !== 'string')
+            pushMalformed('collect');
+        if (typeof data.deposit !== 'string')
+            pushMalformed('deposit');
+        if (typeof data.amount !== 'number')
+            pushMalformed('amount');
+        if (data.from && typeof data.from !== 'string')
+            pushMalformed('from');
+        if (data.hint && typeof data.hint !== 'string')
+            pushMalformed('hint');
+        if (data.id && typeof data.id !== 'string')
+            pushMalformed('id');
+    }
+    else
+        delete validate.errors[data_1.TEXT.errors.validation.malformedValues];
     var throwError = function () {
-        return validate.errors['Missing values:'].length > 0 || validate.errors['Malformed values:'].length > 0;
+        return validate.errors[data_1.TEXT.errors.validation.missingValues].length > 0 ||
+            validate.errors[data_1.TEXT.errors.validation.malformedValues].length > 0;
     };
     // if status false throw error
     if (throwError()) {
         Object.keys(validate.errors).forEach(function (key) {
             if (validate.errors[key].length > 0) {
-                validate.message = validate.message + " " + key + " " + validate.errors[key].join(', ') + ".";
+                validate.message = validate.message + " " + key + validate.errors[key].join(', ') + ".";
             }
         });
-        throw new Error(validate.message);
+        throw new TypeError(validate.message);
     }
 };
-exports.validateSettings = function (settings) {
-    if (settings !== Object(settings))
+exports.validateObject = function (data) {
+    if (data !== Object(data))
         throw new TypeError(data_1.TEXT.errors.validation.typeOfObject);
-    if (Array.isArray(settings))
+    if (Array.isArray(data))
         throw new TypeError(data_1.TEXT.errors.validation.noArray);
-    if (typeof settings === 'function')
+    if (typeof data === 'function')
         throw new TypeError(data_1.TEXT.errors.validation.noFunction);
+};
+exports.validateSettings = function (settings) {
+    exports.validateObject(settings);
     var setObj = settings;
     var objKeys = Object.keys(setObj);
     if (objKeys.length === 0)

@@ -19,6 +19,7 @@ declare class Service {
     private _responder;
     private _logger;
     private _errLogger;
+    private _makeError;
     private _refreshInbox;
     getLastAddresses: () => string[];
     clearLastAddresses: () => never[];
