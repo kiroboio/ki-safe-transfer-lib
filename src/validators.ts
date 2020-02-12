@@ -1,4 +1,5 @@
 import validator from 'multicoin-address-validator'
+
 import { Sendable, validateReport, Settings, ObjectWithStringKeys } from './types'
 import { listOfSettingsKeys, typeOfSettingsKeys, valuesForSettings, TEXT } from './data'
 import { makeStringFromTemplate } from './tools'
@@ -16,46 +17,54 @@ export const validateAddress = ({ address, currency, networkType }: Props): bool
 
 export const validateData = (data: Sendable, currency: string, networkType: string): void => {
   const validate: validateReport = {
-    message: 'Data is malformed.',
-    errors: { 'Missing values:': [], 'Malformed values:': [] },
+    message: TEXT.errors.validation.malformedData,
+    errors: { [TEXT.errors.validation.missingValues]: [], [TEXT.errors.validation.malformedValues]: [] },
   }
 
-  const pushMissing = (subject: string) => validate.errors['Missing values:'].push(subject)
+  const pushMissing = (subject: string) => validate.errors[TEXT.errors.validation.missingValues].push(subject)
 
-  const pushMalformed = (subject: string) => validate.errors['Malformed values:'].push(subject)
+  const pushMalformed = (subject: string) => validate.errors[TEXT.errors.validation.malformedValues].push(subject)
 
-  // checking for missing values
+  // checking for missing required values
   if (!data.to) pushMissing('to')
   if (!data.amount) pushMissing('amount')
   if (!data.collect) pushMissing('collect')
   if (!data.deposit) pushMissing('deposit')
 
-  // checking for malformed values
-  // if (data.to && !data.to.match(/^[a-z0-9]+$/i)) validate.errors['Malformed values:'].push('to')
-  if (!validateAddress({ address: data.to, currency, networkType })) pushMalformed('to')
-  if (typeof data.collect !== 'string') pushMalformed('collect')
-  if (typeof data.deposit !== 'string') pushMalformed('deposit')
-  if (data.from && typeof data.from !== 'string') pushMalformed('from')
-  if (data.hint && typeof data.hint !== 'string') pushMalformed('hint')
+  // if all keys present, check for malformed values
+  if (!validate.errors[TEXT.errors.validation.missingValues].length) {
+    if (!validateAddress({ address: data.to, currency, networkType })) pushMalformed('to')
+    if (typeof data.collect !== 'string') pushMalformed('collect')
+    if (typeof data.deposit !== 'string') pushMalformed('deposit')
+    if (typeof data.amount !== 'number') pushMalformed('amount')
+    if (data.from && typeof data.from !== 'string') pushMalformed('from')
+    if (data.hint && typeof data.hint !== 'string') pushMalformed('hint')
+    if (data.id && typeof data.id !== 'string') pushMalformed('id')
+  } else delete validate.errors[TEXT.errors.validation.malformedValues]
 
   const throwError = () =>
-    validate.errors['Missing values:'].length > 0 || validate.errors['Malformed values:'].length > 0
+    validate.errors[TEXT.errors.validation.missingValues].length > 0 ||
+    validate.errors[TEXT.errors.validation.malformedValues].length > 0
 
   // if status false throw error
   if (throwError()) {
     Object.keys(validate.errors).forEach(key => {
       if (validate.errors[key].length > 0) {
-        validate.message = `${validate.message} ${key} ${validate.errors[key].join(', ')}.`
+        validate.message = `${validate.message} ${key}${validate.errors[key].join(', ')}.`
       }
     })
-    throw new Error(validate.message)
+    throw new TypeError(validate.message)
   }
 }
 
+export const validateObject = (data: unknown) => {
+  if (data !== Object(data)) throw new TypeError(TEXT.errors.validation.typeOfObject)
+  if (Array.isArray(data)) throw new TypeError(TEXT.errors.validation.noArray)
+  if (typeof data === 'function') throw new TypeError(TEXT.errors.validation.noFunction)
+}
+
 export const validateSettings = (settings: unknown) => {
-  if (settings !== Object(settings)) throw new TypeError(TEXT.errors.validation.typeOfObject)
-  if (Array.isArray(settings)) throw new TypeError(TEXT.errors.validation.noArray)
-  if (typeof settings === 'function') throw new TypeError(TEXT.errors.validation.noFunction)
+  validateObject(settings)
 
   const setObj = settings as ObjectWithStringKeys
   const objKeys = Object.keys(setObj)

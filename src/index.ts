@@ -22,7 +22,8 @@ import {
   Settings,
   Status,
 } from './types'
-import { validateAddress, validateData, validateSettings } from './validators'
+import { validateAddress, validateData, validateObject, validateSettings } from './validators'
+import { TEXT } from './data'
 
 // TODO: add comments
 /**
@@ -155,6 +156,9 @@ class Service {
   private _errLogger = (message: string, error: string) =>
     this._logger({ type: Logger.Error, message: `${message}${error ? ' ' + error : ''}` })
 
+  private _makeError = (e: TypeError | Error) =>
+    e instanceof TypeError ? new TypeError(e.message) : new Error(e.message)
+
   private _refreshInbox = () => {
     if (this._lastAddresses.length)
       return this._inbox
@@ -232,12 +236,15 @@ class Service {
   // send retrievable/collectable transaction
   public send = async (transaction: Sendable) => {
     try {
+      // validate props
+      if (transaction === undefined || transaction === null) throw new Error(TEXT.errors.validation.missingArgument)
+      validateObject(transaction)
       validateData(transaction, this._settings.currency, this._settings.network)
 
       const payload = await this._transfers.create(transaction)
       return this._responder(EventTypes.SEND_TRANSACTION, payload)
     } catch (e) {
-      if (this._settings.respondAs === Responses.Direct) throw new Error(e.message)
+      if (this._settings.respondAs === Responses.Direct) throw this._makeError(e)
       this._errLogger(`Service (send) got an error.`, e.message)
     }
   }
