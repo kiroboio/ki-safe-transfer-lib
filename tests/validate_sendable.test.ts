@@ -26,7 +26,6 @@ describe('Send', () => {
         expect(error).toHaveProperty('message', TEXT.errors.validation.missingArgument)
       }
     })
-
     test('- throws TypeError on array as argument', async () => {
       try {
         // @ts-ignore

@@ -22,6 +22,7 @@ import {
   Settings,
   Status,
 } from './types'
+import { makeStringFromTemplate } from './tools'
 import { validateAddress, validateData, validateObject, validateSettings } from './validators'
 import { TEXT } from './data'
 
@@ -214,10 +215,14 @@ class Service {
   // get all collectables by recipient address
   public getCollectables = async (addresses: string[]) => {
     try {
-      if (!Array.isArray(addresses)) throw new Error('Malformed request. Not an array.')
+      // validate props
+      if (!addresses) throw new TypeError(TEXT.errors.validation.missingArgument)
+      if (!Array.isArray(addresses)) throw new TypeError(TEXT.errors.validation.typeOfObject)
+
       addresses.forEach(address => {
+        if (typeof address !== 'string') throw new TypeError(TEXT.errors.validation.typeOfObject)
         if (!validateAddress({ address, currency: this._settings.currency, networkType: this._settings.network }))
-          throw new Error(`Malformed address: ${address}`)
+          throw new Error(makeStringFromTemplate(TEXT.errors.validation.malformedAddress, [address]))
       })
 
       const payload: ResponseCollectable = await this._inbox.find({ query: { to: addresses.join(';') } })
@@ -228,7 +233,7 @@ class Service {
 
       return this._responder(EventTypes.GET_COLLECTABLES, payload.data)
     } catch (e) {
-      if (this._settings.respondAs === Responses.Direct) throw new Error(e.message)
+      if (this._settings.respondAs === Responses.Direct) throw this._makeError(e)
       this._errLogger(`Service (getCollectables) got an error.`, e.message)
     }
   }
