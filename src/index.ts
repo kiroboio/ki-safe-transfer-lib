@@ -141,7 +141,7 @@ class Service {
   // logger
   private _logger = ({ type, payload, message }: LoggerProps) => {
     // if not MUTE mode
-    if (this._settings.debug !== DebugLevels.MUTE) {
+    if (this._settings.debug !== DebugLevels.MUTE && !this._isTest) {
       // errors are shown in all other modes
       if (!type) console.error(message)
       // info is shown only in verbose mode
