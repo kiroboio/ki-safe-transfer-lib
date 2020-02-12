@@ -28,39 +28,39 @@
   ```typescript
   function eventBus(event: Event) {
     console.log('event fired: ', event)
-    event fired:  {
-      type: 'service_get_collectables',
-      payload: [
-        {
-          amount: 100000,
-          collect: {
-             broadcasted: -1, confirmed: -1, txid: ''
-          },
-          createdAt: '2020-02-05T08:51:58.607Z',
-          expires: { at: '2020-02-06T08:51:58.607Z' },
-          from: 'Kirobo',
-          hint: 'xxxxx',
-          id: 'xxxxx',
-          salt: 'xxxxx',
-          state: 'ready',
-          to: 'xxxxx',
-          updatedAt: '2020-02-05T08:51:58.607Z'
-        },
-        {
-          amount: 100000,
-          collect: {
-            broadcasted: -1, confirmed: -1, txid: ''
-          },
-          createdAt: '2020-02-05T08:51:58.607Z',
-          expires: { at: '2020-02-06T08:51:58.607Z' },
-          id: 'xxxxx',
-          salt: 'xxxxx',
-          state: 'ready',
-          to: 'xxxxx',
-          updatedAt: '2020-02-05T10:30:31.862Z'
-        }
-      ]
-    }
+    // event fired:  {
+    //   type: 'service_get_collectables',
+    //   payload: [
+    //     {
+    //       amount: 100000,
+    //       collect: {
+    //          broadcasted: -1, confirmed: -1, txid: ''
+    //       },
+    //       createdAt: '2020-02-05T08:51:58.607Z',
+    //       expires: { at: '2020-02-06T08:51:58.607Z' },
+    //       from: 'Kirobo',
+    //       hint: 'xxxxx',
+    //       id: 'xxxxx',
+    //       salt: 'xxxxx',
+    //       state: 'ready',
+    //       to: 'xxxxx',
+    //       updatedAt: '2020-02-05T08:51:58.607Z'
+    //     },
+    //     {
+    //       amount: 100000,
+    //       collect: {
+    //         broadcasted: -1, confirmed: -1, txid: ''
+    //       },
+    //       createdAt: '2020-02-05T08:51:58.607Z',
+    //       expires: { at: '2020-02-06T08:51:58.607Z' },
+    //       id: 'xxxxx',
+    //       salt: 'xxxxx',
+    //       state: 'ready',
+    //       to: 'xxxxx',
+    //       updatedAt: '2020-02-05T10:30:31.862Z'
+    //     }
+    //   ]
+    // }
   }
 
   const service = new Service({
@@ -116,7 +116,7 @@
     deposit: string // raw deposit transaction, already broadcasted
     from?: string // any text to identify sender, optional
     hint?: string // hint for automated transactions, optional
-    id?: string // custom ID, uses hash; more on this below
+    id?: string // custom ID, uses hash, optional; more on this below
     to: string // recipient's address
   }
   ```
@@ -166,7 +166,7 @@
   ```typescript
 
   Service (collect):  {
-    fromNodeTxid: '3792c7051d0f914264057b400bc2649ddaec1b671a6c953a39838cf8a7940595'
+    fromNodeTxid: 'xxxxxx'
   }
 
   Service (collect) got an error. Transaction Rejected by the Blockchain
