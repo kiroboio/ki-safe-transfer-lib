@@ -1,6 +1,6 @@
 import Service, { DebugLevels, Currencies, Networks, Responses, Event, Sendable } from '../src'
 import { TEXT, valuesForSettings } from '../src/data'
-import { makeStringFromTemplate } from '../src/tools'
+import { makeStringFromTemplate, compareBasicObjects } from '../src/tools'
 
 let storedEvent: {}
 
@@ -12,6 +12,9 @@ function eventBus(event: Event) {
 process.on('unhandledRejection', () => {})
 
 describe('Library configuration', () => {
+  beforeEach(() => {
+    storedEvent = {}
+  })
   test('service runs without settings', async () => {
     const service = new Service()
   })
@@ -124,6 +127,20 @@ describe('Library configuration', () => {
           makeStringFromTemplate(TEXT.errors.validation.wrongValue, ['5', 'debug', list.join(', ')]),
         )
       }
+    })
+  })
+  describe('- correct settings', () => {
+    test('- correct value provided & retrieved', async () => {
+      const settings = {
+        debug: DebugLevels.VERBOSE,
+        currency: Currencies.Bitcoin,
+        network: Networks.Testnet,
+        respondAs: Responses.Direct,
+      }
+      const service = new Service(settings)
+      const result = service.getSettings()
+      const compare = compareBasicObjects(result, { ...settings, version: 'v1' })
+      expect(compare).toBe(true)
     })
   })
 })

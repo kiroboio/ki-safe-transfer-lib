@@ -57,6 +57,18 @@ export const validateData = (data: Sendable, currency: string, networkType: stri
   }
 }
 
+export const validateArray = (arr: unknown[], type: string[]): boolean => {
+  if (!Array.isArray(arr)) return false
+
+  let result = true
+
+  arr.forEach(el => {
+    if (!type.includes(typeof el)) result = false
+  })
+
+  return result
+}
+
 export const validateObject = (data: unknown) => {
   if (data !== Object(data)) throw new TypeError(TEXT.errors.validation.typeOfObject)
   if (Array.isArray(data)) throw new TypeError(TEXT.errors.validation.noArray)

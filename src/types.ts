@@ -203,3 +203,5 @@ export type validateReport = {
 export type ObjectWithStringKeys = {
   [index: string]: string[] | number[] | string
 }
+
+export type ObjectWithStringKeysAnyValues = { [index: string]: any }
