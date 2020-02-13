@@ -190,7 +190,11 @@ class Service {
     this._networks
       .get(this._settings.network)
       .then((response: NetworkTip) => {
-        const payload: Status = { height: response.height, online: response.online, fee: response.fee }
+        const payload: Status = {
+          height: response.height,
+          online: response.online,
+          fee: response.fee,
+        }
         this._logger({ type: Logger.Info, payload, message: 'Service (getStatus): ' })
         return this._responder(EventTypes.UPDATE_STATUS, payload)
       })
@@ -200,17 +204,21 @@ class Service {
       })
 
   // get retrievable by ID
-  public getRetrievable = (id: string) =>
-    this._transfers
-      .get(id)
-      .then((payload: Retrievable) => {
-        this._logger({ type: Logger.Info, payload, message: 'Service (getRetrievable): ' })
-        return this._responder(EventTypes.GET_RETRIEVABLE, payload)
-      })
-      .catch((e: ApiResponseError) => {
-        if (this._settings.respondAs === Responses.Direct) throw new Error(e.message)
-        this._errLogger(`Service (getRetrievable) got an error.`, e.message)
-      })
+  public getRetrievable = async (id: string) => {
+    try {
+      // validate props
+      if (!id) throw new TypeError(TEXT.errors.validation.missingArgument)
+      if (typeof id !== 'string') throw new TypeError(TEXT.errors.validation.typeOfObject)
+
+      const payload: Retrievable = await this._transfers.get(id)
+
+      this._logger({ type: Logger.Info, payload, message: 'Service (getRetrievable): ' })
+      return this._responder(EventTypes.GET_RETRIEVABLE, payload)
+    } catch (e) {
+      if (this._settings.respondAs === Responses.Direct) throw this._makeError(e)
+      this._errLogger(`Service (getRetrievable) got an error.`, e.message)
+    }
+  }
 
   // get all collectables by recipient address
   public getCollectables = async (addresses: string[]) => {
@@ -221,15 +229,27 @@ class Service {
 
       addresses.forEach(address => {
         if (typeof address !== 'string') throw new TypeError(TEXT.errors.validation.typeOfObject)
-        if (!validateAddress({ address, currency: this._settings.currency, networkType: this._settings.network }))
+        if (
+          !validateAddress({
+            address,
+            currency: this._settings.currency,
+            networkType: this._settings.network,
+          })
+        )
           throw new Error(makeStringFromTemplate(TEXT.errors.validation.malformedAddress, [address]))
       })
 
-      const payload: ResponseCollectable = await this._inbox.find({ query: { to: addresses.join(';') } })
+      const payload: ResponseCollectable = await this._inbox.find({
+        query: { to: addresses.join(';') },
+      })
 
       this._lastAddresses = addresses
 
-      this._logger({ type: Logger.Info, payload: payload.data, message: 'Service (getCollectables): ' })
+      this._logger({
+        type: Logger.Info,
+        payload: payload.data,
+        message: 'Service (getCollectables): ',
+      })
 
       return this._responder(EventTypes.GET_COLLECTABLES, payload.data)
     } catch (e) {

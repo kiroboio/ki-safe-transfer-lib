@@ -1,11 +1,10 @@
-import Service, { DebugLevels, Currencies, Networks, Responses, Event, Sendable } from '../src'
-import { TEXT, valuesForSettings, validBitcoinAddresses } from '../src/data'
-import { makeStringFromTemplate, compareBasicObjects } from '../src/tools'
+import Service, { DebugLevels, Responses, Event } from '../src'
+import { TEXT, validBitcoinAddresses } from '../src/data'
+import { makeStringFromTemplate } from '../src/tools'
 
-let storedEvent: {}
+let storedEvent: Event
 
 function eventBus(event: Event) {
-  console.log(event)
   storedEvent = event
 }
 
@@ -14,9 +13,6 @@ const service = new Service({ debug: DebugLevels.MUTE })
 process.on('unhandledRejection', () => {})
 
 describe('Collectables', () => {
-  beforeEach(() => {
-    storedEvent = {}
-  })
   describe('- empty/incorrect argument validation', () => {
     test('- throws Error on missing argument', async () => {
       try {
@@ -30,7 +26,7 @@ describe('Collectables', () => {
     test('- throws TypeError argument with wrong type', async () => {
       try {
         // @ts-ignore
-        await service.send(1234)
+        await service.getCollectables(1234)
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', TEXT.errors.validation.typeOfObject)
@@ -60,5 +56,12 @@ describe('Collectables', () => {
   test('get an array as a result of proper request', async () => {
     const result = await service.getCollectables([validBitcoinAddresses[2]])
     expect(Array.isArray(result)).toBe(true)
+  })
+  test('get an array through eventBus, if used', async () => {
+    const newService = new Service({ eventBus, respondAs: Responses.Callback })
+    const result = await newService.getCollectables([validBitcoinAddresses[2]])
+    expect(result).toBe(undefined)
+    expect(storedEvent.type).toBe('service_get_collectables')
+    expect(Array.isArray(storedEvent.payload)).toBe(true)
   })
 })

@@ -20,6 +20,10 @@ export const TEXT = {
   },
 }
 
+export const listOfStatusKeys = ['height', 'online', 'fee']
+
+export const typeOfStatusValues = { height: 'number', online: 'boolean', fee: 'number' }
+
 export const listOfSettingsKeys = ['debug', 'currency', 'network', 'eventBus', 'respondAs']
 
 export const typeOfSettingsKeys: ObjectWithStringKeys = {
