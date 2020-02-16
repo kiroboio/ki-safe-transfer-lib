@@ -8,16 +8,7 @@ module.exports = {
     project: 'tsconfig.json',
     sourceType: 'module',
   },
-  plugins: [
-    '@typescript-eslint',
-    'react-hooks',
-    'promise',
-    'eslint-comments',
-    'json',
-    'markdown',
-    'async-await',
-    'prettier',
-  ],
+  plugins: ['@typescript-eslint', 'react-hooks', 'promise', 'eslint-comments', 'json', 'markdown', 'async-await'],
   rules: {
     '@typescript-eslint/explicit-member-accessibility': [
       'off',
@@ -70,6 +61,5 @@ module.exports = {
         allowWholeFile: true,
       },
     ],
-    'prettier/prettier': 'error',
   },
 }

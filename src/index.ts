@@ -91,6 +91,14 @@ class Service {
       })
     })
 
+    // collectable removed
+    this._transfers.on('removed', (payload: Collectable) => {
+      this._eventBus({
+        type: EventTypes.REMOVED_RETRIEVABLE,
+        payload,
+      })
+    })
+
     // new collectable has been created for the previously requested address
     this._inbox.on('created', (payload: Collectable) => {
       this._eventBus({
@@ -200,7 +208,7 @@ class Service {
       })
       .catch((e: ApiResponseError) => {
         if (this._settings.respondAs === Responses.Direct) throw new Error(e.message)
-        this._errLogger(`Service (getStatus) got an error.`, e.message)
+        this._errLogger('Service (getStatus) got an error.', e.message)
       })
 
   // get retrievable by ID
@@ -216,7 +224,7 @@ class Service {
       return this._responder(EventTypes.GET_RETRIEVABLE, payload)
     } catch (e) {
       if (this._settings.respondAs === Responses.Direct) throw this._makeError(e)
-      this._errLogger(`Service (getRetrievable) got an error.`, e.message)
+      this._errLogger('Service (getRetrievable) got an error.', e.message)
     }
   }
 
@@ -254,7 +262,7 @@ class Service {
       return this._responder(EventTypes.GET_COLLECTABLES, payload.data)
     } catch (e) {
       if (this._settings.respondAs === Responses.Direct) throw this._makeError(e)
-      this._errLogger(`Service (getCollectables) got an error.`, e.message)
+      this._errLogger('Service (getCollectables) got an error.', e.message)
     }
   }
 
@@ -270,7 +278,7 @@ class Service {
       return this._responder(EventTypes.SEND_TRANSACTION, payload)
     } catch (e) {
       if (this._settings.respondAs === Responses.Direct) throw this._makeError(e)
-      this._errLogger(`Service (send) got an error.`, e.message)
+      this._errLogger('Service (send) got an error.', e.message)
     }
   }
 

@@ -154,6 +154,7 @@ export enum EventTypes {
   SEND_TRANSACTION = 'service_send_transaction',
   COLLECT_TRANSACTION = 'service_collect_transaction',
   UPDATED_RETRIEVABLE = 'service_updated_retrievable',
+  REMOVED_RETRIEVABLE = 'service_removed_retrievable',
   UPDATED_COLLECTABLE = 'service_updated_collectable',
   REMOVED_COLLECTABLE = 'service_removed_collectable',
   CREATED_COLLECTABLE = 'service_created_collectable',
