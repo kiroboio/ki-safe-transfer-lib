@@ -46,7 +46,7 @@ describe('Retrievables', () => {
       }
     })
   })
-  test("get 'not found' error in case of correct request", async () => {
+  test('get \'not found\' error in case of correct request', async () => {
     const id = 'xxxxxxxxxx'
     try {
       await service.getRetrievable(id)
@@ -55,7 +55,7 @@ describe('Retrievables', () => {
       expect(error).toHaveProperty('message', `No record found for id '${id}'`)
     }
   })
-  test("get 'not found' error even if in 'Callback mode'", async () => {
+  test('get \'not found\' error even if in \'Callback mode\'', async () => {
     const id = 'xxxxxxxxxx'
     try {
       const newService = new Service({ eventBus, respondAs: Responses.Callback })
