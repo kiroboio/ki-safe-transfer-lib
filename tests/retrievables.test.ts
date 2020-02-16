@@ -5,7 +5,6 @@ import { makeStringFromTemplate, compareBasicObjects } from '../src/tools'
 let storedEvent: {}
 
 function eventBus(event: Event) {
-  console.log(event)
   storedEvent = event
 }
 
