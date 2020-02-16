@@ -97,7 +97,7 @@ class Config {
   }
 
   private _debugLevelSelector = (debug: DebugLevels | undefined) => {
-    if (debug) return debug
+    if (debug === 0 || debug === 1 || debug === 2) return debug
     if (this._isTest) return DebugLevels.MUTE
     if (this._isDev) return DebugLevels.VERBOSE
     return DebugLevels.QUIET
