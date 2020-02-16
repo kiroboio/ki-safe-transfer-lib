@@ -1,4 +1,4 @@
-import { ObjectWithStringKeys } from './types';
+import { ObjectWithStringKeys, ObjectWithStringKeysAnyValues } from './types';
 export declare const TEXT: {
     errors: {
         validation: {
@@ -12,11 +12,14 @@ export declare const TEXT: {
             wrongValueType: string;
             wrongValue: string;
             malformedData: string;
+            malformedAddress: string;
             missingValues: string;
             malformedValues: string;
         };
     };
 };
+export declare const listOfStatusKeys: ObjectWithStringKeysAnyValues;
+export declare const typeOfStatusValues: ObjectWithStringKeysAnyValues;
 export declare const listOfSettingsKeys: string[];
 export declare const typeOfSettingsKeys: ObjectWithStringKeys;
 export declare const valuesForSettings: ObjectWithStringKeys;

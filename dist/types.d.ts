@@ -178,4 +178,7 @@ export declare type validateReport = {
 export declare type ObjectWithStringKeys = {
     [index: string]: string[] | number[] | string;
 };
+export declare type ObjectWithStringKeysAnyValues = {
+    [index: string]: any;
+};
 export {};

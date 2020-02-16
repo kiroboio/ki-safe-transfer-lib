@@ -55,6 +55,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var config_1 = __importDefault(require("./config"));
 var types_1 = require("./types");
+var tools_1 = require("./tools");
 var validators_1 = require("./validators");
 var data_1 = require("./data");
 // TODO: add comments
@@ -97,7 +98,7 @@ var Service = /** @class */ (function () {
         this._logger = function (_a) {
             var type = _a.type, payload = _a.payload, message = _a.message;
             // if not MUTE mode
-            if (_this._settings.debug !== types_1.DebugLevels.MUTE) {
+            if (_this._settings.debug !== types_1.DebugLevels.MUTE && !_this._isTest) {
                 // errors are shown in all other modes
                 if (!type)
                     console.error(message);
@@ -143,7 +144,11 @@ var Service = /** @class */ (function () {
             return _this._networks
                 .get(_this._settings.network)
                 .then(function (response) {
-                var payload = { height: response.height, online: response.online, fee: response.fee };
+                var payload = {
+                    height: response.height,
+                    online: response.online,
+                    fee: response.fee,
+                };
                 _this._logger({ type: types_1.Logger.Info, payload: payload, message: 'Service (getStatus): ' });
                 return _this._responder(types_1.EventTypes.UPDATE_STATUS, payload);
             })
@@ -154,44 +159,72 @@ var Service = /** @class */ (function () {
             });
         };
         // get retrievable by ID
-        this.getRetrievable = function (id) {
-            return _this._transfers
-                .get(id)
-                .then(function (payload) {
-                _this._logger({ type: types_1.Logger.Info, payload: payload, message: 'Service (getRetrievable): ' });
-                return _this._responder(types_1.EventTypes.GET_RETRIEVABLE, payload);
-            })
-                .catch(function (e) {
-                if (_this._settings.respondAs === types_1.Responses.Direct)
-                    throw new Error(e.message);
-                _this._errLogger("Service (getRetrievable) got an error.", e.message);
+        this.getRetrievable = function (id) { return __awaiter(_this, void 0, void 0, function () {
+            var payload, e_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        // validate props
+                        if (!id)
+                            throw new TypeError(data_1.TEXT.errors.validation.missingArgument);
+                        if (typeof id !== 'string')
+                            throw new TypeError(data_1.TEXT.errors.validation.typeOfObject);
+                        return [4 /*yield*/, this._transfers.get(id)];
+                    case 1:
+                        payload = _a.sent();
+                        this._logger({ type: types_1.Logger.Info, payload: payload, message: 'Service (getRetrievable): ' });
+                        return [2 /*return*/, this._responder(types_1.EventTypes.GET_RETRIEVABLE, payload)];
+                    case 2:
+                        e_1 = _a.sent();
+                        if (this._settings.respondAs === types_1.Responses.Direct)
+                            throw this._makeError(e_1);
+                        this._errLogger("Service (getRetrievable) got an error.", e_1.message);
+                        return [3 /*break*/, 3];
+                    case 3: return [2 /*return*/];
+                }
             });
-        };
+        }); };
         // get all collectables by recipient address
         this.getCollectables = function (addresses) { return __awaiter(_this, void 0, void 0, function () {
-            var payload, e_1;
+            var payload, e_2;
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 2, , 3]);
+                        // validate props
+                        if (!addresses)
+                            throw new TypeError(data_1.TEXT.errors.validation.missingArgument);
                         if (!Array.isArray(addresses))
-                            throw new Error('Malformed request. Not an array.');
+                            throw new TypeError(data_1.TEXT.errors.validation.typeOfObject);
                         addresses.forEach(function (address) {
-                            if (!validators_1.validateAddress({ address: address, currency: _this._settings.currency, networkType: _this._settings.network }))
-                                throw new Error("Malformed address: " + address);
+                            if (typeof address !== 'string')
+                                throw new TypeError(data_1.TEXT.errors.validation.typeOfObject);
+                            if (!validators_1.validateAddress({
+                                address: address,
+                                currency: _this._settings.currency,
+                                networkType: _this._settings.network,
+                            }))
+                                throw new Error(tools_1.makeStringFromTemplate(data_1.TEXT.errors.validation.malformedAddress, [address]));
                         });
-                        return [4 /*yield*/, this._inbox.find({ query: { to: addresses.join(';') } })];
+                        return [4 /*yield*/, this._inbox.find({
+                                query: { to: addresses.join(';') },
+                            })];
                     case 1:
                         payload = _a.sent();
                         this._lastAddresses = addresses;
-                        this._logger({ type: types_1.Logger.Info, payload: payload.data, message: 'Service (getCollectables): ' });
+                        this._logger({
+                            type: types_1.Logger.Info,
+                            payload: payload.data,
+                            message: 'Service (getCollectables): ',
+                        });
                         return [2 /*return*/, this._responder(types_1.EventTypes.GET_COLLECTABLES, payload.data)];
                     case 2:
-                        e_1 = _a.sent();
+                        e_2 = _a.sent();
                         if (this._settings.respondAs === types_1.Responses.Direct)
-                            throw new Error(e_1.message);
-                        this._errLogger("Service (getCollectables) got an error.", e_1.message);
+                            throw this._makeError(e_2);
+                        this._errLogger("Service (getCollectables) got an error.", e_2.message);
                         return [3 /*break*/, 3];
                     case 3: return [2 /*return*/];
                 }
@@ -199,7 +232,7 @@ var Service = /** @class */ (function () {
         }); };
         // send retrievable/collectable transaction
         this.send = function (transaction) { return __awaiter(_this, void 0, void 0, function () {
-            var payload, e_2;
+            var payload, e_3;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -214,10 +247,10 @@ var Service = /** @class */ (function () {
                         payload = _a.sent();
                         return [2 /*return*/, this._responder(types_1.EventTypes.SEND_TRANSACTION, payload)];
                     case 2:
-                        e_2 = _a.sent();
+                        e_3 = _a.sent();
                         if (this._settings.respondAs === types_1.Responses.Direct)
-                            throw this._makeError(e_2);
-                        this._errLogger("Service (send) got an error.", e_2.message);
+                            throw this._makeError(e_3);
+                        this._errLogger("Service (send) got an error.", e_3.message);
                         return [3 /*break*/, 3];
                     case 3: return [2 /*return*/];
                 }

@@ -10,7 +10,7 @@ import { ConfigProps, Currencies, DebugLevels, Endpoints, Logger, LoggerFunction
 class Config {
   // fixed
   protected _VERSION = 'v1'
-  protected _url = 'http://3.92.123.183'
+  protected _url = 'https://api.kirobo.me'
   protected _endpoints = {
     collect: 'transfer/action/collect',
     inbox: 'transfer/inbox',

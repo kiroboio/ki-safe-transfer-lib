@@ -13,11 +13,14 @@ exports.TEXT = {
             wrongValueType: "Key '%1' in settings has value of wrong type. Should be: %2.",
             wrongValue: "Wrong value '%1' for key '%2' in settings. Should be one of: %3.",
             malformedData: 'Data is malformed.',
+            malformedAddress: 'Malformed address: %1.',
             missingValues: 'Missing values: ',
             malformedValues: 'Malformed values: ',
         },
     },
 };
+exports.listOfStatusKeys = ['height', 'online', 'fee'];
+exports.typeOfStatusValues = { height: 'number', online: 'boolean', fee: 'number' };
 exports.listOfSettingsKeys = ['debug', 'currency', 'network', 'eventBus', 'respondAs'];
 exports.typeOfSettingsKeys = {
     debug: 'number',
@@ -35,5 +38,6 @@ exports.valuesForSettings = {
 exports.validBitcoinAddresses = [
     '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2',
     '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy',
+    '2N83Bu4MbzxDscNCtx5qFQHpV5VhpgghzVn',
     'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq',
 ];

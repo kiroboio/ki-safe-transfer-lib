@@ -61,6 +61,16 @@ exports.validateData = function (data, currency, networkType) {
         throw new TypeError(validate.message);
     }
 };
+exports.validateArray = function (arr, type) {
+    if (!Array.isArray(arr))
+        return false;
+    var result = true;
+    arr.forEach(function (el) {
+        if (!type.includes(typeof el))
+            result = false;
+    });
+    return result;
+};
 exports.validateObject = function (data) {
     if (data !== Object(data))
         throw new TypeError(data_1.TEXT.errors.validation.typeOfObject);

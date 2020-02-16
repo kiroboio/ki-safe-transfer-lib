@@ -15,7 +15,7 @@ var Config = /** @class */ (function () {
         var debug = _a.debug, network = _a.network, currency = _a.currency, logger = _a.logger, getStatus = _a.getStatus, refreshInbox = _a.refreshInbox;
         // fixed
         this._VERSION = 'v1';
-        this._url = 'http://3.92.123.183';
+        this._url = 'https://api.kirobo.me';
         this._endpoints = {
             collect: 'transfer/action/collect',
             inbox: 'transfer/inbox',

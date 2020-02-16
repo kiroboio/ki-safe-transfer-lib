@@ -1,4 +1,4 @@
-import { ObjectWithStringKeys } from './types'
+import { ObjectWithStringKeys, ObjectWithStringKeysAnyValues } from './types'
 
 export const TEXT = {
   errors: {
@@ -20,9 +20,9 @@ export const TEXT = {
   },
 }
 
-export const listOfStatusKeys = ['height', 'online', 'fee']
+export const listOfStatusKeys: ObjectWithStringKeysAnyValues = ['height', 'online', 'fee']
 
-export const typeOfStatusValues = { height: 'number', online: 'boolean', fee: 'number' }
+export const typeOfStatusValues: ObjectWithStringKeysAnyValues = { height: 'number', online: 'boolean', fee: 'number' }
 
 export const listOfSettingsKeys = ['debug', 'currency', 'network', 'eventBus', 'respondAs']
 
