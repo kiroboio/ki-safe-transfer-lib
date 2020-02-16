@@ -1,28 +1,29 @@
 {
   "name": "@kirobo/safe-transfer-lib",
-  "version": "0.0.1",
+  "version": "1.0.1",
   "description": "Safe Transfer library",
   "author": "Dmitry Melnikov <d.dash.mv@gmail.com>",
   "license": "MIT",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf dist && tsc && rm -rf dist/tests && mv dist/src/* dist && rm -rf dist/src",
     "prepare": "npm run build",
     "prepublishOnly": "npm test && npm run lint",
     "preversion": "npm run lint",
     "version": "npm run test && npm run format && git add -A src",
     "postversion": "git push && git push --tags",
     "test": "jest --coverage",
-    "dev:production": "export NODE_ENV=production && ts-node-dev ./test/run.ts",
-    "dev": "ts-node-dev ./test/run.ts",
-    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
-    "lint": "tslint -p tsconfig.json"
+    "test:watch": "jest --coverage --watchAll --unhandled-rejections=strict",
+    "test:push": "jest --unhandled-rejections=strict",
+    "dev:production": "export NODE_ENV=production && ts-node-dev ./tests/client.ts",
+    "dev": "ts-node-dev ./tests/client.ts",
+    "lint": "eslint --cache --ext .js,.jsx,.ts,.tsx src"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run format && npm run lint",
-      "pre-push": "npm run test"
+      "pre-commit": "npm run lint",
+      "pre-push": "npm run test:push"
     }
   },
   "files": [
@@ -35,6 +36,9 @@
   "devDependencies": {
     "@types/jest": "^25.1.1",
     "@types/node": "^13.7.0",
+    "@typescript-eslint/eslint-plugin": "^2.19.2",
+    "@typescript-eslint/parser": "^2.19.2",
+    "eslint": "^6.8.0",
     "eslint-plugin-async-await": "0.0.0",
     "eslint-plugin-eslint-comments": "^3.1.2",
     "eslint-plugin-jest": "^23.6.0",
@@ -52,6 +56,7 @@
   "dependencies": {
     "@feathersjs/feathers": "^4.5.1",
     "@feathersjs/socketio-client": "^4.5.1",
+    "multicoin-address-validator": "^0.4.1",
     "socket.io-client": "^2.3.0"
   }
 }

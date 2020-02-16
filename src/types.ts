@@ -22,7 +22,7 @@ export type Settings = {
   currency: Currencies
   network: Networks
   version: string
-  respond?: Responses
+  respondAs?: Responses
 }
 
 export enum Endpoints {
@@ -55,6 +55,7 @@ export interface NetworkTip {
   online: boolean
   netId: string
   timestamp: number
+  fee: number
 }
 
 export type Retrievable = {
@@ -81,6 +82,8 @@ export type Collectable = {
   collect: { broadcasted: number; confirmed: number; txid: string }
   createdAt: string
   expires: { at: string }
+  from?: string
+  hint?: string
   id: string
   salt: string
   state: string
@@ -95,10 +98,33 @@ export type ResponseCollectable = {
   data: Collectable[]
 }
 
-export interface ConfigProps {
+export type ResponseCollect = {
+  fromNodeTxid: string
+}
+
+export interface LoggerFunction {
+  ({ type, payload, message }: LoggerProps): void
+}
+
+export interface ResponderFunction {
+  (type: EventTypes, payload: Status | Retrievable | Collectable[] | ResponseCollect | Message): any
+}
+
+interface LibraryBlockProps {
   debug?: DebugLevels
   currency?: Currencies
   network?: Networks
+}
+
+export interface ServiceProps extends LibraryBlockProps {
+  eventBus?: EventBus
+  respondAs?: Responses
+}
+
+export interface ConfigProps extends LibraryBlockProps {
+  getStatus: () => any
+  logger: LoggerFunction
+  refreshInbox: () => void
 }
 
 // who the service should respond from methods:
@@ -112,12 +138,12 @@ export enum Responses {
 export enum Logger {
   Error = 0,
   Info = 1,
-  Warning = 2
+  Warning = 2,
 }
 
 export interface LoggerProps {
   type: Logger
-  payload?: Status | Retrievable | Collectable[]
+  payload?: Status | Retrievable | Collectable[] | ResponseCollect | string
   message: string
 }
 
@@ -127,43 +153,56 @@ export enum EventTypes {
   UPDATE_STATUS = 'service_update_status',
   SEND_TRANSACTION = 'service_send_transaction',
   COLLECT_TRANSACTION = 'service_collect_transaction',
+  UPDATED_RETRIEVABLE = 'service_updated_retrievable',
+  REMOVED_RETRIEVABLE = 'service_removed_retrievable',
+  UPDATED_COLLECTABLE = 'service_updated_collectable',
+  REMOVED_COLLECTABLE = 'service_removed_collectable',
+  CREATED_COLLECTABLE = 'service_created_collectable',
+  SEND_MESSAGE = 'service_message',
+}
+
+export type Message = {
+  text: string
+  isError: boolean
+  data?: unknown
 }
 
 export type Status = {
   height: number //block height of the blockchain
+  fee: number // current transaction fees (per Kilobyte)
   online: boolean // status of server connection to blockchain
 }
 
 export type Event = {
   type: EventTypes
-  payload: Status | Retrievable | Collectable[]
+  payload: Status | Retrievable | Collectable | Collectable[] | ResponseCollect | Message
 }
 
 export type EventBus = {
   (arg0: Event): void
 }
 
-//
-export interface ServiceProps extends ConfigProps {
-  respond?: Responses
-  eventBus: EventBus
-}
-
 export type Sendable = {
-  to: string
-  from?: string
-  hint?: string
+  amount: number
   collect: string
   deposit: string
-  amount: number
-  key: string
+  from?: string
+  hint?: string
+  id?: string
+  to: string
 }
 
 export type CollectRequest = {
   id: string
   key: string
 }
-export type VerifyReport = {
+export type validateReport = {
   message: string
   errors: { [index: string]: string[] }
 }
+
+export type ObjectWithStringKeys = {
+  [index: string]: string[] | number[] | string
+}
+
+export type ObjectWithStringKeysAnyValues = { [index: string]: any }

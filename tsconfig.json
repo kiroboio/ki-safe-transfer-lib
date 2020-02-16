@@ -10,11 +10,6 @@
     "allowSyntheticDefaultImports": true,
     "maxNodeModuleJsDepth": 15,
     "baseUrl": "./",
-    "paths": {
-      "@src/*": [
-        "src/*"
-      ]
-    },
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "moduleResolution": "node",
@@ -33,7 +28,7 @@
   },
   "include": [
     "src/**/*",
-    "test/**/*"
+    "tests/**/*",
   ],
   "exclude": [
     "node_modules",

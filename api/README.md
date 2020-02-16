@@ -4,17 +4,20 @@
 
 - [Terminology](#Terminology)
 - [Setup](#Setup)
-  - [Why eventBus is always required?](#Why-eventBus-is-always-required?)
+  - [Why eventBus is always required?](#Why-eventBus-is-always-required)
   - [Default settings](#Default-settings)
   - [Options for settings](#Options-for-settings)
     - [Debug](#Debug)
-- [API Endpoints](./endpoints.md#API-Endpoints)
-  - [_getSettings()_](./endpoints.md#___getSettings()___)
-  - [async _getCollectables()_](./endpoints.md#async-___getCollectables()___)
-  - [async _getRetrievable()_](./endpoints.md#async-___getRetrievable()___)
-  - [async _send()_](./endpoints.md#async-___send()___)
-  - [async _collect()_](./endpoints.md#async-___collect()___)
-  - [async _getStatus()_](./endpoints.md#async-___getStatus()___)
+- [Errors and handling them](errors.md#Errors-and-handling-them)
+- [API Endpoints](endpoints.md#API-Endpoints)
+  - [_getSettings()_](endpoints.md#___getSettings()___)
+  - [_clearLastAddresses()_]()
+  - [async _getCollectables()_](endpoints.md#async-___getCollectables()___)
+  - [async _getRetrievable()_](endpoints.md#async-___getRetrievable()___)
+  - [async _send()_](endpoints.md#async-___send()___)
+  - [async _collect()_](endpoints.md#async-___collect()___)
+  - [async _getStatus()_](endpoints.md#async-___getStatus()___)
+
 
 ## Terminology
 
@@ -29,20 +32,38 @@ The setup is plain simple:
 ```javascript
 import Service, { Event } from '@kirobo/safe-transfer-lib'
 
-const service = new Service({})
+try {
+
+  const service = new Service() // nothing is required
+
+} catch (e) {
+  console.log(e.message)
+}
  ```
+ > Please, see [Default settings](#Default-settings) for details.
+
+ > Always wrap library calls to catch helpful error messages. More about this [here](errors.md#Errors-and-handling-them).
 
  or
 
 ```javascript
-import Service, { Event } from '@kirobo/safe-transfer-lib'
+import Service, { Event } from '@kiroboio/safe-transfer-lib'
 
 function eventBus(event: Event) {
   console.log('event fired: ', event)
 }
 
-const service = new Service({ eventBus })
+try {
+
+  const service = new Service({ eventBus })
+
+} catch (e) {
+  console.log(e.message)
+}
  ```
+
+> More about eventBus requirements and format is discussed [here](event_bus.md).
+
 
  or
 
@@ -61,15 +82,21 @@ const serviceOptions = {
   eventBus
   }
 
-const service = new Service(serviceOptions)
+try {
+
+  const service = new Service(serviceOptions)
+
+} catch (e) {
+  console.log(e.message)
+}
  ```
 
-### Why `eventBus` is always required?
+### Why [eventBus](event_bus.md) is always required?
 
-Or almost always. `eventBus` is used for event updates from the Kirobo server. Without it the functionality of the library is limited to one-way client-to-server actions without on-time updates.
+Or almost always. [eventBus](event_bus.md) is used for event updates from the Kirobo server. Without it the functionality of the library is limited to one-way client-to-server actions without on-time updates.
 
 The library can work in two modes - _direct reply_ and _use callback_:
-- in _direct reply_ mode each function reply directly with answer or Error:
+- in _direct reply_ mode each function replies directly with answer or Error:
 
    ```javascript
    ...
@@ -78,8 +105,10 @@ The library can work in two modes - _direct reply_ and _use callback_:
 
    async function run() {
      try {
+
        const result = await service.getStatus()
-       console.log(result) // { height: 1664921, online: true }
+       console.log(result) // { height: 1664921, online: true, fee: 10000 }
+
      } catch (e) {
        console.log(e.message)
      }
@@ -88,9 +117,9 @@ The library can work in two modes - _direct reply_ and _use callback_:
    run()
    ```
 
-- _use callback_ is when all data responses go through `eventBus`, using Redux-friendly syntax (type/payload):
+- _use callback_ is when all data responses go through [eventBus](event_bus.md), using Redux-friendly syntax (type/payload):
 
-  > Please note, that for this mode `eventBus` is required!
+  > Please note, that for this mode [eventBus](event_bus.md) is required!
 
    ```javascript
    ...
@@ -99,7 +128,7 @@ The library can work in two modes - _direct reply_ and _use callback_:
      console.log('event fired: ', event)
      // event fired:  {
      //  type: 'service_update_status',
-     //  payload: { height: 1664922, online: true }
+     //  payload: { height: 1664922, online: true, fee: 10000 }
      // }
    }
 
@@ -107,15 +136,16 @@ The library can work in two modes - _direct reply_ and _use callback_:
 
    async function run() {
      try {
+
        const result = await service.getStatus()
        console.log(result) // undefined
+
      } catch (e) {
        console.log(e.message)
      }
    }
 
    run()
-
    ```
 
 ### Default settings
