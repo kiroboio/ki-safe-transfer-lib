@@ -4,7 +4,18 @@ import socketio from '@feathersjs/socketio-client'
 
 import { capitalize } from './tools'
 
-import { ConfigProps, Currencies, DebugLevels, Endpoints, Logger, LoggerFunction, Networks, Settings } from './types'
+import {
+  ConfigProps,
+  Currencies,
+  DebugLevels,
+  Endpoints,
+  Logger,
+  LoggerFunction,
+  Networks,
+  Settings,
+  Switch,
+  SwitchActions,
+} from './types'
 
 // TODO: add comments
 class Config {
@@ -25,6 +36,7 @@ class Config {
   private _currency: Currencies
   private _network: Networks
   private _connect: Application<any>
+  private _socket: SocketIOClient.Socket
   private _getStatus: () => any
   private _logger: LoggerFunction
 
@@ -36,13 +48,13 @@ class Config {
     this._logger = logger ? logger : ({}) => {}
 
     // setup
-    const socket = io(this._url)
+    this._socket = io(this._url)
 
-    this._connect = feathers().configure(socketio(socket))
+    this._connect = feathers().configure(socketio(this._socket))
 
     // connect/disconnect
     try {
-      socket.on('connect', (): void => {
+      this._socket.on('connect', (): void => {
         this._logger({
           type: Logger.Info,
           message: 'Service (connect) is ON.',
@@ -58,7 +70,7 @@ class Config {
     }
 
     try {
-      socket.on('disconnect', (payload: any) =>
+      this._socket.on('disconnect', (payload: any) =>
         this._logger({
           type: Logger.Warning,
           message: 'Service (disconnect) is OFF.',
@@ -79,19 +91,19 @@ class Config {
         require('dns')
           .promises.lookup('google.com')
           .then(() => {
-            if (!socket.connected) socket.connect()
+            if (!this._socket.connected) this._socket.connect()
           })
           .catch(() => {
-            if (socket.connected) socket.disconnect()
+            if (this._socket.connected) this._socket.disconnect()
           })
       }, 3000)
     } else {
       //  this is web
       window.addEventListener('offline', () => {
-        if (socket.connected) socket.disconnect()
+        if (this._socket.connected) this._socket.disconnect()
       })
       window.addEventListener('online', () => {
-        if (!socket.connected) socket.connect()
+        if (!this._socket.connected) this._socket.connect()
       })
     }
   }
@@ -117,6 +129,26 @@ class Config {
     network: this._network,
     version: this._VERSION,
   })
+
+  public switch = ({ action, value }: Switch): boolean | void => {
+    // if status is requested -> return status
+    if (action === SwitchActions.STATUS) return this._socket.connected
+    // if connect/disconnect
+    if (action === SwitchActions.CONNECT) {
+      // if value is provided and is not equal to status of connection
+      // proceed as per request
+      if (typeof value !== 'undefined' && value !== this._socket.connected)
+        value ? this._socket.connect() : this._socket.disconnect()
+      // if value is not provided -> toggle connection
+      else if (typeof value === 'undefined') {
+        if (!this._socket.connected) {
+          this._socket.connect()
+        } else {
+          this._socket.disconnect()
+        }
+      }
+    }
+  }
 }
 
 export default Config

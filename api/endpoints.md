@@ -4,28 +4,105 @@
 
   Function to check the current settings of the library session:
 
-  ```typescript
+  ```TypeScript
   ...
 
-  const service = new Service({})
+  const service = new Service()
 
   const result = service.getSettings()
 
   console.log(result)
   // {
-  //   debug: 1,
+  //   debug: 2,
   //   currency: 'btc',
   //   network: 'testnet',
   //   version: 'v1',
-  //   respond: 'direct'
+  //   respondAs: 'direct'
   // }
   ```
+
+  > Check morev details about [debug levels](README.md#Debug) and [default settings](README.md#Default-settings).
+
+- #### ___getLastAddresses()___
+
+  Show [cached]() addresses, saved after last [getCollectables()](#async-___getCollectables()___):
+
+  ```TypeScript
+
+  const result = service.getLastAddresses()
+
+  console.log(result) // ['xxxxxx', 'xxxxxx']
+
+  ```
+
+- #### ___clearLastAddresses()___
+
+  Clear [cached]() addresses, saved after last [getCollectables()](#async-___getCollectables()___):
+
+  ```TypeScript
+
+  service.clearLastAddresses()
+
+  ```
+
+- #### ___connect()___
+
+  Get information about library connection status and connect/disconnect library from Kirobo service.
+
+  To check connection status:
+
+  ```TypeScript
+
+  const service = new Service()
+
+  const status = service.connect({ action: SwitchActions.STATUS })
+
+  console.log(status) // true
+
+  ```
+
+  To connect:
+
+  ```TypeScript
+
+  service.connect({ action: SwitchActions.CONNECT, value: true })
+
+  // will be a minor connection delay
+
+  const status = service.connect({ action: SwitchActions.STATUS })
+
+  console.log(status) // true
+
+  ```
+
+  To disconnect:
+
+  ```TypeScript
+
+  service.connect({ action: SwitchActions.CONNECT, value: false })
+
+  const status = service.connect({ action: SwitchActions.STATUS })
+
+  console.log(status) // false
+
+  ```
+
+  To toggle connection:
+
+  ```TypeScript
+
+  service.connect({ action: SwitchActions.CONNECT })
+
+  // might a minor connection delay, if connecting
+
+  ```
+
 
 - #### async ___getCollectables()___
 
   Get collectable transactions for a certain address:
 
-  ```typescript
+  ```TypeScript
   function eventBus(event: Event) {
     console.log('event fired: ', event)
     // event fired:  {
@@ -70,13 +147,15 @@
 
   service.getCollectables('xxxxx') // provide recipient's address
   ```
-  > Read more about object `confirmed` [here]()
+  > Read more about __confirmed__ object  [here]()
+
+  Every time you send request for collectables, the address(es) from your last request are being cached in the library. In case Internet connection dropped, the library will attempt  to reconnect once the connection is restored. After successful reconnection, library will use the cached addresses to update (re-send last request for collectables). To check the contents of the cache you can use [getLastAddresses()](#___getLastAddresses()___) function. To clear the cache - [clearLastAddresses()](#___clearLastAddresses()___).
 
 - #### async ___getRetrievable()___
 
   Get information about a retrievable transaction by it's ID:
 
-  ```typescript
+  ```TypeScript
   function eventBus(event: Event) {
       console.log('event fired: ', event)
       // event fired:  {
@@ -109,7 +188,7 @@
 - #### async ___send()___
 
   Send _retrievable_ transaction. The format is the following:
-  ```typescript
+  ```TypeScript
   export type Sendable = {
     amount: number  // amount of transaction
     collect: string // encrypted raw collect transaction, to be collected
@@ -124,7 +203,7 @@
 
   Sending:
 
-  ```typescript
+  ```TypeScript
   const service = new Service({
     respond: Responses.Callback,
     eventBus,
@@ -143,7 +222,7 @@
   ```
   In case of successful acceptance of transaction by the API, it will respond with the following:
 
-  ```typescript
+  ```TypeScript
   {
     amount: 100000,
     createdAt: '2020-02-05T08:51:58.598Z',
@@ -163,7 +242,7 @@
 
 - #### async ___collect()___
 
-  ```typescript
+  ```TypeScript
 
   Service (collect):  {
     fromNodeTxid: 'xxxxxx'

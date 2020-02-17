@@ -5,7 +5,7 @@
 - [Purpose](#Purpose)
 - [What this library can do?](#What-this-library-can-do?)
 - [How does it work?](#How-does-it-work?)
-- [API](#API)
+- [API](api/README.md)
 - [Dependencies](#Dependencies)
 
 ## Purpose
@@ -20,10 +20,6 @@
 - Why this format?
 
 These and other questions are discussed [here](api/how_does_it_work.md)
-
-## API
-
-Detailed API description with examples located [here](api/README.md)
 
 ## Addtionals
 

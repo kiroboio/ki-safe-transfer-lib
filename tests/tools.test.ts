@@ -1,8 +1,10 @@
 import { capitalize, makeStringFromTemplate, compareBasicObjects } from '../src/tools'
 
+process.on('unhandledRejection', () => {})
+
 describe('Tools', () => {
-  describe("- 'capitalize'", () => {
-    test("- doesn't crash at non-string, and returns empty string", () => {
+  describe('- \'capitalize\'', () => {
+    test('- doesn\'t crash at non-string, and returns empty string', () => {
       // @ts-ignore
       expect(capitalize(123)).toBe('')
     })
@@ -13,20 +15,20 @@ describe('Tools', () => {
       expect(capitalize('qwerty qwerty')).toBe('Qwerty qwerty')
     })
   })
-  describe("- 'makeStringFromTemplate'", () => {
-    test("- doesn't crash at no arguments", () => {
+  describe('- \'makeStringFromTemplate\'', () => {
+    test('- doesn\'t crash at no arguments', () => {
       // @ts-ignore
       expect(makeStringFromTemplate(123)).toBe('')
     })
-    test("- doesn't crash at missing some arguments", () => {
+    test('- doesn\'t crash at missing some arguments', () => {
       // @ts-ignore
       expect(makeStringFromTemplate(123)).toBe('')
     })
-    test("- doesn't crash at wrong argument types", () => {
+    test('- doesn\'t crash at wrong argument types', () => {
       // @ts-ignore
       expect(makeStringFromTemplate('qwerty')).toBe('')
     })
-    test("- doesn't crash at wrong argument types #2", () => {
+    test('- doesn\'t crash at wrong argument types #2', () => {
       // @ts-ignore
       expect(makeStringFromTemplate('qwerty', [2, {}])).toBe('')
     })
@@ -41,22 +43,22 @@ describe('Tools', () => {
       )
     })
   })
-  describe("- 'compareBasicObjects'", () => {
-    test("- doesn't crash at no arguments", () => {
+  describe('- \'compareBasicObjects\'', () => {
+    test('- doesn\'t crash at no arguments', () => {
       // @ts-ignore
       expect(compareBasicObjects()).toBe(false)
     })
-    test("- doesn't crash without some arguments", () => {
+    test('- doesn\'t crash without some arguments', () => {
       // @ts-ignore
       expect(compareBasicObjects(123)).toBe(false)
     })
-    test("- different objects, don't match", () => {
+    test('- different objects, don\'t match', () => {
       expect(compareBasicObjects({ key: 'value' }, { key: 'qwerty' })).toBe(false)
     })
-    test("- different objects, don't match #2", () => {
+    test('- different objects, don\'t match #2', () => {
       expect(compareBasicObjects({ key: 'qwerty' }, { key: 'qwerty', keyTwo: 2 })).toBe(false)
     })
-    test("- objects with complex values, don't match", () => {
+    test('- objects with complex values, don\'t match', () => {
       expect(compareBasicObjects({ key: ['qwerty'] }, { key: ['qwerty'] })).toBe(false)
     })
     test('- objects with same basic values match', () => {

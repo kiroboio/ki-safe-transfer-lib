@@ -1,7 +1,7 @@
 
 
 
-```typescript
+```TypeScript
 
 function eventBus(event: Event) {
   console.log('event fired: ', event)

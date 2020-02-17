@@ -21,6 +21,7 @@ import {
   ServiceProps,
   Settings,
   Status,
+  Switch,
 } from './types'
 import { makeStringFromTemplate } from './tools'
 import { validateAddress, validateData, validateObject, validateSettings } from './validators'
@@ -41,6 +42,7 @@ class Service {
   private _inbox: ApiService
   private _collect: ApiService
   private _lastAddresses: string[] = [] // caching last addresses request
+  private _switch: (arg0: Switch) => void
 
   private _isTest = process.env.NODE_ENV === 'test'
 
@@ -65,6 +67,8 @@ class Service {
       ...config.getSettings(),
       respondAs: respondAs || Responses.Direct,
     }
+
+    this._switch = config.switch
 
     // set services
     this._networks = config.getService(Endpoints.Networks)
@@ -107,8 +111,8 @@ class Service {
       })
     })
 
-    // collectable updated
-    this._inbox.on('updated', (payload: Collectable) => {
+    // collectable patched
+    this._inbox.on('patched', (payload: Collectable) => {
       this._eventBus({
         type: EventTypes.UPDATED_COLLECTABLE,
         payload,
@@ -304,6 +308,9 @@ class Service {
           isError: true,
         })
       })
+
+  // connection
+  public connect = (props: Switch) => this._switch(props)
 }
 
 export * from './types'

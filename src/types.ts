@@ -206,3 +206,15 @@ export type ObjectWithStringKeys = {
 }
 
 export type ObjectWithStringKeysAnyValues = { [index: string]: any }
+
+// types of switch actions
+export enum SwitchActions {
+  STATUS = 'status',
+  CONNECT = 'connect',
+}
+
+// switch function props for connect
+export interface Switch {
+  action: SwitchActions
+  value?: boolean
+}
