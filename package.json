@@ -1,6 +1,6 @@
 {
   "name": "@kiroboio/safe-transfer-lib",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Safe Transfer library",
   "author": "Dmitry Melnikov <d.dash.mv@gmail.com>",
   "license": "MIT",
