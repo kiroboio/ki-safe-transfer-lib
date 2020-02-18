@@ -177,7 +177,6 @@ class Service {
       return this._inbox
         .find({ query: { to: this._lastAddresses.join(';') } })
         .then((payload: ResponseCollectable) => {
-          console.log(payload)
           this._eventBus({ type: EventTypes.GET_COLLECTABLES, payload: payload.data })
         })
         .catch((e: ApiResponseError) => {
