@@ -17,6 +17,7 @@
   - [_getLastAddresses()_](endpoints.md#___getLastAddresses()___)
   - [_connect()_](endpoints.md#___connect()___)
   - [async _getCollectables()_](endpoints.md#async-___getCollectables()___)
+    - [Caching of get Collectables request](endpoints.md#Caching-of-get-Collectables-request)
   - [async _getRetrievable()_](endpoints.md#async-___getRetrievable()___)
   - [async _send()_](endpoints.md#async-___send()___)
   - [async _collect()_](endpoints.md#async-___collect()___)

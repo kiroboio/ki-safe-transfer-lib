@@ -149,7 +149,9 @@
   ```
   > Read more about __confirmed__ object  [here]()
 
-  Every time you send request for collectables, the address(es) from your last request are being cached in the library. In case Internet connection dropped, the library will attempt  to reconnect once the connection is restored. After successful reconnection, library will use the cached addresses to update (re-send last request for collectables). To check the contents of the cache you can use [getLastAddresses()](#___getLastAddresses()___) function. To clear the cache - [clearLastAddresses()](#___clearLastAddresses()___).
+    #### Caching of get Collectables request
+
+    Every time you send request for collectables, the address(es) from your last request are being cached in the library. In case Internet connection dropped, the library will attempt  to reconnect once the connection is restored. After successful reconnection, library will use the cached addresses to update (re-send last request for collectables). To check the contents of the cache you can use [getLastAddresses()](#___getLastAddresses()___) function. To clear the cache - [clearLastAddresses()](#___clearLastAddresses()___).
 
 - #### async ___getRetrievable()___
 
