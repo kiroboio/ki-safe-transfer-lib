@@ -199,7 +199,7 @@
     to: string // recipient's address
   }
   ```
-  > Why and what to encrypt, as well as how, is discussed [here](how_does_it_work.md).
+  > Why and what to encrypt, as well as how, is discussed [here](encryption.md).
 
   Sending:
 
