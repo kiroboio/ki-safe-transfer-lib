@@ -1,4 +1,4 @@
-## How does it work?
+# How does it work?
 
 - [Steps](#Steps)
 - [Creation](#Creation)
