@@ -3,16 +3,16 @@
 
 ## Contents
 
-  - [_getSettings()_](endpoints.md#___getSettings()___)
-  - [_getLastAddresses()_](endpoints.md#___getLastAddresses()___)
-  - [_clearLastAddresses()_](endpoints.md#___clearLastAddresses()___)
-  - [_connect()_](endpoints.md#___connect()___)
-  - [async _getCollectables()_](endpoints.md#async-___getCollectables()___)
-    - [Caching of get Collectables request](endpoints.md#Caching-of-get-Collectables-request)
-  - [async _getRetrievable()_](endpoints.md#async-___getRetrievable()___)
-  - [async _send()_](endpoints.md#async-___send()___)
-  - [async _collect()_](endpoints.md#async-___collect()___)
-  - [async _getStatus()_](endpoints.md#async-___getStatus()___)
+  - [_getSettings()_](#___getSettings()___)
+  - [_getLastAddresses()_](#___getLastAddresses()___)
+  - [_clearLastAddresses()_](#___clearLastAddresses()___)
+  - [_connect()_](#___connect()___)
+  - [async _getCollectables()_](#async-___getCollectables()___)
+    - [Caching of get Collectables request](#Caching-of-get-Collectables-request)
+  - [async _getRetrievable()_](#async-___getRetrievable()___)
+  - [async _send()_](#async-___send()___)
+  - [async _collect()_](#async-___collect()___)
+  - [async _getStatus()_](#async-___getStatus()___)
 
 
 
