@@ -46,7 +46,6 @@ try {
 
 > More about eventBus requirements and format is discussed [here](event_bus.md).
 
-
  or
 
  ```TypeScript
