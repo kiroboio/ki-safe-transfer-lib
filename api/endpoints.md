@@ -1,6 +1,22 @@
-## API Endpoints
+# API Endpoints
+[◅ _return home_](../README.md#Kirobo-Retrievable-Transfer-Library)
 
-- #### ___getSettings()___
+## Contents
+
+  - [_getSettings()_](endpoints.md#___getSettings()___)
+  - [_clearLastAddresses()_](endpoints.md#___clearLastAddresses()___)
+  - [_getLastAddresses()_](endpoints.md#___getLastAddresses()___)
+  - [_connect()_](endpoints.md#___connect()___)
+  - [async _getCollectables()_](endpoints.md#async-___getCollectables()___)
+    - [Caching of get Collectables request](endpoints.md#Caching-of-get-Collectables-request)
+  - [async _getRetrievable()_](endpoints.md#async-___getRetrievable()___)
+  - [async _send()_](endpoints.md#async-___send()___)
+  - [async _collect()_](endpoints.md#async-___collect()___)
+  - [async _getStatus()_](endpoints.md#async-___getStatus()___)
+
+
+
+## ___getSettings()___
 
   Function to check the current settings of the library session:
 
@@ -23,7 +39,9 @@
 
   > Check morev details about [debug levels](README.md#Debug) and [default settings](README.md#Default-settings).
 
-- #### ___getLastAddresses()___
+  [⬑ _to top_](#API-Endpoints)
+
+## ___getLastAddresses()___
 
   Show [cached]() addresses, saved after last [getCollectables()](#async-___getCollectables()___):
 
@@ -35,7 +53,9 @@
 
   ```
 
-- #### ___clearLastAddresses()___
+  [⬑ _to top_](#API-Endpoints)
+
+## ___clearLastAddresses()___
 
   Clear [cached]() addresses, saved after last [getCollectables()](#async-___getCollectables()___):
 
@@ -45,7 +65,9 @@
 
   ```
 
-- #### ___connect()___
+  [⬑ _to top_](#API-Endpoints)
+
+## ___connect()___
 
   Get information about library connection status and connect/disconnect library from Kirobo service.
 
@@ -97,8 +119,9 @@
 
   ```
 
+  [⬑ _to top_](#API-Endpoints)
 
-- #### async ___getCollectables()___
+## async ___getCollectables()___
 
   Get collectable transactions for a certain address:
 
@@ -149,11 +172,13 @@
   ```
   > Read more about __confirmed__ object  [here]()
 
-    #### Caching of get Collectables request
+  ### Caching of get Collectables request
 
-    Every time you send request for collectables, the address(es) from your last request are being cached in the library. In case Internet connection dropped, the library will attempt  to reconnect once the connection is restored. After successful reconnection, library will use the cached addresses to update (re-send last request for collectables). To check the contents of the cache you can use [getLastAddresses()](#___getLastAddresses()___) function. To clear the cache - [clearLastAddresses()](#___clearLastAddresses()___).
+  Every time you send request for collectables, the address(es) from your last request are being cached in the library. In case Internet connection dropped, the library will attempt  to reconnect once the connection is restored. After successful reconnection, library will use the cached addresses to update (re-send last request for collectables). To check the contents of the cache you can use [getLastAddresses()](#___getLastAddresses()___) function. To clear the cache - [clearLastAddresses()](#___clearLastAddresses()___).
 
-- #### async ___getRetrievable()___
+  [⬑ _to top_](#API-Endpoints)
+
+## async ___getRetrievable()___
 
   Get information about a retrievable transaction by it's ID:
 
@@ -187,7 +212,9 @@
   ```
   > For information on how to make an ID, please refer [this section](how_does_it_work.md).
 
-- #### async ___send()___
+  [⬑ _to top_](#API-Endpoints)
+
+## async ___send()___
 
   Send _retrievable_ transaction. The format is the following:
   ```TypeScript
@@ -242,7 +269,9 @@
   ```
   > Life cycle, including states and expiration is explained [here](how_does_it_work.md).
 
-- #### async ___collect()___
+  [⬑ _to top_](#API-Endpoints)
+
+## async ___collect()___
 
   ```TypeScript
 
@@ -256,5 +285,10 @@
 
   ```
 
-- #### async ___getStatus()___
+  [⬑ _to top_](#API-Endpoints)
 
+## async ___getStatus()___
+
+  [⬑ _to top_](#API-Endpoints)
+
+  [◅ _return home_](../README.md#Kirobo-Retrievable-Transfer-Library)

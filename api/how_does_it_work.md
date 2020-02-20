@@ -1,4 +1,7 @@
 # How does it work?
+[◅ _return home_](../README.md#Kirobo-Retrievable-Transfer-Library)
+
+## Contents
 
 - [Steps](#Steps)
 - [Creation](#Creation)
@@ -6,7 +9,7 @@
   - [Subscription](#Subscription)
 - [Collection](#Collection)
 
-### Steps
+## Steps
 
 The Retrievable Transfer process consists of several blocks:
 - [ creation of retrievable transfer and sending it's details to server ](#Creation)
@@ -15,7 +18,7 @@ The Retrievable Transfer process consists of several blocks:
 
 [⬑ _to top_](#How-does-it-work?)
 
-### Creation
+## Creation
 
 To create a retrievable transfer (or just Retrievable), that can be collected the following steps have to be made:
 
@@ -42,7 +45,7 @@ To check manually or to start getting updates in the new session (connection) us
 
 [⬑ _to top_](#How-does-it-work?)
 
-### Life on server
+## Life on server
 
 After creation of the Retrievable transaction a Collectable one appears and those, [subscribed](#Subscription) to recipient's address, will receive an event, with Collectable object. We'll talk about subscription mechanism in a bit. The difference between the Retrievable and Collectable objects is slight - after all, both of them are the same transaction. Here are the types of them:
 
@@ -92,7 +95,7 @@ ID strings are different for security purposes. The Retrievable has an ID, based
 
 [⬑ _to top_](#How-does-it-work?)
 
-#### Subscription
+### Subscription
 
 Subscription is an automated feature. Every new session of the library use (```const service = new Service()```) creates an individual real-time socket connection to the server. Every request for/about Retrievable and Collectable subscribes this session to the updates about the subject.
 
@@ -100,7 +103,7 @@ For example, a request for all Collectable transactions for address 'xxxxx', wil
 
 [⬑ _to top_](#How-does-it-work?)
 
-### Collection
+## Collection
 
 Collection of the transaction is a rather simple process. To do that you just need to know the recipient's address and passcode for individual ones; while for automated systems you need you system needs to recognize and process _hint_ values:
 
@@ -121,3 +124,5 @@ Collection of the transaction is a rather simple process. To do that you just ne
   ```
 
 [⬑ _to top_](#How-does-it-work?)
+
+[◅ _return home_](../README.md#Kirobo-Retrievable-Transfer-Library)

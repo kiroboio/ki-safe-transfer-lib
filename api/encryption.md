@@ -1,4 +1,7 @@
 # Encryption
+[◅ _return home_](../README.md#Kirobo-Retrievable-Transfer-Library)
+
+## Contents
 
 - [Why encryption?](#Why-encryption?)
 - [What is being encrypted?](#What-is-being-encrypted?)

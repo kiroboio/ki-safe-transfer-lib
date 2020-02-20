@@ -1,4 +1,5 @@
 ## Errors and handling them
+[◅ _return home_](../README.md#Kirobo-Retrievable-Transfer-Library)
 
 - [Why throwing errors?](#Why-throwing-errors?)
 - [What types of error?](#What-types-of-error?)
@@ -65,3 +66,5 @@ async function run() {
 }
 run()
 ```
+
+[◅ _return home_](../README.md#Kirobo-Retrievable-Transfer-Library)
