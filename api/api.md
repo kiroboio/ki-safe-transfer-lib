@@ -1,0 +1,26 @@
+# API Documentation
+[◅ _return home_](README.md#Kirobo-Retrievable-Transfer-Library-Documentation)
+
+- [Setup](setup.md#Setup)
+  - [Why eventBus is always required?](setup.md#Why-eventBus-is-always-required)
+  - [Default settings](setup.md#Default-settings)
+  - [Options for settings](setup.md#Options-for-settings)
+    - [debug](setup.md#_debug_)
+    - [respondAs](setup.md#_respondAs_)
+    - [eventBus](setup.md#_eventBus_)
+- [Errors and handling them](errors.md#Errors-and-handling-them)
+- [API Endpoints](endpoints.md#API-Endpoints)
+  - [_getSettings()_](endpoints.md#getSettings)
+  - [_getLastAddresses()_](endpoints.md#getLastAddresses)
+  - [_clearLastAddresses()_](endpoints.md#clearLastAddresses)
+  - [_connect()_](endpoints.md#connect)
+  - [async _getCollectables()_](endpoints.md#async-getCollectables)
+    - [Caching of get Collectables request](endpoints.md#Caching-of-get-Collectables-request)
+  - [async _getRetrievable()_](endpoints.md#async-getRetrievable)
+  - [async _send()_](endpoints.md#async-send)
+  - [async _collect()_](endpoints.md#async-collect)
+  - [async _getStatus()_](endpoints.md#async-getStatus)
+
+[⬑ _to top_](#API-Documentation)
+
+[◅ _return home_](README.md#Kirobo-Retrievable-Transfer-Library-Documentation)

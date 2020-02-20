@@ -1,5 +1,5 @@
 # API Endpoints
-[◅ _return home_](../README.md#Kirobo-Retrievable-Transfer-Library)
+[◅ _return home_](README.md#Kirobo-Retrievable-Transfer-Library-Documentation)
 
 ## Contents
 
@@ -43,7 +43,7 @@
 
 ## ___getLastAddresses()___
 
-  Show [cached](#Caching-of-get-Collectables-request) addresses, saved after last [getCollectables()](#async-___getCollectables()___):
+  Show [cached](#Caching-of-get-Collectables-request) addresses, saved after last [getCollectables()](#async-getCollectables):
 
   ```TypeScript
 
@@ -57,7 +57,7 @@
 
 ## ___clearLastAddresses()___
 
-  Clear [cached](#Caching-of-get-Collectables-request) addresses, saved after last [getCollectables()](#async-___getCollectables()___):
+  Clear [cached](#Caching-of-get-Collectables-request) addresses, saved after last [getCollectables()](#async-getCollectables):
 
   ```TypeScript
 
@@ -174,7 +174,7 @@
 
   ### Caching of get Collectables request
 
-  Every time you send request for collectables, the address(es) from your last request are being cached in the library. In case Internet connection dropped, the library will attempt  to reconnect once the connection is restored. After successful reconnection, library will use the cached addresses to update (re-send last request for collectables). To check the contents of the cache you can use [getLastAddresses()](#___getLastAddresses()___) function. To clear the cache - [clearLastAddresses()](#___clearLastAddresses()___).
+  Every time you send request for collectables, the address(es) from your last request are being cached in the library. In case Internet connection dropped, the library will attempt  to reconnect once the connection is restored. After successful reconnection, library will use the cached addresses to update (re-send last request for collectables). To check the contents of the cache you can use [getLastAddresses()](#getLastAddresses) function. To clear the cache - [clearLastAddresses()](#clearLastAddresses).
 
   [⬑ _to top_](#API-Endpoints)
 
@@ -372,4 +372,4 @@ Get status - block height for current network, server status and average fee for
 
   [⬑ _to top_](#API-Endpoints)
 
-  [◅ _return home_](../README.md#Kirobo-Retrievable-Transfer-Library)
+  [◅ _return home_](README.md#Kirobo-Retrievable-Transfer-Library-Documentation)

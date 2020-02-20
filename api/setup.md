@@ -1,6 +1,9 @@
-## Setup
-[◅ _return home_](../README.md#Kirobo-Retrievable-Transfer-Library)
+# Setup
+[◅ _return home_](README.md#Kirobo-Retrievable-Transfer-Library-Documentation)
 
+## Contents
+
+- [Setting things up](#Settings-things-up)
 - [Why eventBus is always required?](#Why-eventBus-is-always-required)
 - [Default settings](#Default-settings)
 - [Options for settings](#Options-for-settings)
@@ -8,6 +11,7 @@
   - [respondAs](#_respondAs_)
   - [eventBus](#_eventBus_)
 
+## Setting things up
 
 The setup is plain simple:
 
@@ -38,7 +42,7 @@ function eventBus(event: Event) {
 try {
 
   const service = new Service({
-    respond: Responses.Callback,
+    respondAs: Responses.Callback,
     eventBus
     })
 
@@ -58,7 +62,7 @@ const serviceOptions = {
   debug: DebugLevels.QUIET,
   network: Networks.Testnet,
   currency: Currencies.Bitcoin,
-  respond: Responses.Direct,
+  respondAs: Responses.Direct,
   }
 
 try {
@@ -70,7 +74,9 @@ try {
 }
  ```
 
-### Why [eventBus](event_bus.md) is always required?
+[⬑ _to top_](#Setup)
+
+## Why [eventBus](event_bus.md) is always required?
 
 Or almost always. [eventBus](event_bus.md) is used for event updates from the Kirobo server. Without it the functionality of the library is limited to one-way client-to-server actions without on-time updates.
 
@@ -127,9 +133,11 @@ The library can work in two modes - _direct reply_ and _use callback_:
    run()
    ```
 
-### Default settings
+[⬑ _to top_](#Setup)
 
-Library comes with default settings. You can request the current settings (default or updated) with [getSettings()](#___getSettings()___) function:
+## Default settings
+
+Library comes with default settings. You can request the current settings (default or updated) with [getSettings()](#getSettings) function:
 
  - [debug](#debug) - __1__ / _"quiet"_; _more about debug levels [here](#_Debug_)_;
  - currency - __btc__ / _Bitcoin_;
@@ -137,9 +145,11 @@ Library comes with default settings. You can request the current settings (defau
  - version - __v1__ > current library is set to work with version 1 of Kirobo Retrievable Transfer API;
  - [respondAs](#respondAs) - __direct__ > functions to respond directly
 
-### Options for settings
+[⬑ _to top_](#Setup)
 
-  #### _debug_
+## Options for settings
+
+  ### _debug_
 
   Debug has three levels - verbose, quiet and mute:
 
@@ -161,7 +171,9 @@ Library comes with default settings. You can request the current settings (defau
   - in _development_ mode, all logging is on by default  ( ```DebugLevels.VERBOSE``` )
   - otherwise the default setting is to show errors only ( ```DebugLevels.QUIET``` )
 
-  #### _respondAs_
+  [⬑ _to top_](#Setup)
+
+  ### _respondAs_
 
   _respondAs_ allow to set the mode for the library to communicate with your application. There are two modes available:
 
@@ -171,9 +183,12 @@ Library comes with default settings. You can request the current settings (defau
 
   - _callback_ - in this mode, the library will only return data with non-async functions (please, see [API Endpoints](endpoints.md#API-Endpoints) section). All other data, including real-time updates will be sent through the [_eventBus_](#_eventBus_), which needs to be provided as separate option.
 
-  #### _eventBus_
+  [⬑ _to top_](#Setup)
+
+  ### _eventBus_
 
   [_eventBus_](#Why-eventBus-is-always-required) parameter requires callback function, which takes one argument - object of [Event type](). Details on how it is used are provided [above](#Why-eventBus-is-always-required).
 
+  [⬑ _to top_](#Setup)
 
-[◅ _return home_](../README.md#Kirobo-Retrievable-Transfer-Library)
+[◅ _return home_](README.md#Kirobo-Retrievable-Transfer-Library-Documentation)
