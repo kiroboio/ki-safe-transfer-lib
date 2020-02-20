@@ -3,16 +3,16 @@
 
 ## Contents
 
-  - [_getSettings()_](#___getSettings()___)
-  - [_getLastAddresses()_](#___getLastAddresses()___)
-  - [_clearLastAddresses()_](#___clearLastAddresses()___)
-  - [_connect()_](#___connect()___)
-  - [async _getCollectables()_](#async-___getCollectables()___)
+  - [_getSettings()_](#getSettings)
+  - [_getLastAddresses()_](#getLastAddresses)
+  - [_clearLastAddresses()_](#clearLastAddresses)
+  - [_connect()_](#connect)
+  - [async _getCollectables()_](#async-getCollectables)
     - [Caching of get Collectables request](#Caching-of-get-Collectables-request)
-  - [async _getRetrievable()_](#async-___getRetrievable()___)
-  - [async _send()_](#async-___send()___)
-  - [async _collect()_](#async-___collect()___)
-  - [async _getStatus()_](#async-___getStatus()___)
+  - [async _getRetrievable()_](#async-getRetrievable)
+  - [async _send()_](#async-send)
+  - [async _collect()_](#async-collect)
+  - [async _getStatus()_](#async-getStatus)
 
 
 
