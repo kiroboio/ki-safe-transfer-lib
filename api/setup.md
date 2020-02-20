@@ -37,7 +37,10 @@ function eventBus(event: Event) {
 
 try {
 
-  const service = new Service({ eventBus })
+  const service = new Service({
+    respond: Responses.Callback,
+    eventBus
+    })
 
 } catch (e) {
   console.log('error: ', e.message)
@@ -51,16 +54,11 @@ try {
  ```TypeScript
 import Service, { DebugLevels, Currencies, Networks, Responses, Event } from '@kirobo/safe-transfer-lib'
 
-function eventBus(event: Event) {
-  console.log('event fired: ', event)
-}
-
 const serviceOptions = {
   debug: DebugLevels.QUIET,
   network: Networks.Testnet,
   currency: Currencies.Bitcoin,
   respond: Responses.Direct,
-  eventBus
   }
 
 try {

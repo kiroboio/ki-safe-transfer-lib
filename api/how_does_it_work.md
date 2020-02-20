@@ -6,6 +6,7 @@
 - [Steps](#Steps)
 - [Creation](#Creation)
 - [Life on server](#Life-on-server)
+  - [Expiration](#Expiration)
   - [Subscription](#Subscription)
 - [Collection](#Collection)
 
@@ -88,6 +89,8 @@ export type Collectable = {
 }
 ```
 > ¹ We'll cover this below.
+
+#### Expiration
 
 Once transaction is sent to server - there are 5 minutes to start the collection process, after which the transaction will be wiped from the server. Once collection has been requested, the transaction changes state to 'collecting' and will be wiped after 10 blocks from confirmation block. The expiration information is provided for your convenience by both Retrievable and Collectable objects.
 

@@ -4,8 +4,8 @@
 ## Contents
 
   - [_getSettings()_](endpoints.md#___getSettings()___)
-  - [_clearLastAddresses()_](endpoints.md#___clearLastAddresses()___)
   - [_getLastAddresses()_](endpoints.md#___getLastAddresses()___)
+  - [_clearLastAddresses()_](endpoints.md#___clearLastAddresses()___)
   - [_connect()_](endpoints.md#___connect()___)
   - [async _getCollectables()_](endpoints.md#async-___getCollectables()___)
     - [Caching of get Collectables request](endpoints.md#Caching-of-get-Collectables-request)
@@ -37,13 +37,13 @@
   // }
   ```
 
-  > Check morev details about [debug levels](README.md#Debug) and [default settings](README.md#Default-settings).
+  > Check more details about [debug levels](setup.md#debug) and [default settings](setup.md#Default-settings).
 
   [⬑ _to top_](#API-Endpoints)
 
 ## ___getLastAddresses()___
 
-  Show [cached]() addresses, saved after last [getCollectables()](#async-___getCollectables()___):
+  Show [cached](#Caching-of-get-Collectables-request) addresses, saved after last [getCollectables()](#async-___getCollectables()___):
 
   ```TypeScript
 
@@ -57,7 +57,7 @@
 
 ## ___clearLastAddresses()___
 
-  Clear [cached]() addresses, saved after last [getCollectables()](#async-___getCollectables()___):
+  Clear [cached](#Caching-of-get-Collectables-request) addresses, saved after last [getCollectables()](#async-___getCollectables()___):
 
   ```TypeScript
 
@@ -170,7 +170,7 @@
 
   service.getCollectables('xxxxx') // provide recipient's address
   ```
-  > Read more about __confirmed__ object  [here]()
+  > Read more about object contents [here](how_does_it_work#Life-on-server).
 
   ### Caching of get Collectables request
 
@@ -210,7 +210,7 @@
 
   service.getRetrievable('xxxxx') // provide transaction id
   ```
-  > For information on how to make an ID, please refer [this section](how_does_it_work.md).
+  > For information on how to make an ID, please refer [this section](creating_retrievable_id.md).
 
   [⬑ _to top_](#API-Endpoints)
 
@@ -228,7 +228,7 @@
     to: string // recipient's address
   }
   ```
-  > Why and what to encrypt, as well as how, is discussed [here](encryption.md).
+  > Why and what to encrypt, as well as how, is discussed [here](encryption.md#Encryption).
 
   Sending:
 
@@ -267,27 +267,108 @@
     updatedAt: '2020-02-05T08:51:58.598Z'
   }
   ```
-  > Life cycle, including states and expiration is explained [here](how_does_it_work.md).
+  > Life cycle, including states and expiration is explained [here](how_does_it_work.md#How-does-it-work?).
 
   [⬑ _to top_](#API-Endpoints)
 
 ## async ___collect()___
 
+Collect Collectable transaction:
+
   ```TypeScript
+  function eventBus(event: Event) {
+    console.log('event fired: ', event)
 
-  Service (collect):  {
-    fromNodeTxid: 'xxxxxx'
+  // >>> event #1
+
+  // *** if unsuccessful:
+
+  // event fired:  {
+    // type: 'service_message',
+    // payload: {
+    //  isError: true,
+    //  text: "Transaction Rejected by the Blockchain"
+    //  }
+
+    // ***  or, if successful:
+
+    // event fired:  {
+    // type: 'service_collect_transaction',
+    // payload: {
+    //  data: {
+    //    fromNodeTxid: "xxxxxx"
+    //    },
+    //    isError: false,
+    //    text: "Request submitted."
+    //}
+
+    // >>> event #2 (only if successful)
+
+    // event fired:  {
+    // type: 'service_updated_collectable',
+    // payload: {
+    //  amount: 12345
+    //  collect: {
+    //  broadcasted: 12345;
+    //  confirmed: -1; // only will be updated, when 1st confirmation happens
+    //  txid: 'xxxxxx'
+    //}
+    //  createdAt: "2020-02-20T13:12:26.064Z"
+    //  expires: { at: string }
+    //  from: 'Kirobo
+    //  id: 'xxxxxx'
+    //  salt: 'xxxxxx'
+    //  state: 'collecting'
+    //  to: 'xxxxxx'
+    //  updatedAt: "2020-02-20T13:12:26.064Z"
+    //}
+
+  try {
+
+    const service = new Service({
+      respond: Responses.Callback,
+      eventBus
+      })
+
+    service.collect({
+      id: selected.id,
+      key: createCollectKey(passcode, transaction.salt),
+    })
+
+  } catch (e) {
+    console.log('error: ', e.message)
   }
+  ```
 
-  Service (collect) got an error. Transaction Rejected by the Blockchain
+  If transaction ID is wrong (for example, it [expired](how_does_it_work.md#Expiration) before the collect request has reached the server), the error message will be:
 
-  Service (collect) got an error. No record found for id 'dec962629088b1ae2fa9ecd72a6f74a8a8016f91e1239988fd9701069837d3c'
-
+  ```
+  No record found for id 'xxxxxx'
   ```
 
   [⬑ _to top_](#API-Endpoints)
 
 ## async ___getStatus()___
+
+Get status - block height for current network, server status and average fee for the latest block. The height and the fee are taken from the blockchain directly.
+
+  ```TypeScript
+
+  async function run() {
+
+    try {
+      const service = new Service()
+      const result = await service.getStatus()
+      console.log(result)
+      // { height: 123456, online: true, fee: 12345 }
+    } catch (e) {
+      console.log('error: ', e.message)
+    }
+
+  }
+
+  run()
+  ```
 
   [⬑ _to top_](#API-Endpoints)
 
