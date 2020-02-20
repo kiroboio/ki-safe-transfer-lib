@@ -137,7 +137,7 @@ Library comes with default settings. You can request the current settings (defau
  - [debug](#debug) - __1__ / _"quiet"_; _more about debug levels [here](#_Debug_)_;
  - currency - __btc__ / _Bitcoin_;
  - network - __testnet__ / _Testnet_;
- - version - __v1__ > current library is set to work with version 1 of Kirobo Safe Transfer API;
+ - version - __v1__ > current library is set to work with version 1 of Kirobo Retrievable Transfer API;
  - [respondAs](#respondAs) - __direct__ > functions to respond directly
 
 ### Options for settings

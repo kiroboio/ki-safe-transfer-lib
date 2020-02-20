@@ -1,9 +1,8 @@
-# Kirobo Safe Transfer JS/TS Library
+# Kirobo Retrievable Transfer Library
 
 ## Contents
 
-- [Purpose](#Purpose)
-- [What this library can do?](#What-this-library-can-do?)
+- [What this library is intended to do?](#What-this-library-is-intended-to-do?)
 - [How does it work?](api/how_does_it_work#How-does-it-work?)
 - [API](api/README.md)
 - [Dependencies](#Dependencies)

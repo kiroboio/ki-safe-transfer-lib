@@ -29,7 +29,7 @@ import { TEXT } from './data'
 
 // TODO: add comments
 /**
- * Kirobo Safe Transfer library class to provide convenient
+ * Kirobo Retrievable Transfer library class to provide convenient
  * way to use the service
  * @class
  * @name Service

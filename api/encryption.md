@@ -22,7 +22,7 @@ The main element - the signed collect transaction, is encrypted to ensure it can
 
 As mentioned above, the signed collect transaction and the passcode (in collect request) are the only valuable data and both being encrypted. Encrypting passcode before sending it to collect transaction creates additional security layer to protect in case of traffic hijacking.
 
-For encryption/decryption we provide the [__Safe Transfer Crypto__ npm library](). The reason for not making Crypto a part of this library is to make the process more transparent and to give users more control of the Safe Transfer flow.
+For encryption/decryption we provide the [__Retrievable Transfer Crypto__ npm library](). The reason for not making Crypto a part of this library is to make the process more transparent and to give users more control of the Retrievable Transfer flow.
 
 ### How to do it?
 

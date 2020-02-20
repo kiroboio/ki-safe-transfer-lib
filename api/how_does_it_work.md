@@ -8,7 +8,7 @@
 
 ### Steps
 
-The Safe Transfer process consists of several blocks:
+The Retrievable Transfer process consists of several blocks:
 - [ creation of retrievable transfer and sending it's details to server ](#Creation)
 - [ life-cycle of transaction on server ](#Life-on-server)
 - [ collection of the transfer and it's life-cycle after that ](#Collection)
@@ -46,7 +46,7 @@ After creation of the Retrievable transaction a Collectable one appears and thos
 ```TypeScript
 export type Retrievable = {
   amount: number
-  collect: { // below information is available only after the Safe Transfer has been collected
+  collect: { // below information is available only after the Retrievable Transfer has been collected
     broadcasted: number // block height at the moment the collect transaction has been broadcasted
     confirmed: number // block height at the moment the transaction has been confirmed
     txid: string // txid of the transaction
