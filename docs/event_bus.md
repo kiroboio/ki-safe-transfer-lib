@@ -1,5 +1,5 @@
 # eventBus
-[◅ _return home_](README.md#Kirobo-Retrievable-Transfer-Library-Documentation)
+[◅ _return home_](api.md#api-documentation)
 
 eventBus feature is using provided function, capable of taking one object as argument. The object has only two keys: ```type``` and ```payload```. Type is a text description of an event, starting with ```'service_'``` marker:
 
@@ -39,10 +39,10 @@ function eventBus(event: Event) {
 ```
 From now on, the status updates will be coming automatically, with each new block on the blockchain or when the service reconnects after connection drop.
 
-eventBus will be receiving all result of async functions, as well as events, connected to [subscribed](how_does_it_work.md#Subscription) transactions.
+eventBus will be receiving all result of async functions, as well as events, connected to [subscribed](how_does_it_work.md#subscription) transactions.
 
 To use the eventBus feature, two settings has to be set - ```respondAs``` and ```eventBus```. ```respondAs``` should have ```Responses.Callback``` if you use TypeScript or ```'callback'``` if you use JavaScript.
 
-[⬑ _to top_](#eventBus)
+[⬑ _to top_](#eventbus)
 
-[◅ _return home_](README.md#Kirobo-Retrievable-Transfer-Library-Documentation)
+[◅ _return home_](api.md#api-documentation)

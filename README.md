@@ -1,6 +1,6 @@
 # Kirobo Retrievable Transfer Library
 
-Please, find the documentation [here](api/README.md#Kirobo-Retrievable-Transfer-Library-Documentation).
+Please, find the documentation [here](docs/README.md#kirobo-retrievable-transfer-library-documentation).
 
 ## Scripts
 

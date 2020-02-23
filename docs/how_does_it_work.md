@@ -1,23 +1,23 @@
 # How does it work?
-[◅ _return home_](README.md#Kirobo-Retrievable-Transfer-Library-Documentation)
+[◅ _return home_](README.md#kirobo-retrievable-transfer-library-documentation)
 
 ## Contents
 
-- [Steps](#Steps)
-- [Creation](#Creation)
-- [Life on server](#Life-on-server)
-  - [Expiration](#Expiration)
-  - [Subscription](#Subscription)
-- [Collection](#Collection)
+- [Steps](#steps)
+- [Creation](#creation)
+- [Life on server](#life-on-server)
+  - [Expiration](#expiration)
+  - [Subscription](#subscription)
+- [Collection](#collection)
 
 ## Steps
 
 The Retrievable Transfer process consists of several blocks:
-- [ creation of retrievable transfer and sending it's details to server ](#Creation)
-- [ life-cycle of transaction on server ](#Life-on-server)
-- [ collection of the transfer and it's life-cycle after that ](#Collection)
+- [ creation of retrievable transfer and sending it's details to server ](#creation)
+- [ life-cycle of transaction on server ](#life-on-server)
+- [ collection of the transfer and it's life-cycle after that ](#collection)
 
-[⬑ _to top_](#How-does-it-work?)
+[⬑ _to top_](#how-does-it-work)
 
 ## Creation
 
@@ -41,14 +41,14 @@ To create a retrievable transfer (or just Retrievable), that can be collected th
 
 - send the above object with data to Kirobo, using [send()](endpoints.md#async-send) function.
 
-After the positive response from server that the transaction has been accepted, current session will be receiving the updates through [eventBus] on the changes of the transaction status. This is how the [subscription](#Subscription) mechanism works.
-To check manually or to start getting updates in the new session (connection) use either [getRetrievable()](endpoints.md#async-getRetrievable) with id, or [getCollectables()](endpoints.md#async-getCollectables) using the array of recipient's addresses.
+After the positive response from server that the transaction has been accepted, current session will be receiving the updates through [eventBus] on the changes of the transaction status. This is how the [subscription](#subscription) mechanism works.
+To check manually or to start getting updates in the new session (connection) use either [getRetrievable()](endpoints.md#async-getretrievable) with id, or [getCollectables()](endpoints.md#async-getcollectables) using the array of recipient's addresses.
 
-[⬑ _to top_](#How-does-it-work?)
+[⬑ _to top_](#how-does-it-work)
 
 ## Life on server
 
-After creation of the Retrievable transaction a Collectable one appears and those, [subscribed](#Subscription) to recipient's address, will receive an event, with Collectable object. We'll talk about subscription mechanism in a bit. The difference between the Retrievable and Collectable objects is slight - after all, both of them are the same transaction. Here are the types of them:
+After creation of the Retrievable transaction a Collectable one appears and those, [subscribed](#subscription) to recipient's address, will receive an event, with Collectable object. We'll talk about subscription mechanism in a bit. The difference between the Retrievable and Collectable objects is slight - after all, both of them are the same transaction. Here are the types of them:
 
 ```TypeScript
 export type Retrievable = {
@@ -94,9 +94,9 @@ export type Collectable = {
 
 Once transaction is sent to server - there are 5 minutes to start the collection process, after which the transaction will be wiped from the server. Once collection has been requested, the transaction changes state to 'collecting' and will be wiped after 10 blocks from confirmation block. The expiration information is provided for your convenience by both Retrievable and Collectable objects.
 
-ID strings are different for security purposes. The Retrievable has an ID, based on deposits' _hash_ and _vout_, while Collectable has a random ID, to avoid compromising the deposit hash, and thus leaking the sender's information. You can check out how to create ID [here](creating_retrievable_id.md#Creating-Retrievable-ID).
+ID strings are different for security purposes. The Retrievable has an ID, based on deposits' _hash_ and _vout_, while Collectable has a random ID, to avoid compromising the deposit hash, and thus leaking the sender's information. You can check out how to create ID [here](create_retrievable_id.md#create_retrievable_id).
 
-[⬑ _to top_](#How-does-it-work?)
+[⬑ _to top_](#how-does-it-work)
 
 ### Subscription
 
@@ -104,14 +104,14 @@ Subscription is an automated feature. Every new session of the library use (```c
 
 For example, a request for all Collectable transactions for address 'xxxxx', will subscribe the session to events about all transactions with 'to: "xxxxx"' in the body, even those, not yet created. A request for Retrievable transaction or creation of Retrievable with 'id: "yyyyy"' will subscribe the session, which was used for that, to all the updates of this transaction.
 
-[⬑ _to top_](#How-does-it-work?)
+[⬑ _to top_](#how-does-it-work)
 
 ## Collection
 
 Collection of the transaction is a rather simple process. To do that you just need to know the recipient's address and passcode for individual ones; while for automated systems you need you system needs to recognize and process _hint_ values:
 
-- get the list of transactions for provided address  with [getCollectables()](endpoints.md#async-getCollectables)
-- collect the transaction with [collect()](endpoints.md#async-collect), using ID of the selected transaction and a key, generated from the entered passcode and salt. You can read more about encryption/decryption [here](encryption.md#Encryption):
+- get the list of transactions for provided address  with [getCollectables()](endpoints.md#async-getcollectables)
+- collect the transaction with [collect()](endpoints.md#async-collect), using ID of the selected transaction and a key, generated from the entered passcode and salt. You can read more about encryption/decryption [here](encryption.md#encryption):
 
   ```TypeScript
   try {
@@ -126,6 +126,6 @@ Collection of the transaction is a rather simple process. To do that you just ne
   }
   ```
 
-[⬑ _to top_](#How-does-it-work?)
+[⬑ _to top_](#how-does-it-work)
 
-[◅ _return home_](README.md#Kirobo-Retrievable-Transfer-Library-Documentation)
+[◅ _return home_](README.md#kirobo-retrievable-transfer-library-documentation)

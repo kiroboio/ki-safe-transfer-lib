@@ -1,18 +1,18 @@
 # API Endpoints
-[◅ _return home_](README.md#Kirobo-Retrievable-Transfer-Library-Documentation)
+[◅ _return home_](api.md#api-documentation)
 
 ## Contents
 
-  - [_getSettings()_](#getSettings)
-  - [_getLastAddresses()_](#getLastAddresses)
-  - [_clearLastAddresses()_](#clearLastAddresses)
+  - [_getSettings()_](#getsettings)
+  - [_getLastAddresses()_](#getlastaddresses)
+  - [_clearLastAddresses()_](#clearlastaddresses)
   - [_connect()_](#connect)
-  - [async _getCollectables()_](#async-getCollectables)
-    - [Caching of get Collectables request](#Caching-of-get-Collectables-request)
-  - [async _getRetrievable()_](#async-getRetrievable)
+  - [async _getCollectables()_](#async-getcollectables)
+    - [Caching of get Collectables request](#caching-of-get-collectables-request)
+  - [async _getRetrievable()_](#async-getretrievable)
   - [async _send()_](#async-send)
   - [async _collect()_](#async-collect)
-  - [async _getStatus()_](#async-getStatus)
+  - [async _getStatus()_](#async-getstatus)
 
 
 
@@ -37,13 +37,13 @@
   // }
   ```
 
-  > Check more details about [debug levels](setup.md#debug) and [default settings](setup.md#Default-settings).
+  > Check more details about [debug levels](setup.md#debug) and [default settings](setup.md#default-settings).
 
-  [⬑ _to top_](#API-Endpoints)
+  [⬑ _to top_](#api-endpoints)
 
 ## ___getLastAddresses()___
 
-  Show [cached](#Caching-of-get-Collectables-request) addresses, saved after last [getCollectables()](#async-getCollectables):
+  Show [cached](#caching-of-get-collectables-request) addresses, saved after last [getCollectables()](#async-getcollectables):
 
   ```TypeScript
 
@@ -53,11 +53,11 @@
 
   ```
 
-  [⬑ _to top_](#API-Endpoints)
+  [⬑ _to top_](#api-endpoints)
 
 ## ___clearLastAddresses()___
 
-  Clear [cached](#Caching-of-get-Collectables-request) addresses, saved after last [getCollectables()](#async-getCollectables):
+  Clear [cached](#caching-of-get-collectables-request) addresses, saved after last [getCollectables()](#async-getcollectables):
 
   ```TypeScript
 
@@ -65,7 +65,7 @@
 
   ```
 
-  [⬑ _to top_](#API-Endpoints)
+  [⬑ _to top_](#api-endpoints)
 
 ## ___connect()___
 
@@ -119,7 +119,7 @@
 
   ```
 
-  [⬑ _to top_](#API-Endpoints)
+  [⬑ _to top_](#api-endpoints)
 
 ## async ___getCollectables()___
 
@@ -170,13 +170,13 @@
 
   service.getCollectables('xxxxx') // provide recipient's address
   ```
-  > Read more about object contents [here](how_does_it_work#Life-on-server).
+  > Read more about object contents [here](how_does_it_work.md#life-on-server).
 
   ### Caching of get Collectables request
 
-  Every time you send request for collectables, the address(es) from your last request are being cached in the library. In case Internet connection dropped, the library will attempt  to reconnect once the connection is restored. After successful reconnection, library will use the cached addresses to update (re-send last request for collectables). To check the contents of the cache you can use [getLastAddresses()](#getLastAddresses) function. To clear the cache - [clearLastAddresses()](#clearLastAddresses).
+  Every time you send request for collectables, the address(es) from your last request are being cached in the library. In case Internet connection dropped, the library will attempt  to reconnect once the connection is restored. After successful reconnection, library will use the cached addresses to update (re-send last request for collectables). To check the contents of the cache you can use [getLastAddresses()](#getlastaddresses) function. To clear the cache - [clearLastAddresses()](#clearlastaddresses).
 
-  [⬑ _to top_](#API-Endpoints)
+  [⬑ _to top_](#api-endpoints)
 
 ## async ___getRetrievable()___
 
@@ -210,9 +210,9 @@
 
   service.getRetrievable('xxxxx') // provide transaction id
   ```
-  > For information on how to make an ID, please refer [this section](creating_retrievable_id.md).
+  > For information on how to make an ID, please refer [this section](create_retrievable_id.md#create_retrievable_id).
 
-  [⬑ _to top_](#API-Endpoints)
+  [⬑ _to top_](#api-endpoints)
 
 ## async ___send()___
 
@@ -228,7 +228,7 @@
     to: string // recipient's address
   }
   ```
-  > Why and what to encrypt, as well as how, is discussed [here](encryption.md#Encryption).
+  > Why and what to encrypt, as well as how, is discussed [here](encryption.md#encryption).
 
   Sending:
 
@@ -267,9 +267,9 @@
     updatedAt: '2020-02-05T08:51:58.598Z'
   }
   ```
-  > Life cycle, including states and expiration is explained [here](how_does_it_work.md#How-does-it-work?).
+  > Life cycle, including states and expiration is explained [here](how_does_it_work.md#how-does-it-work).
 
-  [⬑ _to top_](#API-Endpoints)
+  [⬑ _to top_](#api-endpoints)
 
 ## async ___collect()___
 
@@ -340,13 +340,13 @@ Collect Collectable transaction:
   }
   ```
 
-  If transaction ID is wrong (for example, it [expired](how_does_it_work.md#Expiration) before the collect request has reached the server), the error message will be:
+  If transaction ID is wrong (for example, it [expired](how_does_it_work.md#expiration) before the collect request has reached the server), the error message will be:
 
   ```
   No record found for id 'xxxxxx'
   ```
 
-  [⬑ _to top_](#API-Endpoints)
+  [⬑ _to top_](#api-endpoints)
 
 ## async ___getStatus()___
 
@@ -370,6 +370,6 @@ Get status - block height for current network, server status and average fee for
   run()
   ```
 
-  [⬑ _to top_](#API-Endpoints)
+  [⬑ _to top_](#api-endpoints)
 
-  [◅ _return home_](README.md#Kirobo-Retrievable-Transfer-Library-Documentation)
+  [◅ _return home_](api.md#api-documentation)

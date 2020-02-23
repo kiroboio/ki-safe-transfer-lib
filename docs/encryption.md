@@ -1,12 +1,12 @@
 # Encryption
-[◅ _return home_](README.md#Kirobo-Retrievable-Transfer-Library-Documentation)
+[◅ _return home_](api.md#api-documentation)
 
 ## Contents
 
-- [Why encryption?](#Why-encryption?)
-- [What is being encrypted?](#What-is-being-encrypted?)
-- [How to do it?](#How-to-do-it?)
-- [What about collecting?](#What-about-collecting?)
+- [Why encryption?](#why-encryption)
+- [What is being encrypted?](#what-is-being-encrypted)
+- [How to do it?](#how-to-do-it)
+- [What about collecting?](#what-about-collecting)
 
 ## Why encryption?
 
@@ -21,7 +21,7 @@ Encryption is required to ensure additional layer of client's data protection, e
 The main element - the signed collect transaction, is encrypted to ensure it can't be used without the key. The passcode is not sent with Retrievable. The key for collection, when being sent to server, is an encrypted passcode;  The expiration policies ensure, that data is wiped and not stored - the successful transactions can be found on the blockchain.
 > Despite passcode being always hidden, we highly recommend ___not to reuse passcodes___.
 
-[⬑ _to top_](#Encryption)
+[⬑ _to top_](#encryption)
 
 ## What is being encrypted?
 
@@ -29,7 +29,7 @@ As mentioned above, the signed collect transaction and the passcode (in collect 
 
 For encryption/decryption we provide the [__Retrievable Transfer Crypto__ npm library](https://github.com/kiroboio/ki-safe-transfer-crypto). The reason for not making Crypto a part of this library is to make the process more transparent and to give users more control of the Retrievable Transfer flow.
 
-[⬑ _to top_](#Encryption)
+[⬑ _to top_](#encryption)
 
 ## How to do it?
 
@@ -50,7 +50,7 @@ const encryptedTrx = encryptTransaction({
 })
 ```
 
-[⬑ _to top_](#Encryption)
+[⬑ _to top_](#encryption)
 
 ## What about collecting?
 
@@ -61,4 +61,6 @@ const createCollectKey = (passcode: string, salt: string) => generateDecryptionK
 ```
 > Salt is provided from the server as a part of Collectable object.
 
-[⬑ _to top_](#Encryption)
+[⬑ _to top_](#encryption)
+
+[◅ _return home_](api.md#api-documentation)

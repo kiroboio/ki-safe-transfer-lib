@@ -1,15 +1,15 @@
 # Setup
-[◅ _return home_](README.md#Kirobo-Retrievable-Transfer-Library-Documentation)
+[◅ _return home_](README.md#kirobo-retrievable-transfer-library-documentation)
 
 ## Contents
 
-- [Setting things up](#Settings-things-up)
-- [Why eventBus is always required?](#Why-eventBus-is-always-required)
-- [Default settings](#Default-settings)
-- [Options for settings](#Options-for-settings)
-  - [debug](#_debug_)
-  - [respondAs](#_respondAs_)
-  - [eventBus](#_eventBus_)
+- [Setting things up](#setting-things-up)
+- [Why eventBus is always required?](#why-eventbus-is-always-required)
+- [Default settings](#default-settings)
+- [Options for settings](#options-for-settings)
+  - [debug](#debug)
+  - [respondAs](#respondas)
+  - [eventBus](#eventbus)
 
 ## Setting things up
 
@@ -26,9 +26,9 @@ try {
   console.log('error: ', e.message)
 }
  ```
- > Please, see [Default settings](#Default-settings) for details.
+ > Please, see [Default settings](#default-settings) for details.
 
- > We strongly advise to handle library errors to catch helpful  messages that will help in development and production. More about this [here](errors.md#Errors-and-handling-them).
+ > We strongly advise to handle library errors to catch helpful  messages that will help in development and production. More about this [here](errors.md#errors-and-handling-them).
 
  or
 
@@ -51,7 +51,7 @@ try {
 }
  ```
 
-> More about eventBus requirements and format is discussed [here](event_bus.md).
+> More about eventBus requirements and format is discussed [here](event_bus.md#eventbus).
 
  or
 
@@ -74,11 +74,11 @@ try {
 }
  ```
 
-[⬑ _to top_](#Setup)
+[⬑ _to top_](#setup)
 
-## Why [eventBus](event_bus.md) is always required?
+## Why [eventBus](event_bus.md#eventbus) is always required?
 
-Or almost always. [eventBus](event_bus.md) is used for event updates from the Kirobo server. Without it the functionality of the library is limited to one-way client-to-server actions without on-time updates.
+Or almost always. [eventBus](event_bus.md#eventbus) is used for event updates from the Kirobo server. Without it the functionality of the library is limited to one-way client-to-server actions without on-time updates.
 
 The library can work in two modes - _direct reply_ and _use callback_:
 - in _direct reply_ mode each function replies directly with answer or Error:
@@ -102,9 +102,9 @@ The library can work in two modes - _direct reply_ and _use callback_:
    run()
    ```
 
-- _use callback_ is when all data responses go through [eventBus](event_bus.md), using Redux-friendly syntax (type/payload):
+- _use callback_ is when all data responses go through [eventBus](event_bus.md#eventbus), using Redux-friendly syntax (type/payload):
 
-  > Please note, that for this mode [eventBus](event_bus.md) is required!
+  > Please note, that for this mode [eventBus](event_bus.md#eventbus) is required!
 
    ```TypeScript
    ...
@@ -133,19 +133,19 @@ The library can work in two modes - _direct reply_ and _use callback_:
    run()
    ```
 
-[⬑ _to top_](#Setup)
+[⬑ _to top_](#setup)
 
 ## Default settings
 
 Library comes with default settings. You can request the current settings (default or updated) with [getSettings()](#getSettings) function:
 
- - [debug](#debug) - __1__ / _"quiet"_; _more about debug levels [here](#_Debug_)_;
+ - [debug](#debug) - __1__ / _"quiet"_; _more about debug levels [here](#debug)_;
  - currency - __btc__ / _Bitcoin_;
  - network - __testnet__ / _Testnet_;
  - version - __v1__ > current library is set to work with version 1 of Kirobo Retrievable Transfer API;
- - [respondAs](#respondAs) - __direct__ > functions to respond directly
+ - [respondAs](#respondas) - __direct__ > functions to respond directly
 
-[⬑ _to top_](#Setup)
+[⬑ _to top_](#setup)
 
 ## Options for settings
 
@@ -171,7 +171,7 @@ Library comes with default settings. You can request the current settings (defau
   - in _development_ mode, all logging is on by default  ( ```DebugLevels.VERBOSE``` )
   - otherwise the default setting is to show errors only ( ```DebugLevels.QUIET``` )
 
-  [⬑ _to top_](#Setup)
+  [⬑ _to top_](#setup)
 
   ### _respondAs_
 
@@ -181,14 +181,14 @@ Library comes with default settings. You can request the current settings (defau
 
     > In this mode, no real-time event will be provided
 
-  - _callback_ - in this mode, the library will only return data with non-async functions (please, see [API Endpoints](endpoints.md#API-Endpoints) section). All other data, including real-time updates will be sent through the [_eventBus_](#_eventBus_), which needs to be provided as separate option.
+  - _callback_ - in this mode, the library will only return data with non-async functions (please, see [API Endpoints](endpoints.md#api-endpoints) section). All other data, including real-time updates will be sent through the [_eventBus_](#eventbus), which needs to be provided as separate option.
 
-  [⬑ _to top_](#Setup)
+  [⬑ _to top_](#setup)
 
   ### _eventBus_
 
-  [_eventBus_](#Why-eventBus-is-always-required) parameter requires callback function, which takes one argument - object of [Event type](). Details on how it is used are provided [above](#Why-eventBus-is-always-required).
+  [_eventBus_](#why-eventbus-is-always-required) parameter requires callback function, which takes one argument - object of [Event type](). Details on how it is used are provided [above](#why-eventbus-is-always-required).
 
-  [⬑ _to top_](#Setup)
+  [⬑ _to top_](#setup)
 
-[◅ _return home_](README.md#Kirobo-Retrievable-Transfer-Library-Documentation)
+[◅ _return home_](README.md#kirobo-retrievable-transfer-library-documentation)
