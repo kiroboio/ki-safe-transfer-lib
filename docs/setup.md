@@ -1,5 +1,5 @@
 # Setup
-[◅ _return home_](README.md#kirobo-retrievable-transfer-library-documentation)
+[◅ _return home_](api.md#api-documentation)
 
 ## Contents
 
@@ -137,7 +137,7 @@ The library can work in two modes - _direct reply_ and _use callback_:
 
 ## Default settings
 
-Library comes with default settings. You can request the current settings (default or updated) with [getSettings()](#getSettings) function:
+Library comes with default settings. You can request the current settings (default or updated) with [getSettings()](endpoints.md#getSettings) function:
 
  - [debug](#debug) - __1__ / _"quiet"_; _more about debug levels [here](#debug)_;
  - currency - __btc__ / _Bitcoin_;
@@ -181,14 +181,14 @@ Library comes with default settings. You can request the current settings (defau
 
     > In this mode, no real-time event will be provided
 
-  - _callback_ - in this mode, the library will only return data with non-async functions (please, see [API Endpoints](endpoints.md#api-endpoints) section). All other data, including real-time updates will be sent through the [_eventBus_](#eventbus), which needs to be provided as separate option.
+  - _callback_ - in this mode, the library will only return data with non-async functions (please, see [API Endpoints](endpoints.md#api-endpoints) section). All other data, including real-time updates will be sent through the [_eventBus_](event_bus.md#eventbus), which needs to be provided as separate option.
 
   [⬑ _to top_](#setup)
 
   ### _eventBus_
 
-  [_eventBus_](#why-eventbus-is-always-required) parameter requires callback function, which takes one argument - object of [Event type](). Details on how it is used are provided [above](#why-eventbus-is-always-required).
+  [_eventBus_](#why-eventbus-is-always-required) parameter requires callback function, which takes one argument - object of [Event type](event_bus.md#eventbus). Details on how it is used are provided [above](#why-eventbus-is-always-required).
 
   [⬑ _to top_](#setup)
 
-[◅ _return home_](README.md#kirobo-retrievable-transfer-library-documentation)
+[◅ _return home_](api.md#api-documentation)
