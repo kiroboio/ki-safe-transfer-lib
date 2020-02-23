@@ -10,7 +10,7 @@
 
 ## Why throwing errors?
 
-Throwing errors allow to provide feedback multiple occasion, when either something doesn't go the right way, or when we get a certain feedback from server. Messages in errors include as much meaningful information as possible. That is highly advisable to ensure that  service calls are covered with [error handling](#how-to-handle-them?).
+Throwing errors allow to provide feedback multiple occasion, when either something doesn't go the right way, or when we get a certain feedback from server. Messages in errors include as much meaningful information as possible. That is highly advisable to ensure that  service calls are covered with [error handling](#how-to-handle-them).
 
  [⬑ _to top_](#errors-and-handling-them)
 
