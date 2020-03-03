@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import feathers, { Application } from '@feathersjs/feathers'
 import io from 'socket.io-client'
 import socketio from '@feathersjs/socketio-client'
@@ -90,34 +91,33 @@ class Config {
     }
 
     this._connect
-      .authenticate({
-        strategy: 'local',
-        key: this._auth.key,
-        // key: this._auth.key || key,
-        secret: this._auth.secret,
-        // secret: this._auth.secret || secret,
-      })
-      .then(r => {
-        // if OK
-        console.log('auth-ok')
-      })
-      .catch(err => {
-        // if not
-        console.log('auth-error')
-        throw new Error(`Authentication error (${err.message}).`)
-      })
-
-    this._connect
       .reAuthenticate()
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .then(() => {
         console.log('re-success')
         // if re-authenticated
-        // eslint-disable-next-line no-console
       })
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       .catch(e => {
         console.log('re-error')
+
+        this._connect
+          .authenticate({
+            strategy: 'local',
+            key: this._auth.key,
+            // key: this._auth.key || key,
+            secret: this._auth.secret,
+            // secret: this._auth.secret || secret,
+          })
+          .then(r => {
+            // if OK
+            console.log('auth-ok')
+          })
+          .catch(err => {
+            // if not
+            console.log('auth-error')
+            throw new Error(`Authentication error (${err.message}).`)
+          })
         // if not, try to authenticate
       })
 
