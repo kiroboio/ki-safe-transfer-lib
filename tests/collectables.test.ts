@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
 import Service, { DebugLevels, Responses, Event, SwitchActions } from '../src'
 import { TEXT, validBitcoinAddresses } from '../src/data'
 import { makeStringFromTemplate } from '../src/tools'
 import { ENV } from '../src/env'
 
-let storedEvent: Event[] = []
+const storedEvent: Event[] = []
 
 function eventBus(event: Event) {
   storedEvent.push(event)
@@ -13,12 +14,12 @@ process.on('unhandledRejection', () => {})
 
 describe('Collectables', () => {
   let service: Service
-   beforeAll(async () => {
-     try {
-       service = await new Service({ authDetails: { ...ENV.auth } })
-       await service.getStatus()
-     } catch (e) {}
-   })
+  beforeAll(async () => {
+    try {
+      service = new Service({ authDetails: { ...ENV.auth } })
+      await service.getStatus()
+    } catch (e) {}
+  })
   afterAll(() => {
     service.connect({ action: SwitchActions.CONNECT, value: false })
   })
@@ -70,7 +71,7 @@ describe('Collectables', () => {
   test('get an array through eventBus, if used', async () => {
     expect.assertions(3)
 
-    service = new Service({ eventBus, respondAs: Responses.Callback, authDetails: {...ENV.auth} })
+    service = new Service({ eventBus, respondAs: Responses.Callback, authDetails: { ...ENV.auth } })
 
     await service.getStatus()
 

@@ -89,43 +89,44 @@ class Config {
       if (refreshInbox) refreshInbox()
     }
 
+    this._connect
+      .authenticate({
+        strategy: 'local',
+        key: this._auth.key,
+        // key: this._auth.key || key,
+        secret: this._auth.secret,
+        // secret: this._auth.secret || secret,
+      })
+      .then(r => {
+        // if OK
+        console.log('auth-ok')
+      })
+      .catch(err => {
+        // if not
+        console.log('auth-error')
+        throw new Error(`Authentication error (${err.message}).`)
+      })
+
+    this._connect
+      .reAuthenticate()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .then(() => {
+        console.log('re-success')
+        // if re-authenticated
+        // eslint-disable-next-line no-console
+      })
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      .catch(e => {
+        console.log('re-error')
+        // if not, try to authenticate
+      })
+
     // connect/disconnect
     try {
       this._socket.on('connect', (): void => {
         // check authentication
-        this._connect
-          .reAuthenticate()
-
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .then(() => {
-            // if re-authenticated
-            // eslint-disable-next-line no-console
-
-            onConnect()
-          })
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          .catch(e => {
-            // if not, try to authenticate
-
-            this._connect
-              .authenticate({
-                strategy: 'local',
-                key: this._auth.key,
-                // key: this._auth.key || key,
-                secret: this._auth.secret,
-                // secret: this._auth.secret || secret,
-              })
-              .then(r => {
-                // if OK
-
-                onConnect()
-              })
-              .catch(err => {
-                // if not
-
-                throw new Error(`Authentication error (${err.message}).`)
-              })
-          })
+        console.log('event')
+        onConnect()
       })
     } catch (e) {
       this._logger({
