@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
 import Service, { DebugLevels, Currencies, Networks, Responses, Event, Sendable } from '../src'
 import { TEXT, validBitcoinAddresses } from '../src/data'
 import { ENV } from '../src/env'
@@ -8,15 +9,17 @@ function eventBus(event: Event) {
   storedEvent = event
 }
 
-process.on('unhandledRejection', () => {})
+process.on('unhandledRejection', () => {
+  return
+})
 
 describe('Send', () => {
   let service: Service
   beforeAll(async () => {
     try {
-      service = await new Service({ debug: DebugLevels.MUTE, authDetails: { ...ENV.auth } })
+      service = new Service({ debug: DebugLevels.MUTE, authDetails: { ...ENV.auth } })
       await service.getStatus()
-    } catch (e) {}
+    } catch (e) { return }
   })
   beforeEach(() => {
     storedEvent = {}
@@ -44,7 +47,9 @@ describe('Send', () => {
     test('- throws TypeError on function as argument', async () => {
       try {
         // @ts-ignore
-        await service.send(() => {})
+        await service.send(() => {
+          return
+        })
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', TEXT.errors.validation.noFunction)

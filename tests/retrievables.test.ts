@@ -1,14 +1,14 @@
-import Service, { DebugLevels, Currencies, Networks, Responses, Event } from '../src'
-import { TEXT, valuesForSettings, validBitcoinAddresses } from '../src/data'
-import { makeStringFromTemplate, compareBasicObjects } from '../src/tools'
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
+import { Service, DebugLevels, Responses, Event } from '../src'
+import { TEXT } from '../src/data'
 import { ENV } from '../src/env'
 
-let storedEvent: {}
-
-function eventBus(event: Event) {
-  storedEvent = event
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function eventBus(event: Event): void {
+  return
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 async function callbackService() {
   const service = new Service({ eventBus, respondAs: Responses.Callback, authDetails: { ...ENV.auth } })
 
@@ -16,18 +16,19 @@ async function callbackService() {
   return service
 }
 
-process.on('unhandledRejection', () => {})
+process.on('unhandledRejection', () => {
+  return
+})
 
 describe('Retrievables', () => {
   let service: Service
   beforeAll(async () => {
     try {
-      service = await new Service({ debug: DebugLevels.MUTE, authDetails: { ...ENV.auth } })
+      service = new Service({ debug: DebugLevels.MUTE, authDetails: { ...ENV.auth } })
       await service.getStatus()
-    } catch (e) {}
-  })
-  beforeEach(() => {
-    storedEvent = {}
+    } catch (e) {
+      return
+    }
   })
   describe('- empty/incorrect argument validation', () => {
     test('- throws Error on missing argument', async () => {
@@ -51,14 +52,15 @@ describe('Retrievables', () => {
     test('- argument with wrong types', async () => {
       try {
         // @ts-ignore
-        await service.getRetrievable([1, () => {}, {}])
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        await service.getRetrievable([1, (): void => {}, {}])
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', TEXT.errors.validation.typeOfObject)
       }
     })
   })
-  test('get \'not found\' error in case of correct request', async () => {
+  test('get "not found" error in case of correct request', async () => {
     const id = 'xxxxxxxxxx'
 
     try {
@@ -68,7 +70,7 @@ describe('Retrievables', () => {
       expect(error).toHaveProperty('message', `No record found for id '${id}'`)
     }
   })
-  test('get \'not found\' error even if in \'Callback mode\'', async () => {
+  test('get "not found" error even if in "Callback mode"', async () => {
     const id = 'xxxxxxxxxx'
 
     try {

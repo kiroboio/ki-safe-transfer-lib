@@ -4,7 +4,7 @@ import { Sendable, validateReport, ObjectWithStringKeys } from './types'
 import { listOfSettingsKeys, typeOfSettingsKeys, valuesForSettings, TEXT, authDetailsData } from './data'
 import { makeStringFromTemplate } from './tools'
 
-const isString = (data: unknown) => typeof data === 'string'
+const isString = (data: unknown): boolean => typeof data === 'string'
 
 interface Props {
   address: string

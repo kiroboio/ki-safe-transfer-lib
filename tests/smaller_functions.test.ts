@@ -1,20 +1,19 @@
 import Service, { DebugLevels, Responses, Event } from '../src'
-import { TEXT, validBitcoinAddresses, listOfStatusKeys, typeOfStatusValues } from '../src/data'
-import { makeStringFromTemplate } from '../src/tools'
+import { validBitcoinAddresses, listOfStatusKeys, typeOfStatusValues } from '../src/data'
 import { validateObject } from '../src/validators'
-import { ObjectWithStringKeysAnyValues } from '../src/types'
+import { ObjectWithStringKeysAnyValues, Status } from '../src/types'
 import { ENV } from '../src/env'
 
 let storedEvent: Event | {}
 
-function eventBus(event: Event) {
+function eventBus(event: Event): void {
   storedEvent = event
 }
 
-let service: Service;
+let service: Service
 
-async function setAsync() {
-  service = await new Service({
+async function setAsync(): Promise<Status> {
+  service = new Service({
     debug: DebugLevels.MUTE,
     eventBus,
     respondAs: Responses.Callback,
@@ -23,20 +22,24 @@ async function setAsync() {
   return await service.getStatus()
 }
 
-process.on('unhandledRejection', () => {})
+process.on('unhandledRejection', () => {
+  return
+})
 
 describe('Smaller functions', () => {
   beforeAll(async () => {
     try {
-      service = await new Service({ debug: DebugLevels.MUTE, authDetails: { ...ENV.auth } })
+      service = new Service({ debug: DebugLevels.MUTE, authDetails: { ...ENV.auth } })
       await service.getStatus()
-    } catch (e) {}
+    } catch (e) {
+      return
+    }
   })
   beforeEach(() => {
     storedEvent = {}
   })
   describe('- getStatus', () => {
-    test('- returns information in \'Direct\' mode', async () => {
+    test('- returns information in "Direct" mode', async () => {
       // await setDirect()
 
       const result = await service.getStatus()
@@ -61,7 +64,7 @@ describe('Smaller functions', () => {
 
       expect(keysValuesCheck).toBe(true)
     })
-    test('- returns information in \'Callback\' mode', async () => {
+    test('- returns information in "Callback" mode', async () => {
       expect.assertions(2)
       await setAsync()
       await service.getStatus()
@@ -94,7 +97,8 @@ describe('Smaller functions', () => {
     })
   })
   describe('- cached addresses functions', () => {
-    test('- doesn\'t cache address in case of incorrect request', async () => {
+    // eslint-disable-next-line @typescript-eslint/quotes
+    test(`- doesn't cache address in case of incorrect request`, async () => {
       await service.getCollectables([validBitcoinAddresses[1]])
 
       const result = service.getLastAddresses()

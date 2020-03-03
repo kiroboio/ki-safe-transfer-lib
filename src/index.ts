@@ -60,6 +60,7 @@ class Service {
 
     this._eventBus = eventBus
       ? eventBus
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       : (event: Event): void => {
           return
         }

@@ -1,16 +1,18 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
-import Service, { DebugLevels, Responses, Event, SwitchActions } from '../src'
+import Service, { Responses, Event, SwitchActions } from '../src'
 import { TEXT, validBitcoinAddresses } from '../src/data'
 import { makeStringFromTemplate } from '../src/tools'
 import { ENV } from '../src/env'
 
 const storedEvent: Event[] = []
 
-function eventBus(event: Event) {
+function eventBus(event: Event): void {
   storedEvent.push(event)
 }
 
-process.on('unhandledRejection', () => {})
+process.on('unhandledRejection', () => {
+  return
+})
 
 describe('Collectables', () => {
   let service: Service
@@ -18,7 +20,9 @@ describe('Collectables', () => {
     try {
       service = new Service({ authDetails: { ...ENV.auth } })
       await service.getStatus()
-    } catch (e) {}
+    } catch (e) {
+      return
+    }
   })
   afterAll(() => {
     service.connect({ action: SwitchActions.CONNECT, value: false })
@@ -45,7 +49,8 @@ describe('Collectables', () => {
     test('- argument with wrong types', async () => {
       try {
         // @ts-ignore
-        await service.getCollectables([1, () => {}, {}])
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        await service.getCollectables([1, (): void => {}, {}])
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', TEXT.errors.validation.typeOfObject)

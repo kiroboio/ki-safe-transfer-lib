@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
 import { capitalize, makeStringFromTemplate, compareBasicObjects } from '../src/tools'
 
-process.on('unhandledRejection', () => {})
+process.on('unhandledRejection', () => {
+  return
+})
 
 describe('Tools', () => {
-  describe('- \'capitalize\'', () => {
+  describe('- "capitalize"', () => {
     test('- doesn\'t crash at non-string, and returns empty string', () => {
       // @ts-ignore
       expect(capitalize(123)).toBe('')
@@ -15,7 +18,7 @@ describe('Tools', () => {
       expect(capitalize('qwerty qwerty')).toBe('Qwerty qwerty')
     })
   })
-  describe('- \'makeStringFromTemplate\'', () => {
+  describe('- "makeStringFromTemplate"', () => {
     test('- doesn\'t crash at no arguments', () => {
       // @ts-ignore
       expect(makeStringFromTemplate(123)).toBe('')

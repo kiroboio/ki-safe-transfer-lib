@@ -1,27 +1,26 @@
-import Service, { DebugLevels, Currencies, Networks, Responses, Event, Sendable } from '../src'
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
+import Service, { DebugLevels, Currencies, Networks, Responses, Event } from '../src'
 import { TEXT, valuesForSettings } from '../src/data'
 import { makeStringFromTemplate, compareBasicObjects } from '../src/tools'
 import { ENV } from '../src/env'
 
-let storedEvent: {}
-
-function eventBus(event: Event) {
-  storedEvent = event
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function eventBus(event: Event): void {
+  return
 }
 
-process.on('unhandledRejection', () => {})
+process.on('unhandledRejection', () => {
+  return
+})
 
 describe('Library configuration', () => {
-  beforeEach(() => {
-    storedEvent = {}
-  })
   test('service runs without settings', async () => {
     new Service({ authDetails: { ...ENV.auth } })
   })
   describe('- incorrect settings', () => {
     test('- null not considered as settings', async () => {
       try {
-        await new Service(null)
+        new Service(null)
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', `${TEXT.errors.validation.missingArgument}: authDetails.`)
@@ -31,7 +30,7 @@ describe('Library configuration', () => {
       expect.assertions(2)
 
       try {
-        await new Service('string')
+        new Service('string')
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', TEXT.errors.validation.typeOfObject)
@@ -42,7 +41,7 @@ describe('Library configuration', () => {
 
       try {
         // @ts-ignore
-        await new Service('string', 'string')
+        new Service('string', 'string')
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', TEXT.errors.validation.typeOfObject)
@@ -52,7 +51,9 @@ describe('Library configuration', () => {
       expect.assertions(2)
 
       try {
-        await new Service(() => {})
+        new Service(() => {
+          return
+        })
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', TEXT.errors.validation.noFunction)
@@ -62,7 +63,7 @@ describe('Library configuration', () => {
       expect.assertions(2)
 
       try {
-        await new Service(7)
+        new Service(7)
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', TEXT.errors.validation.typeOfObject)
@@ -72,7 +73,7 @@ describe('Library configuration', () => {
       expect.assertions(2)
 
       try {
-        await new Service(true)
+        new Service(true)
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', TEXT.errors.validation.typeOfObject)
@@ -82,7 +83,7 @@ describe('Library configuration', () => {
       expect.assertions(2)
 
       try {
-        await new Service({})
+        new Service({})
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', TEXT.errors.validation.emptyObject)
@@ -93,7 +94,7 @@ describe('Library configuration', () => {
       expect.assertions(2)
 
       try {
-        await new Service({
+        new Service({
           key1: '1',
           key2: '1',
           key3: '1',
@@ -110,7 +111,7 @@ describe('Library configuration', () => {
       expect.assertions(2)
 
       try {
-        await new Service({ key1: '1' })
+        new Service({ key1: '1' })
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', `${TEXT.errors.validation.unknownKeys}key1.`)
@@ -120,7 +121,7 @@ describe('Library configuration', () => {
       expect.assertions(2)
 
       try {
-        await new Service({ debug: '1' })
+        new Service({ debug: '1' })
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty(
@@ -133,7 +134,7 @@ describe('Library configuration', () => {
       expect.assertions(2)
 
       try {
-        await new Service({ debug: 5 })
+        new Service({ debug: 5 })
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
 

@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import { ObjectWithStringKeys, ObjectWithStringKeysAnyValues } from './types'
 
 export const TEXT = {

@@ -1,25 +1,23 @@
-import Service, { DebugLevels, Responses, Event } from '../src'
-import { TEXT, validBitcoinAddresses } from '../src/data'
-import { makeStringFromTemplate } from '../src/tools'
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
+import Service, { DebugLevels } from '../src'
+import { TEXT } from '../src/data'
+
 import { ENV } from '../src/env'
 
-let storedEvent: Event
-
-function eventBus(event: Event) {
-  storedEvent = event
-}
-
-
-process.on('unhandledRejection', () => {})
+process.on('unhandledRejection', () => {
+  return
+})
 
 describe('Send', () => {
-  let service: Service;
-   beforeAll(async () => {
-     try {
-       service = await new Service({ debug: DebugLevels.MUTE, authDetails: { ...ENV.auth } })
-       await service.getStatus()
-     } catch (e) {}
-   })
+  let service: Service
+  beforeAll(async () => {
+    try {
+      service = new Service({ debug: DebugLevels.MUTE, authDetails: { ...ENV.auth } })
+      await service.getStatus()
+    } catch (e) {
+      return
+    }
+  })
   describe('- empty/incorrect argument validation', () => {
     test('- throws Error on missing argument', async () => {
       try {
