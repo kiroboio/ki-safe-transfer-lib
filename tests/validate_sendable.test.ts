@@ -1,21 +1,27 @@
 import Service, { DebugLevels, Currencies, Networks, Responses, Event, Sendable } from '../src'
 import { TEXT, validBitcoinAddresses } from '../src/data'
+import { ENV } from '../src/env'
 
 let storedEvent: {}
 
 function eventBus(event: Event) {
-  console.log(event)
   storedEvent = event
 }
-
-const service = new Service({ debug: DebugLevels.MUTE })
 
 process.on('unhandledRejection', () => {})
 
 describe('Send', () => {
+  let service: Service
+  beforeAll(async () => {
+    try {
+      service = await new Service({ debug: DebugLevels.MUTE, authDetails: { ...ENV.auth } })
+      await service.getStatus()
+    } catch (e) {}
+  })
   beforeEach(() => {
     storedEvent = {}
   })
+
   describe('- empty/incorrect argument validation', () => {
     test('- throws Error on missing argument', async () => {
       try {
@@ -67,7 +73,7 @@ describe('Send', () => {
     })
   })
   describe('- key/value validation', () => {
-    test("- doesn't validate values if at least one missing key or key with empty value", async () => {
+    test('- doesn\'t validate values if at least one missing key or key with empty value', async () => {
       try {
         // @ts-ignore
         await service.send({ to: 123, amount: 123, collect: 123, deposit: '' })
@@ -79,7 +85,7 @@ describe('Send', () => {
         )
       }
     })
-    test("- except for amount, everything else should be 'string', 'to' - must be valid address", async () => {
+    test('- except for amount, everything else should be \'string\', \'to\' - must be valid address', async () => {
       try {
         // @ts-ignore
         await service.send({ to: 123, amount: 123, collect: 123, deposit: 'qwerty' })
@@ -91,7 +97,7 @@ describe('Send', () => {
         )
       }
     })
-    test("- optional values are also tested for being 'string'", async () => {
+    test('- optional values are also tested for being \'string\'', async () => {
       try {
         // @ts-ignore
         await service.send({
@@ -116,7 +122,7 @@ describe('Send', () => {
         )
       }
     })
-    test("- valid address in 'to' passes validation", async () => {
+    test('- valid address in \'to\' passes validation', async () => {
       try {
         // @ts-ignore
         await service.send({ to: validBitcoinAddresses[2], amount: 123, collect: 'qwerty', deposit: 'qwerty' })
@@ -124,7 +130,7 @@ describe('Send', () => {
         expect(error).toBeInstanceOf(Error)
         expect(error).toHaveProperty(
           'message',
-          `{\"code\":400,\"message\":\"'collect' is not a valid BTC transaction.\",\"errors\":[{}]}`,
+          '{"code":400,"message":"\'collect\' is not a valid BTC transaction.","errors":[{}]}',
         )
       }
     })

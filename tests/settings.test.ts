@@ -1,11 +1,11 @@
 import Service, { DebugLevels, Currencies, Networks, Responses, Event, Sendable } from '../src'
 import { TEXT, valuesForSettings } from '../src/data'
 import { makeStringFromTemplate, compareBasicObjects } from '../src/tools'
+import { ENV } from '../src/env'
 
 let storedEvent: {}
 
 function eventBus(event: Event) {
-  console.log(event)
   storedEvent = event
 }
 
@@ -16,14 +16,20 @@ describe('Library configuration', () => {
     storedEvent = {}
   })
   test('service runs without settings', async () => {
-    const service = new Service()
+    new Service({ authDetails: { ...ENV.auth } })
   })
   describe('- incorrect settings', () => {
     test('- null not considered as settings', async () => {
-      await new Service(null)
+      try {
+        await new Service(null)
+      } catch (error) {
+        expect(error).toBeInstanceOf(TypeError)
+        expect(error).toHaveProperty('message', `${TEXT.errors.validation.missingArgument}: authDetails.`)
+      }
     })
     test('- no string', async () => {
       expect.assertions(2)
+
       try {
         await new Service('string')
       } catch (error) {
@@ -33,6 +39,7 @@ describe('Library configuration', () => {
     })
     test('- no multiple parameters', async () => {
       expect.assertions(2)
+
       try {
         // @ts-ignore
         await new Service('string', 'string')
@@ -43,6 +50,7 @@ describe('Library configuration', () => {
     })
     test('- no functions', async () => {
       expect.assertions(2)
+
       try {
         await new Service(() => {})
       } catch (error) {
@@ -52,6 +60,7 @@ describe('Library configuration', () => {
     })
     test('- no numbers', async () => {
       expect.assertions(2)
+
       try {
         await new Service(7)
       } catch (error) {
@@ -61,6 +70,7 @@ describe('Library configuration', () => {
     })
     test('- no booleans', async () => {
       expect.assertions(2)
+
       try {
         await new Service(true)
       } catch (error) {
@@ -70,6 +80,7 @@ describe('Library configuration', () => {
     })
     test('- no empty object', async () => {
       expect.assertions(2)
+
       try {
         await new Service({})
       } catch (error) {
@@ -78,8 +89,9 @@ describe('Library configuration', () => {
       }
     })
 
-    test('- not extra keys', async () => {
+    test('- no extra keys', async () => {
       expect.assertions(2)
+
       try {
         await new Service({
           key1: '1',
@@ -91,11 +103,12 @@ describe('Library configuration', () => {
         })
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
-        expect(error).toHaveProperty('message', TEXT.errors.validation.extraKeys)
+        expect(error).toHaveProperty('message', `${TEXT.errors.validation.unknownKeys}key1.`)
       }
     })
     test('- no unknown keys', async () => {
       expect.assertions(2)
+
       try {
         await new Service({ key1: '1' })
       } catch (error) {
@@ -105,6 +118,7 @@ describe('Library configuration', () => {
     })
     test('- wrong value type', async () => {
       expect.assertions(2)
+
       try {
         await new Service({ debug: '1' })
       } catch (error) {
@@ -117,11 +131,14 @@ describe('Library configuration', () => {
     })
     test('- wrong value', async () => {
       expect.assertions(2)
+
       try {
         await new Service({ debug: 5 })
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
+
         const list = valuesForSettings.debug as string[]
+
         expect(error).toHaveProperty(
           'message',
           makeStringFromTemplate(TEXT.errors.validation.wrongValue, ['5', 'debug', list.join(', ')]),
@@ -137,9 +154,13 @@ describe('Library configuration', () => {
         network: Networks.Testnet,
         respondAs: Responses.Direct,
       }
-      const service = new Service(settings)
+
+      const service = new Service({ ...settings, authDetails: { ...ENV.auth } })
+
       const result = service.getSettings()
+
       const compare = compareBasicObjects(result, { ...settings, version: 'v1' })
+
       expect(compare).toBe(true)
     })
   })

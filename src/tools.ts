@@ -10,11 +10,13 @@ const reassign = (group: string[], position: number, newMember: string): string[
 
 export const capitalize = (text: string): string => {
   if (typeof text !== 'string') return ''
+
   return reassign(splitText(text), 0, splitText(text)[0].toUpperCase()).join('')
 }
 
 export const makeStringFromTemplate = (template: string, params: string[]) => {
   if (typeof template !== 'string') return ''
+
   if (!validateArray(params, ['string', 'number'])) return ''
 
   let result = template
@@ -31,10 +33,12 @@ export const compareBasicObjects = (
   objTwo: ObjectWithStringKeysAnyValues,
 ): boolean => {
   let result = true
+
   try {
     // validation
     validateObject(objOne)
     validateObject(objTwo)
+
     if (Object.keys(objOne).length !== Object.keys(objTwo).length) return false
 
     Object.keys(objOne).forEach(key => {
@@ -43,5 +47,6 @@ export const compareBasicObjects = (
   } catch (e) {
     result = false
   }
+
   return result
 }

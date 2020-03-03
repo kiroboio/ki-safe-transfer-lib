@@ -1,6 +1,6 @@
 {
   "name": "@kiroboio/safe-transfer-lib",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Safe Transfer library",
   "author": "Dmitry Melnikov <d.dash.mv@gmail.com>",
   "license": "MIT",
@@ -39,8 +39,10 @@
     "@typescript-eslint/eslint-plugin": "^2.19.2",
     "@typescript-eslint/parser": "^2.19.2",
     "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-async-await": "0.0.0",
     "eslint-plugin-eslint-comments": "^3.1.2",
+    "eslint-plugin-import": "^2.20.1",
     "eslint-plugin-jest": "^23.6.0",
     "eslint-plugin-json": "^2.0.1",
     "eslint-plugin-markdown": "^1.0.1",
@@ -49,11 +51,13 @@
     "eslint-plugin-react-hooks": "^2.3.0",
     "husky": "^4.2.1",
     "jest": "^25.1.0",
+    "prettier": "^1.19.1",
     "ts-jest": "^25.2.0",
     "ts-node-dev": "^1.0.0-pre.44",
     "typescript": "^3.7.5"
   },
   "dependencies": {
+    "@feathersjs/authentication-client": "^4.5.1",
     "@feathersjs/feathers": "^4.5.1",
     "@feathersjs/socketio-client": "^4.5.1",
     "multicoin-address-validator": "^0.4.1",

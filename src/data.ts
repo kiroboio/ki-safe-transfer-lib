@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { ObjectWithStringKeys, ObjectWithStringKeysAnyValues } from './types'
 
 export const TEXT = {
@@ -24,7 +25,7 @@ export const listOfStatusKeys: ObjectWithStringKeysAnyValues = ['height', 'onlin
 
 export const typeOfStatusValues: ObjectWithStringKeysAnyValues = { height: 'number', online: 'boolean', fee: 'number' }
 
-export const listOfSettingsKeys = ['debug', 'currency', 'network', 'eventBus', 'respondAs']
+export const listOfSettingsKeys = ['debug', 'currency', 'network', 'eventBus', 'respondAs', 'authDetails']
 
 export const typeOfSettingsKeys: ObjectWithStringKeys = {
   debug: 'number',
@@ -32,6 +33,7 @@ export const typeOfSettingsKeys: ObjectWithStringKeys = {
   network: 'string',
   eventBus: 'function',
   respondAs: 'string',
+  authDetails: 'object',
 }
 
 export const valuesForSettings: ObjectWithStringKeys = {
@@ -39,6 +41,11 @@ export const valuesForSettings: ObjectWithStringKeys = {
   network: ['testnet', 'regnet'],
   debug: [0, 1, 2],
   respondAs: ['callback', 'direct'],
+}
+
+export const authDetailsData: ObjectWithStringKeys = {
+  key: 'string',
+  secret: 'string',
 }
 
 export const validBitcoinAddresses = [

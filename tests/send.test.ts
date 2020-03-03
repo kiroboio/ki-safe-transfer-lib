@@ -1,6 +1,7 @@
 import Service, { DebugLevels, Responses, Event } from '../src'
 import { TEXT, validBitcoinAddresses } from '../src/data'
 import { makeStringFromTemplate } from '../src/tools'
+import { ENV } from '../src/env'
 
 let storedEvent: Event
 
@@ -8,11 +9,17 @@ function eventBus(event: Event) {
   storedEvent = event
 }
 
-const service = new Service({ debug: DebugLevels.MUTE })
 
 process.on('unhandledRejection', () => {})
 
 describe('Send', () => {
+  let service: Service;
+   beforeAll(async () => {
+     try {
+       service = await new Service({ debug: DebugLevels.MUTE, authDetails: { ...ENV.auth } })
+       await service.getStatus()
+     } catch (e) {}
+   })
   describe('- empty/incorrect argument validation', () => {
     test('- throws Error on missing argument', async () => {
       try {

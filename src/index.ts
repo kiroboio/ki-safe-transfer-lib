@@ -1,4 +1,4 @@
-import Config from './config'
+import { Config } from './config'
 
 import {
   ApiResponseError,
@@ -24,10 +24,9 @@ import {
   Switch,
 } from './types'
 import { makeStringFromTemplate } from './tools'
-import { validateAddress, validateData, validateObject, validateSettings } from './validators'
+import { validateAddress, validateData, validateObject, validateSettings, validateAuthDetails } from './validators'
 import { TEXT } from './data'
 
-// TODO: add comments
 /**
  * Kirobo Safe Transfer library class to provide convenient
  * way to use the service
@@ -36,27 +35,40 @@ import { TEXT } from './data'
  */
 class Service {
   private _settings: Settings
+
   private _eventBus: EventBus
+
   private _networks: ApiService
+
   private _transfers: ApiService
+
   private _inbox: ApiService
+
   private _collect: ApiService
+
   private _lastAddresses: string[] = [] // caching last addresses request
+
   private _switch: (arg0: Switch) => void
 
   private _isTest = process.env.NODE_ENV === 'test'
 
-  // TODO: remove any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(settings?: ServiceProps | any) {
-    if (settings) this._validateProps(settings)
+    this._validateProps(settings)
 
-    const { debug, currency, network, respondAs, eventBus } = settings || {}
-    this._eventBus = eventBus ? eventBus : event => {}
+    const { debug, currency, network, respondAs, eventBus, authDetails } = settings || {}
+
+    this._eventBus = eventBus
+      ? eventBus
+      : (event: Event): void => {
+          return
+        }
 
     const config = new Config({
       debug,
       currency,
       network,
+      authDetails,
       logger: this._logger,
       getStatus: this.getStatus,
       refreshInbox: this._refreshInbox,
@@ -81,6 +93,7 @@ class Service {
     // status update
     this._networks.on('patched', (data: NetworkTip) => {
       const { height, online, fee } = data
+
       this._eventBus({
         type: EventTypes.UPDATE_STATUS,
         payload: { height, online, fee },
@@ -131,8 +144,11 @@ class Service {
   private _validateProps = (settings: unknown) => {
     try {
       validateSettings(settings)
+      validateAuthDetails((settings as ServiceProps).authDetails)
     } catch (e) {
+      // eslint-disable-next-line no-console
       if (!this._isTest) console.log(`Service (validateProps) got an error. ${e.message}`)
+
       throw new TypeError(e.message)
     }
   }
@@ -143,6 +159,7 @@ class Service {
     payload: Status | Retrievable | Collectable[] | ResponseCollect | Message,
   ) => {
     if (this._settings.respondAs === Responses.Direct) return payload
+
     // calling provided function as eventBus might result in error
     try {
       if (this._settings.respondAs === Responses.Callback) this._eventBus({ type, payload })
@@ -159,7 +176,9 @@ class Service {
       if (!type) console.error(message)
       // info is shown only in verbose mode
       else if (type && this._settings.debug === DebugLevels.VERBOSE) {
+        // eslint-disable-next-line no-console
         if (payload) console.log(message, payload)
+        // eslint-disable-next-line no-console
         else console.log(message)
       }
     }
@@ -177,7 +196,6 @@ class Service {
       return this._inbox
         .find({ query: { to: this._lastAddresses.join(';') } })
         .then((payload: ResponseCollectable) => {
-          console.log(payload)
           this._eventBus({ type: EventTypes.GET_COLLECTABLES, payload: payload.data })
         })
         .catch((e: ApiResponseError) => {
@@ -207,11 +225,13 @@ class Service {
           online: response.online,
           fee: response.fee,
         }
+
         this._logger({ type: Logger.Info, payload, message: 'Service (getStatus): ' })
         return this._responder(EventTypes.UPDATE_STATUS, payload)
       })
       .catch((e: ApiResponseError) => {
         if (this._settings.respondAs === Responses.Direct) throw new Error(e.message)
+
         this._errLogger('Service (getStatus) got an error.', e.message)
       })
 
@@ -220,6 +240,7 @@ class Service {
     try {
       // validate props
       if (!id) throw new TypeError(TEXT.errors.validation.missingArgument)
+
       if (typeof id !== 'string') throw new TypeError(TEXT.errors.validation.typeOfObject)
 
       const payload: Retrievable = await this._transfers.get(id)
@@ -228,6 +249,7 @@ class Service {
       return this._responder(EventTypes.GET_RETRIEVABLE, payload)
     } catch (e) {
       if (this._settings.respondAs === Responses.Direct) throw this._makeError(e)
+
       this._errLogger('Service (getRetrievable) got an error.', e.message)
     }
   }
@@ -237,10 +259,12 @@ class Service {
     try {
       // validate props
       if (!addresses) throw new TypeError(TEXT.errors.validation.missingArgument)
+
       if (!Array.isArray(addresses)) throw new TypeError(TEXT.errors.validation.typeOfObject)
 
       addresses.forEach(address => {
         if (typeof address !== 'string') throw new TypeError(TEXT.errors.validation.typeOfObject)
+
         if (
           !validateAddress({
             address,
@@ -266,6 +290,7 @@ class Service {
       return this._responder(EventTypes.GET_COLLECTABLES, payload.data)
     } catch (e) {
       if (this._settings.respondAs === Responses.Direct) throw this._makeError(e)
+
       this._errLogger('Service (getCollectables) got an error.', e.message)
     }
   }
@@ -275,13 +300,16 @@ class Service {
     try {
       // validate props
       if (transaction === undefined || transaction === null) throw new Error(TEXT.errors.validation.missingArgument)
+
       validateObject(transaction)
       validateData(transaction, this._settings.currency, this._settings.network)
 
       const payload = await this._transfers.create(transaction)
+
       return this._responder(EventTypes.SEND_TRANSACTION, payload)
     } catch (e) {
       if (this._settings.respondAs === Responses.Direct) throw this._makeError(e)
+
       this._errLogger('Service (send) got an error.', e.message)
     }
   }
@@ -301,6 +329,7 @@ class Service {
       })
       .catch((e: ApiResponseError) => {
         if (this._settings.respondAs === Responses.Direct) throw new Error(e.message)
+
         this._errLogger(`Service (collect) got an error. ${e.message}`, e.message)
 
         return this._responder(EventTypes.SEND_MESSAGE, {
@@ -310,8 +339,26 @@ class Service {
       })
 
   // connection
-  public connect = (props: Switch) => this._switch(props)
+  public connect = (props: Switch) => {
+    try {
+      const result = this._switch(props)
+
+      return result
+    } catch (e) {
+      if (this._settings.respondAs === Responses.Direct) throw new Error(e.message)
+
+      this._errLogger(`Service (switch) got an error. ${e.message}`, e.message)
+      return this._responder(EventTypes.SEND_MESSAGE, {
+        text: e.message,
+        isError: true,
+      })
+    }
+  }
 }
 
 export * from './types'
+
+// eslint-disable-next-line import/no-default-export
 export default Service
+
+export { Service }

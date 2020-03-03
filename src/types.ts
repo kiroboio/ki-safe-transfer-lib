@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export enum Currencies {
   Bitcoin = 'btc',
 }
@@ -114,6 +115,7 @@ interface LibraryBlockProps {
   debug?: DebugLevels
   currency?: Currencies
   network?: Networks
+  authDetails: AuthDetails
 }
 
 export interface ServiceProps extends LibraryBlockProps {
@@ -168,7 +170,7 @@ export type Message = {
 }
 
 export type Status = {
-  height: number //block height of the blockchain
+  height: number // block height of the blockchain
   fee: number // current transaction fees (per Kilobyte)
   online: boolean // status of server connection to blockchain
 }
@@ -196,6 +198,7 @@ export type CollectRequest = {
   id: string
   key: string
 }
+
 export type validateReport = {
   message: string
   errors: { [index: string]: string[] }
@@ -217,4 +220,9 @@ export enum SwitchActions {
 export interface Switch {
   action: SwitchActions
   value?: boolean
+}
+
+export interface AuthDetails {
+  key: string
+  secret: string
 }

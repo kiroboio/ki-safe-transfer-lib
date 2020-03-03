@@ -1,6 +1,7 @@
 import Service, { DebugLevels, Currencies, Networks, Responses, Event } from '../src'
 import { TEXT, valuesForSettings, validBitcoinAddresses } from '../src/data'
 import { makeStringFromTemplate, compareBasicObjects } from '../src/tools'
+import { ENV } from '../src/env'
 
 let storedEvent: {}
 
@@ -8,11 +9,23 @@ function eventBus(event: Event) {
   storedEvent = event
 }
 
-const service = new Service({ debug: DebugLevels.MUTE })
+async function callbackService() {
+  const service = new Service({ eventBus, respondAs: Responses.Callback, authDetails: { ...ENV.auth } })
+
+  await service.getStatus()
+  return service
+}
 
 process.on('unhandledRejection', () => {})
 
 describe('Retrievables', () => {
+  let service: Service
+  beforeAll(async () => {
+    try {
+      service = await new Service({ debug: DebugLevels.MUTE, authDetails: { ...ENV.auth } })
+      await service.getStatus()
+    } catch (e) {}
+  })
   beforeEach(() => {
     storedEvent = {}
   })
@@ -47,6 +60,7 @@ describe('Retrievables', () => {
   })
   test('get \'not found\' error in case of correct request', async () => {
     const id = 'xxxxxxxxxx'
+
     try {
       await service.getRetrievable(id)
     } catch (error) {
@@ -56,8 +70,10 @@ describe('Retrievables', () => {
   })
   test('get \'not found\' error even if in \'Callback mode\'', async () => {
     const id = 'xxxxxxxxxx'
+
     try {
-      const newService = new Service({ eventBus, respondAs: Responses.Callback })
+      const newService = await callbackService()
+
       await newService.getRetrievable(id)
     } catch (error) {
       expect(error).toBeInstanceOf(Error)
