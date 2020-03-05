@@ -2,6 +2,7 @@
 import feathers, { Application } from '@feathersjs/feathers'
 import io from 'socket.io-client'
 import socketio from '@feathersjs/socketio-client'
+import {AuthenticationResult} from '@feathersjs/authentication'
 import auth from '@feathersjs/authentication-client'
 
 import { capitalize } from './tools'
@@ -53,6 +54,8 @@ class Config {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _getStatus: () => any
 
+  private _refresh: () => void
+
   private _logger: LoggerFunction
 
   constructor({ debug, network, currency, logger, getStatus, refreshInbox, authDetails }: ConfigProps) {
@@ -71,6 +74,7 @@ class Config {
           return
         }
     this._auth = authDetails
+    this._refresh = refreshInbox
 
     // setup
     this._socket = io(this._url)
@@ -79,36 +83,14 @@ class Config {
 
     this._connect = connect.configure(auth({ storageKey: 'auth' }))
 
-    const onConnect = (): void => {
-      this._logger({
-        type: Logger.Info,
-        message: 'Service (connect) is ON.',
-      })
-      this._getStatus()
-
-      if (refreshInbox) refreshInbox()
-    }
-
-    this._connect
-      .reAuthenticate()
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      .catch(e => {
-        this._connect
-          .authenticate({
-            strategy: 'local',
-            key: this._auth.key || '',
-            secret: this._auth.secret || '',
-          })
-          .catch(err => {
-            // if not
-            throw new Error(`Authentication error (${err.message}).`)
-          })
-      })
+    this._authSocket()
 
     // connect/disconnect
     try {
-      this._socket.on('connect', (): void => {
-        onConnect()
+      this._connect.io.on('connect', (): void => {
+        this._authSocket()
+          .then(() => this._onConnect())
+          .catch(e => console.log(e))
       })
     } catch (e) {
       this._logger({
@@ -119,7 +101,7 @@ class Config {
 
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this._socket.on('disconnect', (payload: any) =>
+      this._connect.io.on('disconnect', (payload: any) =>
         this._logger({
           type: Logger.Warning,
           message: 'Service (disconnect) is OFF.',
@@ -140,24 +122,24 @@ class Config {
         require('dns')
           .promises.lookup('google.com')
           .then(() => {
-            if (!this._socket.connected) this._socket.connect()
+            if (!this._connect.io.connected) this._connect.io.connect()
           })
           .catch(() => {
-            if (this._socket.connected) this._socket.disconnect()
+            if (this._connect.io.connected) this._connect.io.disconnect()
           })
       }, 3000)
     } else {
       //  this is web
       window.addEventListener('offline', () => {
-        if (this._socket.connected) this._socket.disconnect()
+        if (this._connect.io.connected) this._connect.io.disconnect()
       })
       window.addEventListener('online', () => {
-        if (!this._socket.connected) this._socket.connect()
+        if (!this._connect.io.connected) this._connect.io.connect()
       })
     }
   }
 
-  private _debugLevelSelector = (debug: DebugLevels | undefined) => {
+  private _debugLevelSelector = (debug: DebugLevels | undefined): DebugLevels => {
     if (debug === 0 || debug === 1 || debug === 2) return debug
 
     if (this._isTest) return DebugLevels.MUTE
@@ -167,12 +149,39 @@ class Config {
     return DebugLevels.QUIET
   }
 
-  private _makeEndpointPath = (endpoint: Endpoints) => {
+  private _makeEndpointPath = (endpoint: Endpoints): string => {
     const path = `/${this._VERSION}/${this._currency}/`
 
     if (endpoint === Endpoints.Networks) return path + endpoint
 
     return path + `${this._network}/${this._endpoints[endpoint]}`
+  }
+
+  public _authSocket = (): Promise<void | AuthenticationResult> =>
+    this._connect
+      .reAuthenticate()
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      .catch(_e => {
+        this._connect
+          .authenticate({
+            strategy: 'local',
+            key: this._auth.key || '',
+            secret: this._auth.secret || '',
+          })
+          .catch((err: { message: string }) => {
+            // if not
+            throw new Error(`Authentication error (${err.message}).`)
+          })
+      })
+
+  private _onConnect = (): void => {
+    this._logger({
+      type: Logger.Info,
+      message: 'Service (connect) is ON.',
+    })
+    this._getStatus()
+
+    if (this._refresh) this._refresh()
   }
 
   public getService = (endpoint: Endpoints) => this._connect.service(this._makeEndpointPath(endpoint))
