@@ -18,6 +18,11 @@
       "statusBarItem.hoverBackground": "#40df3b",
       "statusBar.foreground": "#15202b"
     },
+    "editor.codeLens": true,
+    "codemetrics.basics.CodeLensEnabled": true,
+    "typescript.implementationsCodeLens.enabled": true,
+    "typescript.referencesCodeLens.enabled": true,
+    "typescript.referencesCodeLens.showOnAllFunctions": true,
     "files.autoSave": "off",
     "peacock.color": "#6be667"
 }

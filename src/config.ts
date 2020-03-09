@@ -2,7 +2,7 @@
 import feathers, { Application } from '@feathersjs/feathers'
 import io from 'socket.io-client'
 import socketio from '@feathersjs/socketio-client'
-import {AuthenticationResult} from '@feathersjs/authentication'
+import { AuthenticationResult } from '@feathersjs/authentication'
 import auth from '@feathersjs/authentication-client'
 
 import { capitalize } from './tools'
@@ -90,7 +90,7 @@ class Config {
       this._connect.io.on('connect', (): void => {
         this._authSocket()
           .then(() => this._onConnect())
-          .catch(e => console.log(e))
+          .catch(e => console.log('Service (auth) got an error', e))
       })
     } catch (e) {
       this._logger({
@@ -169,8 +169,10 @@ class Config {
             secret: this._auth.secret || '',
           })
           .catch((err: { message: string }) => {
+            // TODO: check
             // if not
-            throw new Error(`Authentication error (${err.message}).`)
+            this._logger({ type: Logger.Error, message:`Authentication error (${err.message}).` })
+            // throw new Error(`Authentication error (${err.message}).`)
           })
       })
 
