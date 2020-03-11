@@ -1,13 +1,29 @@
-## API Endpoints
+# API Endpoints
+[◅ _return home_](api.md#api-documentation)
 
-- #### ___getSettings()___
+## Contents
+
+  - [_getSettings()_](#getsettings)
+  - [_getLastAddresses()_](#getlastaddresses)
+  - [_clearLastAddresses()_](#clearlastaddresses)
+  - [_connect()_](#connect)
+  - [async _getCollectables()_](#async-getcollectables)
+    - [Caching of get Collectables request](#caching-of-get-collectables-request)
+  - [async _getRetrievable()_](#async-getretrievable)
+  - [async _send()_](#async-send)
+  - [async _collect()_](#async-collect)
+  - [async _getStatus()_](#async-getstatus)
+
+
+
+## ___getSettings()___
 
   Function to check the current settings of the library session:
 
   ```TypeScript
   ...
 
-  const service = new Service()
+  const service = new Service({ authDetails })
 
   const result = service.getSettings()
 
@@ -21,11 +37,13 @@
   // }
   ```
 
-  > Check morev details about [debug levels](README.md#Debug) and [default settings](README.md#Default-settings).
+  > Check more details about [debug levels](setup.md#debug) and [default settings](setup.md#default-settings).
 
-- #### ___getLastAddresses()___
+  [⬑ _to top_](#api-endpoints)
 
-  Show [cached]() addresses, saved after last [getCollectables()](#async-___getCollectables()___):
+## ___getLastAddresses()___
+
+  Show [cached](#caching-of-get-collectables-request) addresses, saved after last [getCollectables()](#async-getcollectables):
 
   ```TypeScript
 
@@ -35,9 +53,11 @@
 
   ```
 
-- #### ___clearLastAddresses()___
+  [⬑ _to top_](#api-endpoints)
 
-  Clear [cached]() addresses, saved after last [getCollectables()](#async-___getCollectables()___):
+## ___clearLastAddresses()___
+
+  Clear [cached](#caching-of-get-collectables-request) addresses, saved after last [getCollectables()](#async-getcollectables):
 
   ```TypeScript
 
@@ -45,7 +65,9 @@
 
   ```
 
-- #### ___connect()___
+  [⬑ _to top_](#api-endpoints)
+
+## ___connect()___
 
   Get information about library connection status and connect/disconnect library from Kirobo service.
 
@@ -53,7 +75,7 @@
 
   ```TypeScript
 
-  const service = new Service()
+  const service = new Service({ authDetails })
 
   const status = service.connect({ action: SwitchActions.STATUS })
 
@@ -97,8 +119,9 @@
 
   ```
 
+  [⬑ _to top_](#api-endpoints)
 
-- #### async ___getCollectables()___
+## async ___getCollectables()___
 
   Get collectable transactions for a certain address:
 
@@ -147,11 +170,15 @@
 
   service.getCollectables('xxxxx') // provide recipient's address
   ```
-  > Read more about __confirmed__ object  [here]()
+  > Read more about object contents [here](how_does_it_work.md#life-on-server).
 
-  Every time you send request for collectables, the address(es) from your last request are being cached in the library. In case Internet connection dropped, the library will attempt  to reconnect once the connection is restored. After successful reconnection, library will use the cached addresses to update (re-send last request for collectables). To check the contents of the cache you can use [getLastAddresses()](#___getLastAddresses()___) function. To clear the cache - [clearLastAddresses()](#___clearLastAddresses()___).
+  ### Caching of get Collectables request
 
-- #### async ___getRetrievable()___
+  Every time you send request for collectables, the address(es) from your last request are being cached in the library. In case Internet connection dropped, the library will attempt  to reconnect once the connection is restored. After successful reconnection, library will use the cached addresses to update (re-send last request for collectables). To check the contents of the cache you can use [getLastAddresses()](#getlastaddresses) function. To clear the cache - [clearLastAddresses()](#clearlastaddresses).
+
+  [⬑ _to top_](#api-endpoints)
+
+## async ___getRetrievable()___
 
   Get information about a retrievable transaction by it's ID:
 
@@ -183,9 +210,11 @@
 
   service.getRetrievable('xxxxx') // provide transaction id
   ```
-  > For information on how to make an ID, please refer [this section](how_does_it_work.md).
+  > For information on how to make an ID, please refer [this section](create_retrievable_id.md#create_retrievable_id).
 
-- #### async ___send()___
+  [⬑ _to top_](#api-endpoints)
+
+## async ___send()___
 
   Send _retrievable_ transaction. The format is the following:
   ```TypeScript
@@ -199,7 +228,7 @@
     to: string // recipient's address
   }
   ```
-  > Why and what to encrypt, as well as how, is discussed [here](how_does_it_work.md).
+  > Why and what to encrypt, as well as how, is discussed [here](encryption.md#encryption).
 
   Sending:
 
@@ -238,21 +267,109 @@
     updatedAt: '2020-02-05T08:51:58.598Z'
   }
   ```
-  > Life cycle, including states and expiration is explained [here](how_does_it_work.md).
+  > Life cycle, including states and expiration is explained [here](how_does_it_work.md#how-does-it-work).
 
-- #### async ___collect()___
+  [⬑ _to top_](#api-endpoints)
+
+## async ___collect()___
+
+Collect Collectable transaction:
+
+  ```TypeScript
+  function eventBus(event: Event) {
+    console.log('event fired: ', event)
+
+  // >>> event #1
+
+  // *** if unsuccessful:
+
+  // event fired:  {
+    // type: 'service_message',
+    // payload: {
+    //  isError: true,
+    //  text: "Transaction Rejected by the Blockchain"
+    //  }
+
+    // ***  or, if successful:
+
+    // event fired:  {
+    // type: 'service_collect_transaction',
+    // payload: {
+    //  data: {
+    //    fromNodeTxid: "xxxxxx"
+    //    },
+    //    isError: false,
+    //    text: "Request submitted."
+    //}
+
+    // >>> event #2 (only if successful)
+
+    // event fired:  {
+    // type: 'service_updated_collectable',
+    // payload: {
+    //  amount: 12345
+    //  collect: {
+    //  broadcasted: 12345;
+    //  confirmed: -1; // only will be updated, when 1st confirmation happens
+    //  txid: 'xxxxxx'
+    //}
+    //  createdAt: "2020-02-20T13:12:26.064Z"
+    //  expires: { at: string }
+    //  from: 'Kirobo
+    //  id: 'xxxxxx'
+    //  salt: 'xxxxxx'
+    //  state: 'collecting'
+    //  to: 'xxxxxx'
+    //  updatedAt: "2020-02-20T13:12:26.064Z"
+    //}
+
+  try {
+
+    const service = new Service({
+      respond: Responses.Callback,
+      eventBus
+      })
+
+    service.collect({
+      id: selected.id,
+      key: createCollectKey(passcode, transaction.salt),
+    })
+
+  } catch (e) {
+    console.log('error: ', e.message)
+  }
+  ```
+
+  If transaction ID is wrong (for example, it [expired](how_does_it_work.md#expiration) before the collect request has reached the server), the error message will be:
+
+  ```
+  No record found for id 'xxxxxx'
+  ```
+
+  [⬑ _to top_](#api-endpoints)
+
+## async ___getStatus()___
+
+Get status - block height for current network, server status and average fee for the latest block. The height and the fee are taken from the blockchain directly.
 
   ```TypeScript
 
-  Service (collect):  {
-    fromNodeTxid: 'xxxxxx'
+  async function run() {
+
+    try {
+      const service = new Service({ authDetails })
+      const result = await service.getStatus()
+      console.log(result)
+      // { height: 123456, online: true, fee: 12345 }
+    } catch (e) {
+      console.log('error: ', e.message)
+    }
+
   }
 
-  Service (collect) got an error. Transaction Rejected by the Blockchain
-
-  Service (collect) got an error. No record found for id 'dec962629088b1ae2fa9ecd72a6f74a8a8016f91e1239988fd9701069837d3c'
-
+  run()
   ```
 
-- #### async ___getStatus()___
+  [⬑ _to top_](#api-endpoints)
 
+  [◅ _return home_](api.md#api-documentation)

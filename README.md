@@ -1,37 +1,14 @@
-# Kirobo Safe Transfer JS/TS Library
+# Kirobo Retrievable Transfer Library
 
-## Contents
+Please, find the documentation [here](docs/README.md#kirobo-retrievable-transfer-library-documentation).
 
-- [Purpose](#Purpose)
-- [What this library can do?](#What-this-library-can-do?)
-- [How does it work?](#How-does-it-work?)
-- [API](api/README.md)
-- [Dependencies](#Dependencies)
+## Scripts
 
-## Purpose
+ - ```build``` - build library
+ - ```test``` - single run tests
+ - ```test:watch``` - tests in watch mode
+ - ```dev``` - run ```client.ts``` from ```tests``` folder - please, use ```client_sample.ts```, located in the same folder for quick start
+  - ```dev:production``` - run the same in __production__ mode
+ - ```lint``` - lint check
 
-## What this library can do?
-
-## How does it work?
-
-- How does Safe Transfer work?
-- What are the inputs?
-- How to prepare them?
-- Why this format?
-
-These and other questions are discussed [here](api/how_does_it_work.md)
-
-## Addtionals
-
-<!-- check for connect via google.com dns -->
-
-## Dependencies
-
-Current version (v1) is using the following dependencies:
-
-- `@feathersjs/feathers` v4.5.1
-- `@feathersjs/socketio-client` v4.5.1
-- `socket.io-client` v2.3.0
-- `multicoin-address-validator` v0.4.1
-
-These libraries are needed to set up the socket communication with the server and for address validation.
+[⬑ _to top_](#Kirobo-Retrievable-Transfer-Library)

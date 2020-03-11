@@ -169,10 +169,8 @@ class Config {
             secret: this._auth.secret || '',
           })
           .catch((err: { message: string }) => {
-            // TODO: check
             // if not
             this._logger({ type: Logger.Error, message:`Authentication error (${err.message}).` })
-            // throw new Error(`Authentication error (${err.message}).`)
           })
       })
 

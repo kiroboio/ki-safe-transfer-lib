@@ -28,7 +28,7 @@ import { validateAddress, validateData, validateObject, validateSettings, valida
 import { TEXT } from './data'
 
 /**
- * Kirobo Safe Transfer library class to provide convenient
+ * Kirobo Retrievable Transfer library class to provide convenient
  * way to use the service
  * @class
  * @name Service
