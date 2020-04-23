@@ -6,3 +6,4 @@ client.ts
 *.swp
 .eslintcache
 dist
+.env

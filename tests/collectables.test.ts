@@ -1,8 +1,13 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
-import Service, { Responses, Event, SwitchActions } from '../src'
+import dotenv from 'dotenv'
+
+import Service, { Responses, Event, SwitchActions, AuthDetails } from '../src'
 import { TEXT, validBitcoinAddresses } from '../src/data'
 import { makeStringFromTemplate } from '../src/tools'
-import { ENV } from '../src/env'
+
+dotenv.config()
+
+const authDetails: AuthDetails = { key: process.env.AUTH_KEY ?? '', secret: process.env.AUTH_SECRET ?? '' }
 
 const storedEvent: Event[] = []
 
@@ -18,7 +23,7 @@ describe('Collectables', () => {
   let service: Service
   beforeAll(async () => {
     try {
-      service = new Service({ authDetails: { ...ENV.auth } })
+      service = new Service({ authDetails })
       await service.getStatus()
     } catch (e) {
       return
@@ -76,7 +81,7 @@ describe('Collectables', () => {
   test('get an array through eventBus, if used', async () => {
     expect.assertions(3)
 
-    service = new Service({ eventBus, respondAs: Responses.Callback, authDetails: { ...ENV.auth } })
+    service = new Service({ eventBus, respondAs: Responses.Callback, authDetails})
 
     await service.getStatus()
 

@@ -1,7 +1,13 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
+
+import dotenv from 'dotenv'
+
 import Service, { SwitchActions } from '../src'
-import { ENV } from '../src/env'
 import { TEXT } from '../src/data'
+
+dotenv.config()
+
+const authDetails = { key: process.env.AUTH_KEY ?? '', secret: process.env.AUTH_SECRET ?? '' }
 
 process.on('unhandledRejection', () => {
   return
@@ -11,7 +17,7 @@ describe('Connect', () => {
   let service: Service
   beforeAll(async () => {
     try {
-      service = new Service({ authDetails: { ...ENV.auth } })
+      service = new Service({ authDetails })
       await service.getStatus()
     } catch (e) {
       return

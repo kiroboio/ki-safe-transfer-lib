@@ -1,8 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
-import Service, { DebugLevels } from '../src'
+import dotenv from 'dotenv'
+
+import Service, { DebugLevels, AuthDetails } from '../src'
 import { TEXT } from '../src/data'
 
-import { ENV } from '../src/env'
+dotenv.config()
+
+const authDetails: AuthDetails = { key: process.env.AUTH_KEY ?? '', secret: process.env.AUTH_SECRET ?? '' }
 
 process.on('unhandledRejection', () => {
   return
@@ -12,7 +16,7 @@ describe('Send', () => {
   let service: Service
   beforeAll(async () => {
     try {
-      service = new Service({ debug: DebugLevels.MUTE, authDetails: { ...ENV.auth } })
+      service = new Service({ debug: DebugLevels.MUTE, authDetails })
       await service.getStatus()
     } catch (e) {
       return

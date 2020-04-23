@@ -1,8 +1,13 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
-import Service, { DebugLevels, Currencies, Networks, Responses, Event } from '../src'
+import dotenv from 'dotenv'
+
+import Service, { DebugLevels, Currencies, Networks, Responses, Event, AuthDetails } from '../src'
 import { TEXT, valuesForSettings } from '../src/data'
 import { makeStringFromTemplate, compareBasicObjects } from '../src/tools'
-import { ENV } from '../src/env'
+
+dotenv.config()
+
+const authDetails: AuthDetails = { key: process.env.AUTH_KEY ?? '', secret: process.env.AUTH_SECRET ?? '' }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function eventBus(event: Event): void {
@@ -15,11 +20,12 @@ process.on('unhandledRejection', () => {
 
 describe('Library configuration', () => {
   test('service runs without settings', async () => {
-    new Service({ authDetails: { ...ENV.auth } })
+    new Service({ authDetails })
   })
   describe('- incorrect settings', () => {
     test('- null not considered as settings', async () => {
       try {
+        // @ts-ignore
         new Service(null)
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
@@ -30,6 +36,7 @@ describe('Library configuration', () => {
       expect.assertions(2)
 
       try {
+        // @ts-ignore
         new Service('string')
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
@@ -51,6 +58,7 @@ describe('Library configuration', () => {
       expect.assertions(2)
 
       try {
+        // @ts-ignore
         new Service(() => {
           return
         })
@@ -63,6 +71,7 @@ describe('Library configuration', () => {
       expect.assertions(2)
 
       try {
+        // @ts-ignore
         new Service(7)
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
@@ -73,6 +82,7 @@ describe('Library configuration', () => {
       expect.assertions(2)
 
       try {
+        // @ts-ignore
         new Service(true)
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
@@ -83,6 +93,7 @@ describe('Library configuration', () => {
       expect.assertions(2)
 
       try {
+        // @ts-ignore
         new Service({})
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
@@ -95,6 +106,7 @@ describe('Library configuration', () => {
 
       try {
         new Service({
+          // @ts-ignore
           key1: '1',
           key2: '1',
           key3: '1',
@@ -111,6 +123,7 @@ describe('Library configuration', () => {
       expect.assertions(2)
 
       try {
+        // @ts-ignore
         new Service({ key1: '1' })
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
@@ -121,6 +134,7 @@ describe('Library configuration', () => {
       expect.assertions(2)
 
       try {
+        // @ts-ignore
         new Service({ debug: '1' })
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
@@ -134,6 +148,7 @@ describe('Library configuration', () => {
       expect.assertions(2)
 
       try {
+        // @ts-ignore
         new Service({ debug: 5 })
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
@@ -156,7 +171,7 @@ describe('Library configuration', () => {
         respondAs: Responses.Direct,
       }
 
-      const service = new Service({ ...settings, authDetails: { ...ENV.auth } })
+      const service = new Service({ ...settings, authDetails })
 
       const result = service.getSettings()
 

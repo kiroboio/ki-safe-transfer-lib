@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Logger } from './logger'
+
 export enum Currencies {
   Bitcoin = 'btc',
 }
@@ -6,6 +7,7 @@ export enum Currencies {
 export enum Networks {
   Testnet = 'testnet',
   Regnet = 'regnet',
+  Mainnet = 'mainnet',
 }
 
 // debug:
@@ -33,11 +35,14 @@ export enum Endpoints {
   Networks = 'networks',
 }
 
-// TODO: fix response type
 export interface ApiService {
-  find: (arg0?: any) => any
-  get: (arg0: any) => any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  find: (arg0?: unknown) => any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  get: (arg0: unknown) => any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   create: (arg0: {}) => any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   on: (arg0: string, arg1: (arg2: any) => any) => any
 }
 
@@ -103,14 +108,6 @@ export type ResponseCollect = {
   fromNodeTxid: string
 }
 
-export interface LoggerFunction {
-  ({ type, payload, message }: LoggerProps): void
-}
-
-export interface ResponderFunction {
-  (type: EventTypes, payload: Status | Retrievable | Collectable[] | ResponseCollect | Message): any
-}
-
 interface LibraryBlockProps {
   debug?: DebugLevels
   currency?: Currencies
@@ -124,8 +121,8 @@ export interface ServiceProps extends LibraryBlockProps {
 }
 
 export interface ConfigProps extends LibraryBlockProps {
-  getStatus: () => any
-  logger: LoggerFunction
+  getStatus: () => Status | undefined
+  logger: Logger
   refreshInbox: () => void
 }
 
@@ -137,16 +134,9 @@ export enum Responses {
   Direct = 'direct',
 }
 
-export enum Logger {
-  Error = 0,
-  Info = 1,
-  Warning = 2,
-}
-
+/** Props for Logger class */
 export interface LoggerProps {
-  type: Logger
-  payload?: Status | Retrievable | Collectable[] | ResponseCollect | string
-  message: string
+  debug: DebugLevels
 }
 
 export enum EventTypes {
@@ -177,11 +167,11 @@ export type Status = {
 
 export type Event = {
   type: EventTypes
-  payload: Status | Retrievable | Collectable | Collectable[] | ResponseCollect | Message
+  payload: unknown
 }
 
 export type EventBus = {
-  (arg0: Event): void
+  (event: Event): void
 }
 
 export type Sendable = {
@@ -208,7 +198,7 @@ export type ObjectWithStringKeys = {
   [index: string]: string[] | number[] | string
 }
 
-export type ObjectWithStringKeysAnyValues = { [index: string]: any }
+export type ObjectWithStringKeysAnyValues<T> = { [index: string]: T }
 
 // types of switch actions
 export enum SwitchActions {
@@ -226,3 +216,5 @@ export interface AuthDetails {
   key: string
   secret: string
 }
+
+export type ResponderPayload = Status | Retrievable | Collectable[] | ResponseCollect | Message

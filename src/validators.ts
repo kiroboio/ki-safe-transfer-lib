@@ -21,9 +21,10 @@ export const validateData = (data: Sendable, currency: string, networkType: stri
     errors: { [TEXT.errors.validation.missingValues]: [], [TEXT.errors.validation.malformedValues]: [] },
   }
 
-  const pushMissing = (subject: string) => validate.errors[TEXT.errors.validation.missingValues].push(subject)
+  const pushMissing = (subject: string): number => validate.errors[TEXT.errors.validation.missingValues].push(subject)
 
-  const pushMalformed = (subject: string) => validate.errors[TEXT.errors.validation.malformedValues].push(subject)
+  const pushMalformed = (subject: string): number =>
+    validate.errors[TEXT.errors.validation.malformedValues].push(subject)
 
   // checking for missing required values
   if (!data.to) pushMissing('to')
@@ -143,8 +144,7 @@ export const validateSettings = (settings: unknown): void => {
     } else {
       const type = typeOfSettingsKeys[key] as string
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const value = setObj[key] as string | [] | any
+      const value = setObj[key] as string | [] | unknown
 
       if (typeof value !== type)
         throw new TypeError(makeStringFromTemplate(TEXT.errors.validation.wrongValueType, [key, type]))
@@ -152,7 +152,7 @@ export const validateSettings = (settings: unknown): void => {
       const values = valuesForSettings[key] as string[] | number[] | undefined
 
       if (values && !values.includes(value as never))
-        throw new TypeError(makeStringFromTemplate(TEXT.errors.validation.wrongValue, [value, key, values.join(', ')]))
+        throw new TypeError(makeStringFromTemplate(TEXT.errors.validation.wrongValue, [value as string, key, values.join(', ')]))
     }
   })
 }

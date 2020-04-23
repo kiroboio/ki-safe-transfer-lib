@@ -1,6 +1,16 @@
 import { validateObject, validateArray } from './validators'
 import { ObjectWithStringKeysAnyValues } from './types'
 
+export function not(value: boolean): boolean {
+  if (typeof value === undefined) return false
+
+  if (typeof value === null) return false
+
+  if (typeof value !== 'boolean') return false
+
+  return !value
+}
+
 const splitText = (text: string): string[] => text.split('')
 
 const reassign = (group: string[], position: number, newMember: string): string[] => {
@@ -29,8 +39,8 @@ export const makeStringFromTemplate = (template: string, params: string[]): stri
 }
 
 export const compareBasicObjects = (
-  objOne: ObjectWithStringKeysAnyValues,
-  objTwo: ObjectWithStringKeysAnyValues,
+  objOne: ObjectWithStringKeysAnyValues<unknown>,
+  objTwo: ObjectWithStringKeysAnyValues<unknown>,
 ): boolean => {
   let result = true
 
@@ -49,4 +59,8 @@ export const compareBasicObjects = (
   }
 
   return result
+}
+
+export function changeType<T>(object: unknown): T {
+  return (object as unknown) as T
 }

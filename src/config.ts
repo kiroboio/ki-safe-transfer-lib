@@ -12,14 +12,16 @@ import {
   Currencies,
   DebugLevels,
   Endpoints,
-  Logger,
-  LoggerFunction,
   Networks,
   Settings,
   Switch,
   SwitchActions,
   AuthDetails,
+  ApiService,
+  Status,
 } from './types'
+import { Logger } from './logger'
+import { is } from './mode'
 
 class Config {
   // fixed
@@ -33,10 +35,6 @@ class Config {
     transfers: 'transfers',
   }
 
-  private _isDev = process.env.NODE_ENV === 'development'
-
-  private _isTest = process.env.NODE_ENV === 'test'
-
   // settings
   private _debug: DebugLevels
 
@@ -46,17 +44,15 @@ class Config {
 
   private _auth: AuthDetails = { key: '', secret: '' }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private _connect: Application<any>
+  private _connect: Application<unknown>
 
   private _socket: SocketIOClient.Socket
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private _getStatus: () => any
+  private _getStatus: () => Status | undefined
 
   private _refresh: () => void
 
-  private _logger: LoggerFunction
+  private _logger: Logger
 
   constructor({ debug, network, currency, logger, getStatus, refreshInbox, authDetails }: ConfigProps) {
     this._debug = this._debugLevelSelector(debug)
@@ -64,15 +60,10 @@ class Config {
     this._network = network ? network : Networks.Testnet
     this._getStatus = getStatus
       ? getStatus
-      : (): void => {
-          return
+      : (): undefined => {
+          return undefined
         }
-    this._logger = logger
-      ? logger
-      : // eslint-disable-next-line no-empty-pattern
-        ({}): void => {
-          return
-        }
+    this._logger = logger ? logger : new Logger({ debug: DebugLevels.MUTE })
     this._auth = authDetails
     this._refresh = refreshInbox
 
@@ -93,26 +84,15 @@ class Config {
           .catch(e => console.log('Service (auth) got an error', e))
       })
     } catch (e) {
-      this._logger({
-        type: Logger.Error,
-        message: `Service (connect) got an error. ${e.message || ''}`,
-      })
+      this._logger.error(`Service (connect) got an error. ${e.message || ''}`)
     }
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this._connect.io.on('disconnect', (payload: any) =>
-        this._logger({
-          type: Logger.Warning,
-          message: 'Service (disconnect) is OFF.',
-          payload: capitalize(payload),
-        }),
+      this._connect.io.on('disconnect', (payload: string) =>
+        this._logger.warning('Service (disconnect) is OFF.', capitalize(payload)),
       )
     } catch (e) {
-      this._logger({
-        type: Logger.Error,
-        message: `Service (disconnect) got an error. ${e.message || ''}`,
-      })
+      this._logger.error(`Service (disconnect) got an error. ${e.message || ''}`)
     }
 
     // set internet connection check
@@ -142,9 +122,9 @@ class Config {
   private _debugLevelSelector = (debug: DebugLevels | undefined): DebugLevels => {
     if (debug === 0 || debug === 1 || debug === 2) return debug
 
-    if (this._isTest) return DebugLevels.MUTE
+    if (is('test')) return DebugLevels.MUTE
 
-    if (this._isDev) return DebugLevels.VERBOSE
+    if (is('dev')) return DebugLevels.VERBOSE
 
     return DebugLevels.QUIET
   }
@@ -170,21 +150,18 @@ class Config {
           })
           .catch((err: { message: string }) => {
             // if not
-            this._logger({ type: Logger.Error, message:`Authentication error (${err.message}).` })
+            this._logger.error(`Authentication error (${err.message}).`)
           })
       })
 
   private _onConnect = (): void => {
-    this._logger({
-      type: Logger.Info,
-      message: 'Service (connect) is ON.',
-    })
+    this._logger.info('Service (connect) is ON.')
     this._getStatus()
 
     if (this._refresh) this._refresh()
   }
 
-  public getService = (endpoint: Endpoints) => this._connect.service(this._makeEndpointPath(endpoint))
+  public getService = (endpoint: Endpoints): ApiService => this._connect.service(this._makeEndpointPath(endpoint))
 
   public getSettings = (): Settings => ({
     debug: this._debug,

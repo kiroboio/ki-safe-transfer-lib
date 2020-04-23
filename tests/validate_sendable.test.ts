@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
-import Service, { DebugLevels, Currencies, Networks, Responses, Event, Sendable } from '../src'
+import dotenv from 'dotenv'
+
+import Service, { DebugLevels, AuthDetails } from '../src'
 import { TEXT, validBitcoinAddresses } from '../src/data'
-import { ENV } from '../src/env'
 
-let storedEvent: {}
+dotenv.config()
 
-function eventBus(event: Event) {
-  storedEvent = event
-}
+const authDetails: AuthDetails = { key: process.env.AUTH_KEY ?? '', secret: process.env.AUTH_SECRET ?? '' }
 
 process.on('unhandledRejection', () => {
   return
@@ -17,12 +16,9 @@ describe('Send', () => {
   let service: Service
   beforeAll(async () => {
     try {
-      service = new Service({ debug: DebugLevels.MUTE, authDetails: { ...ENV.auth } })
+      service = new Service({ debug: DebugLevels.MUTE, authDetails })
       await service.getStatus()
     } catch (e) { return }
-  })
-  beforeEach(() => {
-    storedEvent = {}
   })
 
   describe('- empty/incorrect argument validation', () => {

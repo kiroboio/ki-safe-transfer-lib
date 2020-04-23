@@ -1,8 +1,14 @@
+import dotenv from 'dotenv'
+
 import Service, { DebugLevels, Responses, Event } from '../src'
 import { validBitcoinAddresses, listOfStatusKeys, typeOfStatusValues } from '../src/data'
 import { validateObject } from '../src/validators'
-import { ObjectWithStringKeysAnyValues, Status } from '../src/types'
-import { ENV } from '../src/env'
+import { ObjectWithStringKeysAnyValues, Status, AuthDetails, ObjectWithStringKeys } from '../src/types'
+import { changeType } from '../src/tools'
+
+dotenv.config()
+
+const authDetails: AuthDetails = { key: process.env.AUTH_KEY ?? '', secret: process.env.AUTH_SECRET ?? '' }
 
 let storedEvent: Event | {}
 
@@ -12,12 +18,12 @@ function eventBus(event: Event): void {
 
 let service: Service
 
-async function setAsync(): Promise<Status> {
+async function setAsync(): Promise<Status | undefined> {
   service = new Service({
     debug: DebugLevels.MUTE,
     eventBus,
     respondAs: Responses.Callback,
-    authDetails: { ...ENV.auth },
+    authDetails,
   })
   return await service.getStatus()
 }
@@ -29,7 +35,7 @@ process.on('unhandledRejection', () => {
 describe('Smaller functions', () => {
   beforeAll(async () => {
     try {
-      service = new Service({ debug: DebugLevels.MUTE, authDetails: { ...ENV.auth } })
+      service = new Service({ debug: DebugLevels.MUTE, authDetails })
       await service.getStatus()
     } catch (e) {
       return
@@ -52,15 +58,17 @@ describe('Smaller functions', () => {
         keysValuesCheck = false
       }
 
-      Object.keys(result).forEach(key => {
-        if (!listOfStatusKeys.includes(key)) keysValuesCheck = false
+      if (result) {
+        Object.keys(result).forEach(key => {
+          if (!listOfStatusKeys.includes(key)) keysValuesCheck = false
 
-        const resValType = typeof result[key]
+          const resValType = typeof changeType<ObjectWithStringKeys>(result)[key]
 
-        const reqValType = typeOfStatusValues[key]
+          const reqValType = typeOfStatusValues[key]
 
-        if (resValType !== reqValType) keysValuesCheck = false
-      })
+          if (resValType !== reqValType) keysValuesCheck = false
+        })
+      }
 
       expect(keysValuesCheck).toBe(true)
     })
@@ -73,7 +81,8 @@ describe('Smaller functions', () => {
 
       expect(eventReceived.type).toBe('service_update_status')
 
-      const result: ObjectWithStringKeysAnyValues = eventReceived.payload
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = changeType<ObjectWithStringKeysAnyValues<any>>(eventReceived.payload)
 
       let keysValuesCheck = true
 

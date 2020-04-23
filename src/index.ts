@@ -5,13 +5,10 @@ import {
   ApiService,
   Collectable,
   CollectRequest,
-  DebugLevels,
   Endpoints,
   EventBus,
+  Event,
   EventTypes,
-  Logger,
-  LoggerProps,
-  Message,
   NetworkTip,
   ResponseCollect,
   ResponseCollectable,
@@ -22,10 +19,13 @@ import {
   Settings,
   Status,
   Switch,
+  DebugLevels,
+  Message,
 } from './types'
 import { makeStringFromTemplate } from './tools'
 import { validateAddress, validateData, validateObject, validateSettings, validateAuthDetails } from './validators'
 import { TEXT } from './data'
+import { Logger } from './logger'
 
 /**
  * Kirobo Retrievable Transfer library class to provide convenient
@@ -36,7 +36,12 @@ import { TEXT } from './data'
 class Service {
   private _settings: Settings
 
-  private _eventBus: EventBus
+  private _logger: Logger
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private _eventBus: EventBus = (_event: Event) => {
+    return
+  }
 
   private _networks: ApiService
 
@@ -48,22 +53,18 @@ class Service {
 
   private _lastAddresses: string[] = [] // caching last addresses request
 
-  private _switch: (arg0: Switch) => void
+  private _switch: (config: Switch) => boolean | void
 
   private _isTest = process.env.NODE_ENV === 'test'
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(settings?: ServiceProps | any) {
+  constructor(settings: ServiceProps) {
     this._validateProps(settings)
 
-    const { debug, currency, network, respondAs, eventBus, authDetails } = settings || {}
+    const { debug, currency, network, respondAs, eventBus, authDetails } = settings
 
-    this._eventBus = eventBus
-      ? eventBus
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      : (event: Event): void => {
-          return
-        }
+    if (eventBus) this._eventBus = eventBus
+
+    this._logger = new Logger({ debug: debug ? debug : DebugLevels.MUTE })
 
     const config = new Config({
       debug,
@@ -142,57 +143,33 @@ class Service {
     })
   }
 
-  private _validateProps = (settings: unknown) => {
+  private _validateProps = (settings: unknown): void => {
     try {
       validateSettings(settings)
       validateAuthDetails((settings as ServiceProps).authDetails)
     } catch (e) {
-      // eslint-disable-next-line no-console
-      if (!this._isTest) console.log(`Service (validateProps) got an error. ${e.message}`)
+      if (!this._isTest) new Logger({debug:DebugLevels.MUTE}).error(`Service (validateProps) got an error. ${e.message}`)
 
       throw new TypeError(e.message)
     }
   }
 
   // responder
-  private _responder = (
-    type: EventTypes,
-    payload: Status | Retrievable | Collectable[] | ResponseCollect | Message,
-  ) => {
+  private _responder<T>(type: EventTypes, payload: T): T | void {
     if (this._settings.respondAs === Responses.Direct) return payload
 
     // calling provided function as eventBus might result in error
     try {
       if (this._settings.respondAs === Responses.Callback) this._eventBus({ type, payload })
     } catch (e) {
-      this._logger({ type: Logger.Error, message: `eventBus got an error. ${e}` })
+      this._logger.error(`eventBus got an error. ${e}`)
     }
   }
 
-  // logger
-  private _logger = ({ type, payload, message }: LoggerProps) => {
-    // if not MUTE mode
-    if (this._settings.debug !== DebugLevels.MUTE && !this._isTest) {
-      // errors are shown in all other modes
-      if (!type) console.error(message)
-      // info is shown only in verbose mode
-      else if (type && this._settings.debug === DebugLevels.VERBOSE) {
-        // eslint-disable-next-line no-console
-        if (payload) console.log(message, payload)
-        // eslint-disable-next-line no-console
-        else console.log(message)
-      }
-    }
-  }
-
-  // send error
-  private _errLogger = (message: string, error: string) =>
-    this._logger({ type: Logger.Error, message: `${message}${error ? ' ' + error : ''}` })
-
-  private _makeError = (e: TypeError | Error) =>
+  private _makeError = (e: TypeError | Error): TypeError | Error =>
     e instanceof TypeError ? new TypeError(e.message) : new Error(e.message)
 
-  private _refreshInbox = () => {
+  private _refreshInbox = (): void => {
     if (this._lastAddresses.length)
       return this._inbox
         .find({ query: { to: this._lastAddresses.join(';') } })
@@ -200,24 +177,21 @@ class Service {
           this._eventBus({ type: EventTypes.GET_COLLECTABLES, payload: payload.data })
         })
         .catch((e: ApiResponseError) => {
-          this._logger({
-            type: Logger.Error,
-            message: `Service (getCollectables) got an error: ${e.message || 'unknown'}`,
-          })
+          this._logger.error(`Service (getCollectables) got an error: ${e.message || 'unknown'}`)
         })
   }
 
   // get last addresses
-  public getLastAddresses = () => this._lastAddresses
+  public getLastAddresses = (): string[] => this._lastAddresses
 
   // clear cached addresses
-  public clearLastAddresses = () => (this._lastAddresses = [])
+  public clearLastAddresses = (): never[] => (this._lastAddresses = [])
 
   // show settings
-  public getSettings = () => this._settings
+  public getSettings = (): Settings => this._settings
 
   // get current API status (height and online)
-  public getStatus = () =>
+  public getStatus = (): Status | undefined =>
     this._networks
       .get(this._settings.network)
       .then((response: NetworkTip) => {
@@ -227,17 +201,18 @@ class Service {
           fee: response.fee,
         }
 
-        this._logger({ type: Logger.Info, payload, message: 'Service (getStatus): ' })
+        this._logger.info('Service (getStatus): ', payload)
         return this._responder(EventTypes.UPDATE_STATUS, payload)
       })
       .catch((e: ApiResponseError) => {
         if (this._settings.respondAs === Responses.Direct) throw new Error(e.message)
 
-        this._errLogger('Service (getStatus) got an error.', e.message)
+        this._logger.error('Service (getStatus) got an error.', e.message)
+        return undefined
       })
 
   // get retrievable by ID
-  public getRetrievable = async (id: string) => {
+  public getRetrievable = async (id: string): Promise<Retrievable | void> => {
     try {
       // validate props
       if (!id) throw new TypeError(TEXT.errors.validation.missingArgument)
@@ -246,17 +221,18 @@ class Service {
 
       const payload: Retrievable = await this._transfers.get(id)
 
-      this._logger({ type: Logger.Info, payload, message: 'Service (getRetrievable): ' })
-      return this._responder(EventTypes.GET_RETRIEVABLE, payload)
+      this._logger.info('Service (getRetrievable): ', payload)
+      return this._responder<Retrievable>(EventTypes.GET_RETRIEVABLE, payload)
     } catch (e) {
       if (this._settings.respondAs === Responses.Direct) throw this._makeError(e)
 
-      this._errLogger('Service (getRetrievable) got an error.', e.message)
+      this._logger.error('Service (getRetrievable) got an error.', e.message)
+      return undefined
     }
   }
 
   // get all collectables by recipient address
-  public getCollectables = async (addresses: string[]) => {
+  public getCollectables = async (addresses: string[]): Promise<Collectable[] | void> => {
     try {
       // validate props
       if (!addresses) throw new TypeError(TEXT.errors.validation.missingArgument)
@@ -282,22 +258,18 @@ class Service {
 
       this._lastAddresses = addresses
 
-      this._logger({
-        type: Logger.Info,
-        payload: payload.data,
-        message: 'Service (getCollectables): ',
-      })
+      this._logger.info('Service (getCollectables): ', payload.data)
 
-      return this._responder(EventTypes.GET_COLLECTABLES, payload.data)
+      return this._responder<Collectable[]>(EventTypes.GET_COLLECTABLES, payload.data)
     } catch (e) {
       if (this._settings.respondAs === Responses.Direct) throw this._makeError(e)
 
-      this._errLogger('Service (getCollectables) got an error.', e.message)
+      this._logger.error('Service (getCollectables) got an error.', e.message)
     }
   }
 
   // send retrievable/collectable transaction
-  public send = async (transaction: Sendable) => {
+  public send = async (transaction: Sendable): Promise<Retrievable | void> => {
     try {
       // validate props
       if (transaction === undefined || transaction === null) throw new Error(TEXT.errors.validation.missingArgument)
@@ -307,22 +279,22 @@ class Service {
 
       const payload = await this._transfers.create(transaction)
 
-      return this._responder(EventTypes.SEND_TRANSACTION, payload)
+      return this._responder<Retrievable>(EventTypes.SEND_TRANSACTION, payload)
     } catch (e) {
       if (this._settings.respondAs === Responses.Direct) throw this._makeError(e)
 
-      this._errLogger('Service (send) got an error.', e.message)
+      this._logger.error('Service (send) got an error.', e.message)
     }
   }
 
   // collect transaction
-  public collect = (request: CollectRequest) =>
+  public collect = (request: CollectRequest): Promise<Message | void> =>
     this._collect
       .create({ ...request })
       .then((payload: ResponseCollect) => {
-        this._logger({ type: Logger.Info, payload, message: 'Service (collect): ' })
+        this._logger.info('Service (collect): ', payload)
 
-        return this._responder(EventTypes.COLLECT_TRANSACTION, {
+        return this._responder<Message>(EventTypes.COLLECT_TRANSACTION, {
           text: 'Request submitted.',
           isError: false,
           data: payload,
@@ -331,7 +303,7 @@ class Service {
       .catch((e: ApiResponseError) => {
         if (this._settings.respondAs === Responses.Direct) throw new Error(e.message)
 
-        this._errLogger(`Service (collect) got an error. ${e.message}`, e.message)
+        this._logger.error(`Service (collect) got an error. ${e.message}`, e.message)
 
         return this._responder(EventTypes.SEND_MESSAGE, {
           text: e.message,
@@ -340,7 +312,7 @@ class Service {
       })
 
   // connection
-  public connect = (props: Switch) => {
+  public connect = (props: Switch): boolean | Message | void => {
     try {
       const result = this._switch(props)
 
@@ -348,8 +320,8 @@ class Service {
     } catch (e) {
       if (this._settings.respondAs === Responses.Direct) throw new Error(e.message)
 
-      this._errLogger(`Service (switch) got an error. ${e.message}`, e.message)
-      return this._responder(EventTypes.SEND_MESSAGE, {
+      this._logger.error(`Service (switch) got an error. ${e.message}`, e.message)
+      return this._responder<Message>(EventTypes.SEND_MESSAGE, {
         text: e.message,
         isError: true,
       })
@@ -362,4 +334,4 @@ export * from './types'
 // eslint-disable-next-line import/no-default-export
 export default Service
 
-export { Service }
+export { Service, validateAddress }

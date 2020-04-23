@@ -1,7 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
-import { Service, DebugLevels, Responses, Event } from '../src'
+import dotenv from 'dotenv'
+
+import { Service, DebugLevels, Responses, Event, AuthDetails } from '../src'
 import { TEXT } from '../src/data'
-import { ENV } from '../src/env'
+
+dotenv.config()
+
+const authDetails: AuthDetails = { key: process.env.AUTH_KEY ?? '', secret: process.env.AUTH_SECRET ?? '' }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function eventBus(event: Event): void {
@@ -10,7 +15,7 @@ function eventBus(event: Event): void {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 async function callbackService() {
-  const service = new Service({ eventBus, respondAs: Responses.Callback, authDetails: { ...ENV.auth } })
+  const service = new Service({ eventBus, respondAs: Responses.Callback, authDetails })
 
   await service.getStatus()
   return service
@@ -24,7 +29,7 @@ describe('Retrievables', () => {
   let service: Service
   beforeAll(async () => {
     try {
-      service = new Service({ debug: DebugLevels.MUTE, authDetails: { ...ENV.auth } })
+      service = new Service({ debug: DebugLevels.MUTE, authDetails })
       await service.getStatus()
     } catch (e) {
       return
