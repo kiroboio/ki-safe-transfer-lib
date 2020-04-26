@@ -5,12 +5,16 @@ export const TEXT = {
     validation: {
       missingArgument: 'Data is missing',
       emptyObject: 'Settings object can\'t be empty.',
-      extraKeys: 'Extra keys present in settings.',
+      emptyGenObject: '%1 object can\'t be empty',
+      extraKeys: 'Extra or missing keys present in settings.',
+      extraGenKeys: 'Extra or missing keys present in %1.',
       noArray: 'Argument can\'t be an Array.',
       noFunction: 'Argument can\'t be a function.',
       typeOfObject: 'Wrong type of argument',
       unknownKeys: 'Unknown key in settings: ',
+      unknownGenKeys: 'Unknown key in \'%1\': ',
       wrongValueType: 'Key \'%1\' in settings has value of wrong type. Should be: %2.',
+      wrongGenValueType: 'Key \'%1\' in \'%2\' has value of wrong type. Should be: %3.',
       wrongValue: 'Wrong value \'%1\' for key \'%2\' in settings. Should be one of: %3.',
       malformedData: 'Data is malformed.',
       malformedAddress: 'Malformed address: %1.',
@@ -20,9 +24,13 @@ export const TEXT = {
   },
 }
 
-export const listOfStatusKeys: ObjectWithStringKeysAnyValues = ['height', 'online', 'fee']
+export const listOfStatusKeys = ['height', 'online', 'fee']
 
-export const typeOfStatusValues: ObjectWithStringKeysAnyValues = { height: 'number', online: 'boolean', fee: 'number' }
+export const typeOfStatusValues: ObjectWithStringKeysAnyValues<string> = {
+  height: 'number',
+  online: 'boolean',
+  fee: 'number',
+}
 
 export const listOfSettingsKeys = ['debug', 'currency', 'network', 'eventBus', 'respondAs', 'authDetails']
 
@@ -53,3 +61,8 @@ export const validBitcoinAddresses = [
   '2N83Bu4MbzxDscNCtx5qFQHpV5VhpgghzVn',
   'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq',
 ]
+
+export const validOptions: ObjectWithStringKeysAnyValues<number> = {
+  skip: 1,
+  limit: 1,
+}

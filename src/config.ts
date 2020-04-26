@@ -33,6 +33,8 @@ class Config {
     collect: 'transfer/action/collect',
     inbox: 'transfer/inbox',
     transfers: 'transfers',
+    utxos: 'utxos',
+    exists: 'exists'
   }
 
   // settings
@@ -79,7 +81,7 @@ class Config {
     // connect/disconnect
     try {
       this._connect.io.on('connect', (): void => {
-        this._authSocket()
+        (this._authSocket() as Promise<AuthDetails>)
           .then(() => this._onConnect())
           .catch(e => console.log('Service (auth) got an error', e))
       })
@@ -137,22 +139,30 @@ class Config {
     return path + `${this._network}/${this._endpoints[endpoint]}`
   }
 
-  public _authSocket = (): Promise<void | AuthenticationResult> =>
-    this._connect
-      .reAuthenticate()
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      .catch(_e => {
+  public _authSocket(): Promise<AuthenticationResult | void> | undefined {
+    try {
+      return (
         this._connect
-          .authenticate({
-            strategy: 'local',
-            key: this._auth.key || '',
-            secret: this._auth.secret || '',
+          .reAuthenticate()
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          .catch(_e => {
+            this._connect
+              .authenticate({
+                strategy: 'local',
+                key: this._auth.key || '',
+                secret: this._auth.secret || '',
+              })
+              .catch((err: { message: string }) => {
+                // if not
+                this._logger.error(`Authentication error (${err.message}).`)
+              })
           })
-          .catch((err: { message: string }) => {
-            // if not
-            this._logger.error(`Authentication error (${err.message}).`)
-          })
-      })
+      )
+    } catch (err) {
+      this._logger.error('Service (authStocket) caught error', err.message)
+      return undefined
+    }
+  }
 
   private _onConnect = (): void => {
     this._logger.info('Service (connect) is ON.')

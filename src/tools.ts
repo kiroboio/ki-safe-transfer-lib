@@ -1,15 +1,17 @@
-import { validateObject, validateArray } from './validators'
-import { ObjectWithStringKeysAnyValues } from './types'
+import { validateObject, validateArray, checkIf } from './validators'
+import { ObjectWithStringKeysAnyValues, Sendable, QueryOptions } from './types'
+import { assoc, isNil, filter, not } from 'ramda'
+import { v4 as generateId } from 'uuid'
 
-export function not(value: boolean): boolean {
-  if (typeof value === undefined) return false
+// export function not(value: boolean): boolean {
+//   if (typeof value === undefined) return false
 
-  if (typeof value === null) return false
+//   if (typeof value === null) return false
 
-  if (typeof value !== 'boolean') return false
+//   if (typeof value !== 'boolean') return false
 
-  return !value
-}
+//   return !value
+// }
 
 const splitText = (text: string): string[] => text.split('')
 
@@ -63,4 +65,35 @@ export const compareBasicObjects = (
 
 export function changeType<T>(object: unknown): T {
   return (object as unknown) as T
+}
+
+// TODO: add test
+/**
+ * Function to check the presence of 'owner' ID and to add auto-generated
+ * one, if not present.
+ *
+ * @function
+ * @name checkOwnerId
+ * @param [Sendable] transaction - transaction
+ *
+ * @returns Sendable
+ */
+export function checkOwnerId(transaction: Sendable): Sendable {
+  if (transaction.owner) return transaction
+
+  return assoc('owner', generateId(), transaction)
+}
+
+export { generateId }
+
+export function makeOptions(options: QueryOptions | undefined): {} {
+  let queryOptions = { $limit: 100, $skip: 0 }
+
+  if (!options) return queryOptions
+
+  if (not(isNil(options.limit))) queryOptions = assoc('$limit', options.limit, queryOptions)
+
+  if (not(isNil(options.skip))) queryOptions = assoc('$skip', options.skip, queryOptions)
+
+  return queryOptions
 }

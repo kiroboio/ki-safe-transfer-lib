@@ -1,7 +1,8 @@
 {
     "cSpell.words": [
-        "regnet",
-        "testnet"
+      "Utxos",
+      "regnet",
+      "testnet"
     ],
     "workbench.colorCustomizations": {
       "activityBar.background": "#96ed93",

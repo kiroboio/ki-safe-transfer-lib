@@ -1,8 +1,10 @@
 import validator from 'multicoin-address-validator'
 
-import { Sendable, validateReport, ObjectWithStringKeys } from './types'
-import { listOfSettingsKeys, typeOfSettingsKeys, valuesForSettings, TEXT, authDetailsData } from './data'
-import { makeStringFromTemplate } from './tools'
+import { Sendable, validateReport, ObjectWithStringKeys, QueryOptions } from './types'
+import { listOfSettingsKeys, typeOfSettingsKeys, valuesForSettings, TEXT, authDetailsData, validOptions } from './data'
+import { makeStringFromTemplate, changeType } from './tools'
+import { filter, is as isOf, isNil, isEmpty, keys, forEach, pipe } from 'ramda'
+import { is } from './mode'
 
 const isString = (data: unknown): boolean => typeof data === 'string'
 
@@ -80,6 +82,8 @@ export const validateArray = (arr: unknown[], type: string[]): boolean => {
 }
 
 export const validateObject = (data: unknown): void => {
+  if (isNil(data)) throw new TypeError(TEXT.errors.validation.missingArgument)
+
   if (data !== Object(data)) throw new TypeError(TEXT.errors.validation.typeOfObject)
 
   if (Array.isArray(data)) throw new TypeError(TEXT.errors.validation.noArray)
@@ -152,7 +156,58 @@ export const validateSettings = (settings: unknown): void => {
       const values = valuesForSettings[key] as string[] | number[] | undefined
 
       if (values && !values.includes(value as never))
-        throw new TypeError(makeStringFromTemplate(TEXT.errors.validation.wrongValue, [value as string, key, values.join(', ')]))
+        throw new TypeError(
+          makeStringFromTemplate(TEXT.errors.validation.wrongValue, [value as string, key, values.join(', ')]),
+        )
     }
   })
+}
+
+// TODO: finish
+// TODO: test
+export function checkIf(
+  data: unknown,
+  type: StringConstructor | ArrayConstructor | BooleanConstructor | NumberConstructor,
+): boolean {
+  if (isOf(Array, data)) {
+    const filterFn = (element: unknown): boolean => {
+      return isOf(type, element)
+    }
+
+    return filter(filterFn, data as unknown[]).length === (data as unknown[]).length
+  }
+
+  return false
+}
+
+// TODO: test
+export function validateOptions(options: unknown): void {
+
+  /** if empty */
+  if (isEmpty(options)) throw new TypeError(makeStringFromTemplate(TEXT.errors.validation.emptyGenObject, ['Options']))
+
+  /** if length is different */
+  if (keys(options).length !== keys(validOptions).length) throw new TypeError(makeStringFromTemplate(TEXT.errors.validation.extraGenKeys,['Options']))
+
+  /** check keys */
+  const validKeys = keys(validOptions)
+
+  const checkFn = (key: string): void => {
+
+    /** if key doesn't exist */
+    if (!validKeys.includes(key))
+      throw new TypeError(`${makeStringFromTemplate(TEXT.errors.validation.unknownGenKeys, ['Options'])}${key}`)
+
+    /** if key is of wrong type */
+    if (typeof changeType<ObjectWithStringKeys>(options)[key] !== typeof validOptions[key])
+      throw new TypeError(
+        `${makeStringFromTemplate(TEXT.errors.validation.wrongGenValueType, [
+          key,
+          'Options',
+          typeof validOptions[key],
+        ])}`,
+      )
+  }
+
+  pipe(keys, forEach(checkFn))(options)
 }

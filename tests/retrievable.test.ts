@@ -8,11 +8,12 @@ dotenv.config()
 
 const authDetails: AuthDetails = { key: process.env.AUTH_KEY ?? '', secret: process.env.AUTH_SECRET ?? '' }
 
-const ids = ['xxxxxxxxxx', 'xxxxxxxxx']
+
+let result = {}
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function eventBus(event: Event): void {
-  return
+result = event
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -27,7 +28,7 @@ process.on('unhandledRejection', () => {
   return
 })
 
-describe('Retrievables', () => {
+describe('Retrievable', () => {
   let service: Service
   beforeAll(async () => {
     try {
@@ -37,6 +38,7 @@ describe('Retrievables', () => {
       return
     }
   })
+
   afterAll(() => {
     service.connect({ action: SwitchActions.CONNECT, value: false })
   })
@@ -46,7 +48,7 @@ describe('Retrievables', () => {
 
       try {
         // @ts-ignore
-        await service.getRetrievables()
+        await service.getRetrievable()
       } catch (error) {
         expect(error).toBeInstanceOf(Error)
         expect(error).toHaveProperty('message', TEXT.errors.validation.missingArgument)
@@ -57,7 +59,7 @@ describe('Retrievables', () => {
 
       try {
         // @ts-ignore
-        await service.getRetrievables(1234)
+        await service.getRetrievable(1234)
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', TEXT.errors.validation.typeOfObject)
@@ -69,7 +71,7 @@ describe('Retrievables', () => {
       try {
         // @ts-ignore
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        await service.getRetrievables([1, (): void => {}, {}])
+        await service.getRetrievable([1, (): void => {}, {}])
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', TEXT.errors.validation.typeOfObject)
@@ -79,23 +81,27 @@ describe('Retrievables', () => {
   test('get "not found" error in case of correct request', async () => {
     expect.assertions(2)
 
+    const id = 'xxxxxxxxxx'
+
     try {
-      await service.getRetrievables(ids)
+      await service.getRetrievable(id)
     } catch (error) {
       expect(error).toBeInstanceOf(Error)
-      expect(error).toHaveProperty('message', `No record found for id '${ids}'`)
+      expect(error).toHaveProperty('message', `No record found for id '${id}'`)
     }
   })
   test('get "not found" error even if in "Callback mode"', async () => {
     expect.assertions(2)
 
+    const id = 'xxxxxxxxxx'
+
     try {
       const newService = await callbackService()
 
-      await newService.getRetrievables(ids)
+      await newService.getRetrievable(id)
     } catch (error) {
       expect(error).toBeInstanceOf(Error)
-      expect(error).toHaveProperty('message', `No record found for id '${ids}'`)
+      expect(error).toHaveProperty('message', `No record found for id '${id}'`)
     }
   })
 })

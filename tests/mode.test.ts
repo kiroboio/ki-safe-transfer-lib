@@ -1,13 +1,28 @@
 import { is } from '../src/mode'
+import { Logger } from '../src/logger'
+import { DebugLevels } from '../src'
+
+
+const Log = new Logger({debug: DebugLevels.QUIET})
 
 describe('Mode', () => {
   it('- should return false on \'development\'', () => {
-    expect(is('dev')).toBe(false)
+    try {
+      expect(is('dev')).toBe(false)
+    } catch (err) { Log.error(err.message) }
   })
   it('- should return false on \'production\'', () => {
-    expect(is('prod')).toBe(false)
+   try {
+     expect(is('prod')).toBe(false)
+   } catch (err) {
+     Log.error(err.message)
+   }
   })
   it('- should return true on \'test\'', () => {
-    expect(is('test')).toBe(true)
+    try {
+      expect(is('test')).toBe(true)
+    } catch (err) {
+      Log.error(err.message)
+    }
   })
 })

@@ -19,6 +19,7 @@ process.on('unhandledRejection', () => {
 })
 
 describe('Library configuration', () => {
+
   test('service runs without settings', async () => {
     new Service({ authDetails })
   })

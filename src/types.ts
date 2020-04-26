@@ -33,6 +33,8 @@ export enum Endpoints {
   Inbox = 'inbox',
   Transfers = 'transfers',
   Networks = 'networks',
+  Utxos = 'utxos',
+  Exists = 'exists',
 }
 
 export interface ApiService {
@@ -81,6 +83,7 @@ export type Retrievable = {
   state: string
   to: string
   updatedAt: string
+  owner: string
 }
 
 export type Collectable = {
@@ -151,6 +154,7 @@ export enum EventTypes {
   REMOVED_COLLECTABLE = 'service_removed_collectable',
   CREATED_COLLECTABLE = 'service_created_collectable',
   SEND_MESSAGE = 'service_message',
+  GET_UTXOS = 'service_get_utxos'
 }
 
 export type Message = {
@@ -182,6 +186,7 @@ export type Sendable = {
   hint?: string
   id?: string
   to: string
+  owner?: string
 }
 
 export type CollectRequest = {
@@ -218,3 +223,47 @@ export interface AuthDetails {
 }
 
 export type ResponderPayload = Status | Retrievable | Collectable[] | ResponseCollect | Message
+
+/**
+ * Base interface for Results, providing the pagination details
+ *
+ * @interface
+ * @name Paging
+ */
+export interface Paging {
+  total: number
+  skip: number
+  limit: number
+}
+
+/**
+ * Unspent transaction output (UTXO) fields
+ *
+ * @interface
+ * @name Utxo
+ */
+export interface Utxo {
+  address: string
+  height: number
+  hex: string
+  type: 'SCRIPTHASH'
+  txid: string
+  value: number
+  vout: number
+}
+
+/**
+ * Describes the data getter results.
+ *
+ * @interface
+ * @name Results
+ * @param T - type of data array content
+ */
+export interface Results<T> extends Paging {
+  data: Array<T>
+}
+
+export interface QueryOptions {
+  limit: number;
+  skip: number;
+}

@@ -21,11 +21,24 @@ import {
   Switch,
   DebugLevels,
   Message,
+  Results,
+  Utxo,
+  QueryOptions,
 } from './types'
-import { makeStringFromTemplate } from './tools'
-import { validateAddress, validateData, validateObject, validateSettings, validateAuthDetails } from './validators'
+import { makeStringFromTemplate, checkOwnerId, generateId, makeOptions } from './tools'
+import {
+  validateAddress,
+  validateData,
+  validateObject,
+  validateSettings,
+  validateAuthDetails,
+  validateArray,
+  validateOptions,
+} from './validators'
 import { TEXT } from './data'
 import { Logger } from './logger'
+import { isNullOrUndefined } from 'util'
+import { join, isNil } from 'ramda'
 
 /**
  * Kirobo Retrievable Transfer library class to provide convenient
@@ -50,6 +63,10 @@ class Service {
   private _inbox: ApiService
 
   private _collect: ApiService
+
+  private _utxos: ApiService
+
+  private _exists: ApiService
 
   private _lastAddresses: string[] = [] // caching last addresses request
 
@@ -89,6 +106,8 @@ class Service {
     this._transfers = config.getService(Endpoints.Transfers)
     this._inbox = config.getService(Endpoints.Inbox)
     this._collect = config.getService(Endpoints.Collect)
+    this._utxos = config.getService(Endpoints.Utxos)
+    this._exists = config.getService(Endpoints.Exists)
 
     // event listeners
 
@@ -148,7 +167,8 @@ class Service {
       validateSettings(settings)
       validateAuthDetails((settings as ServiceProps).authDetails)
     } catch (e) {
-      if (!this._isTest) new Logger({debug:DebugLevels.MUTE}).error(`Service (validateProps) got an error. ${e.message}`)
+      if (!this._isTest)
+        new Logger({ debug: DebugLevels.MUTE }).error(`Service (validateProps) got an error. ${e.message}`)
 
       throw new TypeError(e.message)
     }
@@ -166,8 +186,8 @@ class Service {
     }
   }
 
-  private _makeError = (e: TypeError | Error): TypeError | Error =>
-    e instanceof TypeError ? new TypeError(e.message) : new Error(e.message)
+  // private _makeError = (e: TypeError | Error): TypeError | Error =>
+  //   e instanceof TypeError ? new TypeError(e.message) : new Error(e.message)
 
   private _refreshInbox = (): void => {
     if (this._lastAddresses.length)
@@ -211,6 +231,29 @@ class Service {
         return undefined
       })
 
+  public async getUtxos(addresses: string[], options?: QueryOptions): Promise<Results<Utxo> | void> {
+    try {
+      if (isNil(addresses)) throw new TypeError(TEXT.errors.validation.missingArgument)
+
+      if (!validateArray(addresses, ['string'])) throw new TypeError(TEXT.errors.validation.typeOfObject)
+
+      if (options) {
+        validateObject(options)
+        validateOptions(options)
+      }
+
+      const payload = await this._utxos.find({
+
+        query: { address: join(';', addresses), ...makeOptions(options) },
+      })
+
+      return this._responder<Results<Utxo>>(EventTypes.GET_UTXOS, payload)
+    } catch (err) {
+      this._logger.error('Service (getUtxos) caught error.', err.message)
+      err instanceof TypeError ? new TypeError(err.message) : new Error(err.message)
+    }
+  }
+
   // get retrievable by ID
   public getRetrievable = async (id: string): Promise<Retrievable | void> => {
     try {
@@ -223,12 +266,17 @@ class Service {
 
       this._logger.info('Service (getRetrievable): ', payload)
       return this._responder<Retrievable>(EventTypes.GET_RETRIEVABLE, payload)
-    } catch (e) {
-      if (this._settings.respondAs === Responses.Direct) throw this._makeError(e)
-
-      this._logger.error('Service (getRetrievable) got an error.', e.message)
-      return undefined
+    } catch (err) {
+      this._logger.error('Service (getRetrievable) got an error.', err.message)
+      err instanceof TypeError ? new TypeError(err.message) : new Error(err.message)
     }
+  }
+
+  // TODO: finish
+  public async getRetrievables(ids: string[]): Promise<Retrievable[] | void> {
+    if (isNil(ids)) throw new TypeError(TEXT.errors.validation.missingArgument)
+
+    if (!validateArray(ids, ['string'])) throw new TypeError(TEXT.errors.validation.typeOfObject)
   }
 
   // get all collectables by recipient address
@@ -261,29 +309,27 @@ class Service {
       this._logger.info('Service (getCollectables): ', payload.data)
 
       return this._responder<Collectable[]>(EventTypes.GET_COLLECTABLES, payload.data)
-    } catch (e) {
-      if (this._settings.respondAs === Responses.Direct) throw this._makeError(e)
-
-      this._logger.error('Service (getCollectables) got an error.', e.message)
+    } catch (err) {
+      this._logger.error('Service (getCollectables) got an error.', err.message)
+      err instanceof TypeError ? new TypeError(err.message) : new Error(err.message)
     }
   }
 
   // send retrievable/collectable transaction
-  public send = async (transaction: Sendable): Promise<Retrievable | void> => {
+  public async send(transaction: Sendable): Promise<Retrievable | void> {
     try {
       // validate props
-      if (transaction === undefined || transaction === null) throw new Error(TEXT.errors.validation.missingArgument)
+      if (isNullOrUndefined(transaction)) throw new Error(TEXT.errors.validation.missingArgument)
 
       validateObject(transaction)
       validateData(transaction, this._settings.currency, this._settings.network)
 
-      const payload = await this._transfers.create(transaction)
+      const payload = await this._transfers.create(checkOwnerId(transaction))
 
       return this._responder<Retrievable>(EventTypes.SEND_TRANSACTION, payload)
-    } catch (e) {
-      if (this._settings.respondAs === Responses.Direct) throw this._makeError(e)
-
-      this._logger.error('Service (send) got an error.', e.message)
+    } catch (err) {
+      this._logger.error('Service (send) got an error.', err.message)
+      throw err instanceof TypeError ? new TypeError(err.message) : new Error(err.message)
     }
   }
 
@@ -334,4 +380,4 @@ export * from './types'
 // eslint-disable-next-line import/no-default-export
 export default Service
 
-export { Service, validateAddress }
+export { Service, validateAddress, generateId }

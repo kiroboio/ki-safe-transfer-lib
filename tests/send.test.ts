@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 import dotenv from 'dotenv'
 
-import Service, { DebugLevels, AuthDetails } from '../src'
+import Service, { DebugLevels, AuthDetails, SwitchActions } from '../src'
 import { TEXT } from '../src/data'
 
 dotenv.config()
@@ -21,6 +21,9 @@ describe('Send', () => {
     } catch (e) {
       return
     }
+  })
+  afterAll(() => {
+    service.connect({ action: SwitchActions.CONNECT, value: false })
   })
   describe('- empty/incorrect argument validation', () => {
     test('- throws Error on missing argument', async () => {

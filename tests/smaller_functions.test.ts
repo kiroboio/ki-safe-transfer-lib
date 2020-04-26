@@ -3,7 +3,7 @@ import dotenv from 'dotenv'
 import Service, { DebugLevels, Responses, Event } from '../src'
 import { validBitcoinAddresses, listOfStatusKeys, typeOfStatusValues } from '../src/data'
 import { validateObject } from '../src/validators'
-import { ObjectWithStringKeysAnyValues, Status, AuthDetails, ObjectWithStringKeys } from '../src/types'
+import { ObjectWithStringKeysAnyValues, Status, AuthDetails, ObjectWithStringKeys, SwitchActions } from '../src/types'
 import { changeType } from '../src/tools'
 
 dotenv.config()
@@ -43,6 +43,10 @@ describe('Smaller functions', () => {
   })
   beforeEach(() => {
     storedEvent = {}
+  })
+
+  afterAll(() => {
+    service.connect({ action: SwitchActions.CONNECT, value: false })
   })
   describe('- getStatus', () => {
     test('- returns information in "Direct" mode', async () => {

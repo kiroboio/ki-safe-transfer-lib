@@ -1,6 +1,6 @@
 import { DebugLevels, LoggerProps } from './types'
 import { is } from './mode'
-import { not } from './tools'
+import { not } from 'ramda'
 
 
 class Logger {
