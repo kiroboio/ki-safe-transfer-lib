@@ -112,11 +112,16 @@ describe('Smaller functions', () => {
   describe('- cached addresses functions', () => {
     // eslint-disable-next-line @typescript-eslint/quotes
     test(`- doesn't cache address in case of incorrect request`, async () => {
-      await service.getCollectables([validBitcoinAddresses[1]])
+      expect.assertions(2)
 
-      const result = service.getLastAddresses()
+      try {
+        await service.getCollectables([validBitcoinAddresses[1]])
 
-      expect(result.length).toBe(0)
+        service.getLastAddresses()
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error)
+        expect(error).toHaveProperty('message', `Malformed address: ${validBitcoinAddresses[1]}.`)
+      }
     })
 
     test('- caches address in case of correct request', async () => {
