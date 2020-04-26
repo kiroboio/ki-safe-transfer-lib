@@ -12,6 +12,8 @@
 - [Errors and handling them](errors.md#errors-and-handling-them)
 - [eventBus](event_bus.md#eventbus)
 - [Encryption](encryption.md#encryption)
+- [Find UTXOs](find_utxos.md)
+- [Find Free & Used Addresses](find_addresses.md)
 - [API Endpoints](endpoints.md#api-endpoints)
   - [_getSettings()_](endpoints.md#getsettings)
   - [_getLastAddresses()_](endpoints.md#getlastaddresses)

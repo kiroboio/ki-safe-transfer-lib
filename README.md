@@ -1,6 +1,8 @@
-# Kirobo Retrievable Transfer Library
+![Kirobo](https://kirobo.io/wp-content/uploads/2020/01/cropped-logo.png)
 
-Please, find the documentation [here](docs/README.md#kirobo-retrievable-transfer-library-documentation).
+# Kirobo Transfer Library
+
+Please, find the documentation [here](docs/README.md#kirobo-transfer-library-documentation).
 
 ## Scripts
 

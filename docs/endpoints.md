@@ -13,7 +13,12 @@
   - [async _send()_](#async-send)
   - [async _collect()_](#async-collect)
   - [async _getStatus()_](#async-getstatus)
-
+  - [async _getRetrievables()_]()
+  - [async _getUtxos()_](find_utxos.md#how-to-use-the-library)
+  - [async _getFresh()_](find_addresses.md#how-to-use-the-library)
+  - [async _getUsed()_](find_addresses.md#how-to-use-the-library)
+  - [_generateId()_]()
+  - [_validateAddress()_]()
 
 
 ## ___getSettings()___
@@ -368,6 +373,36 @@ Get status - block height for current network, server status and average fee for
   }
 
   run()
+  ```
+
+  ## async ___generateId()___
+
+  This method generates random id, using the [uuid](https://www.npmjs.com/package/uuid#create-version-4-random-uuids)  library. Use:
+
+  ```typescript
+  import { generateId } from '@kiroboio/safe-transfer-lib'
+
+  const id = generateId()
+
+  // f04eebd3-6580-4c0b-bedd-f9e358d80b2b
+  ```
+
+  [⬑ _to top_](#api-endpoints)
+
+  ## async ___validateAddress()___
+
+This method allows to validate crypto currency address, using [multicoin-address-validator]() library. Use:
+
+  ```typescript
+  import { validateAddress } from '@kiroboio/safe-transfer-lib'
+
+  const isOK = validateAddress({
+            address: 'xxxx',
+            currency: 'btc',
+            networkType: 'mainnet',
+          })
+
+  // true
   ```
 
   [⬑ _to top_](#api-endpoints)

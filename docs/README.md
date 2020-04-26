@@ -1,18 +1,21 @@
-# Kirobo Retrievable Transfer Library Documentation
+![Kirobo](https://kirobo.io/wp-content/uploads/2020/01/cropped-logo.png)
+
+# Kirobo Transfer Library Documentation
 [◅ _return home_](../README.md#Kirobo-Retrievable-Transfer-Library)
 
 ## Contents
 
-- [What this library is intended to do?](#What-this-library-is-intended-to-do?)
-- [How does it work?](#how-does-it-work)
-- [Dependencies](#Dependencies)
-- [Points to mention](#Points-to-mention)
-- [Terminology](#Terminology)
-- [API Documentation](api.md#api-documentation)
+  - [Contents](#contents)
+  - [What this library is intended to do?](#what-this-library-is-intended-to-do)
+  - [How does it work?](#how-does-it-work)
+  - [Dependencies](#dependencies)
+  - [Points to mention](#points-to-mention)
+  - [Terminology](#terminology)
+  - [API documentation](api.md#api-documentation)
 
 ## What this library is intended to do?
 
-This library is an interface for a convenient two-way work with [Retrievable Transfer Service by Kirobo](https://kirobo.io/index.php/retrievable-transfer/). A set of [endpoints](endpoints.md#api-endpoints) provides access to full spectrum of Kirobo API services. It will be updated following the further API development.
+This library is an interface for a convenient two-way work with [Retrievable Transfer Service by Kirobo](https://kirobo.io/index.php/retrievable-transfer/) and a set of blockchain services - [Find UTXOs](find_utxos.md#find-utxos) and [Find Free and Used Addresses](find_addresses.md#find-free-and-used-addresses). A set of [endpoints](endpoints.md#api-endpoints) provides access to full spectrum of Kirobo API services. It will be updated following the further API development.
 
 The library is built with both front-end and back-end in mind. Use of TypeScript allows to provide a convenient and stable work.
 
@@ -26,14 +29,17 @@ Step by step explanation of the process, life-cycle of the transaction on server
 
 ## Dependencies
 
-Current version (v1) is using the following dependencies:
+Current version (v2) is using the following dependencies:
 
-- `@feathersjs/feathers` v4.5.1
-- `@feathersjs/socketio-client` v4.5.1
+- `@feathersjs/feathers` v4.5.3
+- `@feathersjs/socketio-client` v4.5.3
+- `@feathersjs/authentication-client` v4.5.3
 - `socket.io-client` v2.3.0
 - `multicoin-address-validator` v0.4.1
+- `ramda` v0.27.0
+- `uuid` v7.0.3
 
-These libraries are needed to set up the socket communication with the server and for address validation.
+These libraries are needed to set up the socket communication with the server, for address validation and are used in functions. Some of the functionality of these libraries are exposed through the library API.
 
 [⬑ _to top_](#kirobo-retrievable-transfer-library-documentation)
 
@@ -44,6 +50,8 @@ Despite library is built to work with Kirobo API, when used on the back-end libr
 [⬑ _to top_](#kirobo-retrievable-transfer-library-documentation)
 
 ## Terminology
+
+What is Collectable? What is Retrievable?
 
 [⬑ _to top_](#kirobo-retrievable-transfer-library-documentation)
 
