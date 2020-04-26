@@ -68,7 +68,7 @@ module.exports = {
     //   'error',
     //   { max: 20, skipBlankLines: true, skipComments: true, IIFEs: true },
     // ],
-    'max-lines': ['error', { max: 300, skipBlankLines: true, skipComments: true }],
+    // 'max-lines': ['error', { max: 300, skipBlankLines: true, skipComments: true }],
     '@typescript-eslint/explicit-member-accessibility': [
       'off',
       {

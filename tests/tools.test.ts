@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
-import { capitalize, makeStringFromTemplate, compareBasicObjects, not } from '../src/tools'
+import { capitalize, makeStringFromTemplate, compareBasicObjects } from '../src/tools'
 
 process.on('unhandledRejection', () => {
   return
@@ -66,27 +66,6 @@ describe('Tools', () => {
     })
     test('- objects with same basic values match', () => {
       expect(compareBasicObjects({ key: 'qwerty', keyTwo: 2 }, { key: 'qwerty', keyTwo: 2 })).toBe(true)
-    })
-  })
-  describe('- \'not\'', () => {
-    test('- returns false on missing argument', () => {
-      // @ts-ignore
-      expect(not()).toBe(false)
-    })
-    test('- returns false on wrong arguments', () => {
-      expect.assertions(3)
-      // @ts-ignore
-      expect(not(undefined)).toBe(false)
-      // @ts-ignore
-      expect(not(undefined)).toBe(false)
-      // @ts-ignore
-      expect(not([])).toBe(false)
-    })
-    test('- returns false on true', () => {
-      expect(not(true)).toBe(false)
-    })
-    test('- returns true on false', () => {
-      expect(not(false)).toBe(true)
     })
   })
 })

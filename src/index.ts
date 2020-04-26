@@ -24,8 +24,9 @@ import {
   Results,
   Utxo,
   QueryOptions,
+  Address,
 } from './types'
-import { makeStringFromTemplate, checkOwnerId, generateId, makeOptions } from './tools'
+import { makeStringFromTemplate, checkOwnerId, generateId, makeOptions, flattenAddresses } from './tools'
 import {
   validateAddress,
   validateData,
@@ -38,7 +39,7 @@ import {
 import { TEXT } from './data'
 import { Logger } from './logger'
 import { isNullOrUndefined } from 'util'
-import { join, isNil } from 'ramda'
+import { join, isNil, map, filter, assoc } from 'ramda'
 
 /**
  * Kirobo Retrievable Transfer library class to provide convenient
@@ -243,14 +244,87 @@ class Service {
       }
 
       const payload = await this._utxos.find({
-
         query: { address: join(';', addresses), ...makeOptions(options) },
       })
 
       return this._responder<Results<Utxo>>(EventTypes.GET_UTXOS, payload)
     } catch (err) {
       this._logger.error('Service (getUtxos) caught error.', err.message)
-      err instanceof TypeError ? new TypeError(err.message) : new Error(err.message)
+      throw err instanceof TypeError ? new TypeError(err.message) : new Error(err.message)
+    }
+  }
+
+  public async getUsed(addresses: string[], options?: QueryOptions): Promise<Results<string[]> | void> {
+    try {
+      if (isNil(addresses)) throw new TypeError(TEXT.errors.validation.missingArgument)
+
+      if (!validateArray(addresses, ['string'])) throw new TypeError(TEXT.errors.validation.typeOfObject)
+
+      const payload = await this._exists.find({
+        query: { address: join(';', addresses), ...makeOptions(options) },
+      })
+
+      const usedAddresses = flattenAddresses(payload.data as Address[])
+
+      return this._responder<Results<string[]>>(EventTypes.GET_USED, assoc('data', usedAddresses, payload))
+    } catch (err) {
+      this._logger.error('Service (getUsed) caught error.', err.message)
+      throw err instanceof TypeError ? new TypeError(err.message) : new Error(err.message)
+    }
+  }
+
+  /**
+   * Function to check the array of addresses to find the fresh (not used)
+   * ones.
+   *
+   * @param [Array] addresses - array of addresses (string format)
+   * @param [QueryOptions] [options] - optional paging options to modify
+   * the default ones
+   *
+   * @returns Promise - promise can contain results,if in _Direct_ mode -
+   * array of strings. If in _Callback_ mode, the function returns void
+   *  in Promise
+   *
+   * #### Example
+   *
+   * ```typescript
+   * service.getFresh(['xxxx', 'yyyy', 'zzzz'])
+   * ```
+   *
+   * -
+   */
+  public async getFresh(addresses: string[], options?: QueryOptions): Promise<Results<string[]> | void> {
+    try {
+
+      /** throw error if main argument is _null_ or _undefined_ */
+      if (isNil(addresses)) throw new TypeError(TEXT.errors.validation.missingArgument)
+
+      /** validates main argument */
+      if (!validateArray(addresses, ['string'])) throw new TypeError(TEXT.errors.validation.typeOfObject)
+
+      /** request data from service */
+      const payload = await this._exists.find({
+        query: { address: join(';', addresses), ...makeOptions(options) },
+      })
+
+
+      /** flatten the results */
+      const usedAddresses = flattenAddresses(payload.data as Address[])
+
+      /** filter out used ones */
+      const filterFn = (address: string): boolean => !usedAddresses.includes(address)
+
+      const freshAddresses = filter(filterFn, addresses)
+
+      /** return the results */
+      return this._responder<Results<string[]>>(EventTypes.GET_FRESH, assoc('data', freshAddresses, payload))
+    } catch (err) {
+
+      /** log error */
+      this._logger.error('Service (getFresh) caught error.', err.message)
+
+      /** throw appropriate error */
+      throw err instanceof TypeError ? new TypeError(err.message) : new Error(err.message)
     }
   }
 
@@ -268,7 +342,7 @@ class Service {
       return this._responder<Retrievable>(EventTypes.GET_RETRIEVABLE, payload)
     } catch (err) {
       this._logger.error('Service (getRetrievable) got an error.', err.message)
-      err instanceof TypeError ? new TypeError(err.message) : new Error(err.message)
+      throw err instanceof TypeError ? new TypeError(err.message) : new Error(err.message)
     }
   }
 
@@ -311,7 +385,7 @@ class Service {
       return this._responder<Collectable[]>(EventTypes.GET_COLLECTABLES, payload.data)
     } catch (err) {
       this._logger.error('Service (getCollectables) got an error.', err.message)
-      err instanceof TypeError ? new TypeError(err.message) : new Error(err.message)
+      throw err instanceof TypeError ? new TypeError(err.message) : new Error(err.message)
     }
   }
 

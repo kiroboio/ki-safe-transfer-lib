@@ -154,7 +154,9 @@ export enum EventTypes {
   REMOVED_COLLECTABLE = 'service_removed_collectable',
   CREATED_COLLECTABLE = 'service_created_collectable',
   SEND_MESSAGE = 'service_message',
-  GET_UTXOS = 'service_get_utxos'
+  GET_UTXOS = 'service_get_utxos',
+  GET_USED = 'service_get_used',
+  GET_FRESH = 'service_get_fresh',
 }
 
 export type Message = {
@@ -264,6 +266,16 @@ export interface Results<T> extends Paging {
 }
 
 export interface QueryOptions {
-  limit: number;
-  skip: number;
+  limit: number
+  skip: number
+}
+
+/**
+ * Address as an object. Used in getUsed/getFresh
+ *
+ * @interface
+ * @name Address
+ */
+export interface Address {
+  address: string
 }

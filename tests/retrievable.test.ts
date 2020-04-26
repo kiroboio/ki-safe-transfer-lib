@@ -8,16 +8,10 @@ dotenv.config()
 
 const authDetails: AuthDetails = { key: process.env.AUTH_KEY ?? '', secret: process.env.AUTH_SECRET ?? '' }
 
-
-let result = {}
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function eventBus(event: Event): void {
-result = event
-}
+function eventBus(event: Event): void { return; }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-async function callbackService() {
+async function callbackService(): Promise<Service> {
   const service = new Service({ eventBus, respondAs: Responses.Callback, authDetails })
 
   await service.getStatus()
@@ -32,7 +26,7 @@ describe('Retrievable', () => {
   let service: Service
   beforeAll(async () => {
     try {
-      service = new Service({ debug: DebugLevels.MUTE, authDetails })
+      service = new Service({ debug: DebugLevels.MUTE, eventBus, authDetails })
       await service.getStatus()
     } catch (e) {
       return

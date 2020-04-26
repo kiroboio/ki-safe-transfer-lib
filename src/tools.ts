@@ -1,6 +1,6 @@
 import { validateObject, validateArray, checkIf } from './validators'
-import { ObjectWithStringKeysAnyValues, Sendable, QueryOptions } from './types'
-import { assoc, isNil, filter, not } from 'ramda'
+import { ObjectWithStringKeysAnyValues, Sendable, QueryOptions, Address } from './types'
+import { assoc, isNil, filter, not, map } from 'ramda'
 import { v4 as generateId } from 'uuid'
 
 // export function not(value: boolean): boolean {
@@ -96,4 +96,24 @@ export function makeOptions(options: QueryOptions | undefined): {} {
   if (not(isNil(options.skip))) queryOptions = assoc('$skip', options.skip, queryOptions)
 
   return queryOptions
+}
+
+/**
+ * Function to flatten the reply from the API, converting array of
+ * objects with key 'address' to array of strings - array of addresses
+ *
+ * @param [Array] data - array of Address objects
+ *
+ * @returns [Array] - array of strings
+ *
+ * #### Example:
+ *
+ * ```typescript
+ * const usedAddresses = flattenAddresses(payload.data as Address[])
+ * ```
+ */
+export function flattenAddresses(data: Address[]): string[] {
+  const mapperFn = (el: Address): string => el.address
+
+  return map(mapperFn, data)
 }
