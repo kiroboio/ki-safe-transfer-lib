@@ -34,7 +34,7 @@ class Config {
     inbox: 'transfer/inbox',
     transfers: 'transfers',
     utxos: 'utxos',
-    exists: 'exists'
+    exists: 'exists',
   }
 
   // settings
@@ -50,7 +50,7 @@ class Config {
 
   private _socket: SocketIOClient.Socket
 
-  private _getStatus: () => Status | undefined
+  private _getStatus: (() => Promise<Status | void>) | undefined
 
   private _refresh: () => void
 
@@ -62,9 +62,8 @@ class Config {
     this._network = network ? network : Networks.Testnet
     this._getStatus = getStatus
       ? getStatus
-      : (): undefined => {
-          return undefined
-        }
+      : undefined
+
     this._logger = logger ? logger : new Logger({ debug: DebugLevels.MUTE })
     this._auth = authDetails
     this._refresh = refreshInbox
@@ -166,7 +165,8 @@ class Config {
 
   private _onConnect = (): void => {
     this._logger.info('Service (connect) is ON.')
-    this._getStatus()
+
+    if (this._getStatus) this._getStatus()
 
     if (this._refresh) this._refresh()
   }
