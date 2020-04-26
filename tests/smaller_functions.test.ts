@@ -18,7 +18,7 @@ function eventBus(event: Event): void {
 
 let service: Service
 
-async function setAsync(): Promise<Status | undefined> {
+async function setAsync(): Promise<Status | void> {
   service = new Service({
     debug: DebugLevels.MUTE,
     eventBus,

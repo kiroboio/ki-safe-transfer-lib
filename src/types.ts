@@ -124,7 +124,7 @@ export interface ServiceProps extends LibraryBlockProps {
 }
 
 export interface ConfigProps extends LibraryBlockProps {
-  getStatus: () => Status | undefined
+  getStatus: () => Promise<Status | void>
   logger: Logger
   refreshInbox: () => void
 }
@@ -144,6 +144,7 @@ export interface LoggerProps {
 
 export enum EventTypes {
   GET_RETRIEVABLE = 'service_get_retrievable',
+  GET_RETRIEVABLES = 'service_get_retrievables',
   GET_COLLECTABLES = 'service_get_collectables',
   UPDATE_STATUS = 'service_update_status',
   SEND_TRANSACTION = 'service_send_transaction',

@@ -25,6 +25,8 @@ import {
   Utxo,
   QueryOptions,
   Address,
+  Currencies,
+  Networks,
 } from './types'
 import { makeStringFromTemplate, checkOwnerId, generateId, makeOptions, flattenAddresses } from './tools'
 import {
@@ -84,6 +86,15 @@ class Service {
 
     this._logger = new Logger({ debug: debug ? debug : DebugLevels.MUTE })
 
+    // store settings
+    this._settings = {
+      version: 'v1',
+      debug: debug ?? DebugLevels.MUTE,
+      currency: currency ?? Currencies.Bitcoin,
+      network: network ?? Networks.Testnet,
+      respondAs: respondAs || Responses.Direct,
+    }
+
     const config = new Config({
       debug,
       currency,
@@ -94,11 +105,7 @@ class Service {
       refreshInbox: this._refreshInbox,
     })
 
-    // store settings
-    this._settings = {
-      ...config.getSettings(),
-      respondAs: respondAs || Responses.Direct,
-    }
+    this._settings = assoc('version', config.getSettings().version, this._settings)
 
     this._switch = config.switch
 
@@ -163,7 +170,7 @@ class Service {
     })
   }
 
-  private _validateProps = (settings: unknown): void => {
+  private _validateProps(settings: unknown): void {
     try {
       validateSettings(settings)
       validateAuthDetails((settings as ServiceProps).authDetails)
@@ -175,7 +182,28 @@ class Service {
     }
   }
 
-  // responder
+  /**
+   * Function to select respond method according to the settings and respond
+   * with type (if needed) and payload provided
+   *
+   * @private
+   * @function
+   * @name _responder
+   * @param T - type of payload
+   * @param [EventTypes] type - type of event - string which will be sent
+   * through eventBus
+   * @param [T] payload - payload to be either returned (if in _Direct_ mode)
+   * or sent through eventBus
+   *
+   * @returns T | void
+   *
+   * #### Example
+   *
+   * ```typescript
+   * this._responder<Results<Utxo>>(EventTypes.GET_UTXOS, payload)
+   * ```
+   * _
+   */
   private _responder<T>(type: EventTypes, payload: T): T | void {
     if (this._settings.respondAs === Responses.Direct) return payload
 
@@ -186,9 +214,6 @@ class Service {
       this._logger.error(`eventBus got an error. ${e}`)
     }
   }
-
-  // private _makeError = (e: TypeError | Error): TypeError | Error =>
-  //   e instanceof TypeError ? new TypeError(e.message) : new Error(e.message)
 
   private _refreshInbox = (): void => {
     if (this._lastAddresses.length)
@@ -211,11 +236,26 @@ class Service {
   // show settings
   public getSettings = (): Settings => this._settings
 
-  // get current API status (height and online)
-  public getStatus = (): Status | undefined =>
-    this._networks
-      .get(this._settings.network)
-      .then((response: NetworkTip) => {
+  /**
+   * Function to get current status from API - if API is online, block height,
+   * average fee for the previous block
+   *
+   * @returns Promise - promise can contain results,if in _Direct_ mode -
+   * array of strings. If in _Callback_ mode, the function returns void
+   * in Promise
+   *
+   * #### Example
+   *
+   * ```typescript
+   * service.getStatus()
+   * ```
+   *
+   * -
+   */
+  public getStatus = async (): Promise<Status | void>=> {
+    try {
+        const response: NetworkTip = await this._networks.get(this._settings.network)
+
         const payload: Status = {
           height: response.height,
           online: response.online,
@@ -224,13 +264,14 @@ class Service {
 
         this._logger.info('Service (getStatus): ', payload)
         return this._responder(EventTypes.UPDATE_STATUS, payload)
-      })
-      .catch((e: ApiResponseError) => {
-        if (this._settings.respondAs === Responses.Direct) throw new Error(e.message)
+    } catch (err) {
 
-        this._logger.error('Service (getStatus) got an error.', e.message)
-        return undefined
-      })
+      if (this._settings.respondAs === Responses.Direct) throw new Error(err.message)
+
+      this._logger.error('Service (getStatus) got an error.', err.message)
+      return undefined
+    }
+  }
 
   public async getUtxos(addresses: string[], options?: QueryOptions): Promise<Results<Utxo> | void> {
     try {
@@ -260,6 +301,12 @@ class Service {
 
       if (!validateArray(addresses, ['string'])) throw new TypeError(TEXT.errors.validation.typeOfObject)
 
+      /** validate options, if present */
+      if (options) {
+        validateObject(options)
+        validateOptions(options)
+      }
+
       const payload = await this._exists.find({
         query: { address: join(';', addresses), ...makeOptions(options) },
       })
@@ -283,7 +330,7 @@ class Service {
    *
    * @returns Promise - promise can contain results,if in _Direct_ mode -
    * array of strings. If in _Callback_ mode, the function returns void
-   *  in Promise
+   * in Promise
    *
    * #### Example
    *
@@ -299,14 +346,19 @@ class Service {
       /** throw error if main argument is _null_ or _undefined_ */
       if (isNil(addresses)) throw new TypeError(TEXT.errors.validation.missingArgument)
 
-      /** validates main argument */
+      /** validate main argument */
       if (!validateArray(addresses, ['string'])) throw new TypeError(TEXT.errors.validation.typeOfObject)
+
+      /** validate options, if present */
+      if (options) {
+        validateObject(options)
+        validateOptions(options)
+      }
 
       /** request data from service */
       const payload = await this._exists.find({
         query: { address: join(';', addresses), ...makeOptions(options) },
       })
-
 
       /** flatten the results */
       const usedAddresses = flattenAddresses(payload.data as Address[])
@@ -329,7 +381,7 @@ class Service {
   }
 
   // get retrievable by ID
-  public getRetrievable = async (id: string): Promise<Retrievable | void> => {
+  public async getRetrievable(id: string): Promise<Retrievable | void> {
     try {
       // validate props
       if (!id) throw new TypeError(TEXT.errors.validation.missingArgument)
@@ -346,15 +398,61 @@ class Service {
     }
   }
 
-  // TODO: finish
-  public async getRetrievables(ids: string[]): Promise<Retrievable[] | void> {
-    if (isNil(ids)) throw new TypeError(TEXT.errors.validation.missingArgument)
+  /**
+   * Function to get the retrievables transfers for the array of transaction ids.
+   *
+   * @param [Array] ids - array of ids (string format)
+   * @param [QueryOptions] [options] - optional paging options to modify
+   * the default ones
+   *
+   * @returns Promise - promise can contain results,if in _Direct_ mode -
+   * array of transaction. If in _Callback_ mode, the function returns void
+   * in Promise
+   *
+   * #### Example
+   *
+   * ```typescript
+   * service.getRetrievables(['xxxx', 'yyyy', 'zzzz'], { limit: 10, skip: 0 })
+   * ```
+   *
+   * -
+   */
+  public async getRetrievables(ids: string[], options?: QueryOptions): Promise<Retrievable[] | void> {
+    try {
 
-    if (!validateArray(ids, ['string'])) throw new TypeError(TEXT.errors.validation.typeOfObject)
+      /** throw error if main argument is _null_ or _undefined_ */
+      if (isNil(ids)) throw new TypeError(TEXT.errors.validation.missingArgument)
+
+      /** validate main argument */
+      if (!validateArray(ids, ['string'])) throw new TypeError(TEXT.errors.validation.typeOfObject)
+
+      /** validate options, if present */
+      if (options) {
+        validateObject(options)
+        validateOptions(options)
+      }
+
+      /** request data from service */
+      const payload: Retrievable[] = await this._transfers.find({
+        query: { id: ids.join(';'), ...makeOptions(options) },
+      })
+
+      this._logger.info('Service (getRetrievables): ', payload)
+
+      /** return the results */
+      return this._responder<Retrievable[]>(EventTypes.GET_RETRIEVABLES, payload)
+    } catch (err) {
+
+      /** log error */
+      this._logger.error('Service (getRetrievables) got an error.', err.message)
+
+      /** throw appropriate error */
+      throw err instanceof TypeError ? new TypeError(err.message) : new Error(err.message)
+    }
   }
 
   // get all collectables by recipient address
-  public getCollectables = async (addresses: string[]): Promise<Collectable[] | void> => {
+  public async getCollectables(addresses: string[]): Promise<Collectable[] | void> {
     try {
       // validate props
       if (!addresses) throw new TypeError(TEXT.errors.validation.missingArgument)
@@ -408,8 +506,8 @@ class Service {
   }
 
   // collect transaction
-  public collect = (request: CollectRequest): Promise<Message | void> =>
-    this._collect
+  public collect(request: CollectRequest): Promise<Message | void> {
+    return this._collect
       .create({ ...request })
       .then((payload: ResponseCollect) => {
         this._logger.info('Service (collect): ', payload)
@@ -430,9 +528,10 @@ class Service {
           isError: true,
         })
       })
+  }
 
   // connection
-  public connect = (props: Switch): boolean | Message | void => {
+  public connect(props: Switch): boolean | Message | void {
     try {
       const result = this._switch(props)
 
