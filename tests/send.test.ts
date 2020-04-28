@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 import dotenv from 'dotenv'
 
-import Service, { DebugLevels, AuthDetails, SwitchActions } from '../src'
+import Service, { DebugLevels, SwitchActions } from '../src'
 import { TEXT } from '../src/data'
 
 dotenv.config()

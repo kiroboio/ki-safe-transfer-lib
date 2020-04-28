@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
-import { capitalize, makeStringFromTemplate, compareBasicObjects } from '../src/tools'
+import { capitalize, makeString, compareBasicObjects } from '../src/tools'
 
 process.on('unhandledRejection', () => {
   return
@@ -18,30 +18,30 @@ describe('Tools', () => {
       expect(capitalize('qwerty qwerty')).toBe('Qwerty qwerty')
     })
   })
-  describe('- "makeStringFromTemplate"', () => {
+  describe('- "makeString"', () => {
     test('- doesn\'t crash at no arguments', () => {
       // @ts-ignore
-      expect(makeStringFromTemplate(123)).toBe('')
+      expect(makeString(123)).toBe('')
     })
     test('- doesn\'t crash at missing some arguments', () => {
       // @ts-ignore
-      expect(makeStringFromTemplate(123)).toBe('')
+      expect(makeString(123)).toBe('')
     })
     test('- doesn\'t crash at wrong argument types', () => {
       // @ts-ignore
-      expect(makeStringFromTemplate('qwerty')).toBe('')
+      expect(makeString('qwerty')).toBe('')
     })
     test('- doesn\'t crash at wrong argument types #2', () => {
       // @ts-ignore
-      expect(makeStringFromTemplate('qwerty', [2, {}])).toBe('')
+      expect(makeString('qwerty', [2, {}])).toBe('')
     })
     test('- correctly creates string with one parameter', () => {
-      expect(makeStringFromTemplate('- correctly creates string with %1 parameter', ['one'])).toBe(
+      expect(makeString('- correctly creates string with %1 parameter', ['one'])).toBe(
         '- correctly creates string with one parameter',
       )
     })
     test('- correctly creates string with several parameters', () => {
-      expect(makeStringFromTemplate('- correctly %1 string with %2 parameters', ['creates', 'several'])).toBe(
+      expect(makeString('- correctly %1 string with %2 parameters', ['creates', 'several'])).toBe(
         '- correctly creates string with several parameters',
       )
     })

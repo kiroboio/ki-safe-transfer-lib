@@ -2,9 +2,9 @@ import dotenv from 'dotenv'
 
 import Service, { DebugLevels, Responses, Event } from '../src'
 import { validBitcoinAddresses, listOfStatusKeys, typeOfStatusValues } from '../src/data'
-import { validateObject } from '../src/validators'
-import { ObjectWithStringKeysAnyValues, Status, AuthDetails, ObjectWithStringKeys, SwitchActions } from '../src/types'
+import { StringKeyObject, Status, AuthDetails, SwitchActions } from '../src/types'
 import { changeType } from '../src/tools'
+import { validateObject } from 'src/validators'
 
 dotenv.config()
 
@@ -66,7 +66,7 @@ describe('Smaller functions', () => {
         Object.keys(result).forEach(key => {
           if (!listOfStatusKeys.includes(key)) keysValuesCheck = false
 
-          const resValType = typeof changeType<ObjectWithStringKeys>(result)[key]
+          const resValType = typeof changeType<StringKeyObject<string | number | boolean>>(result)[key]
 
           const reqValType = typeOfStatusValues[key]
 
@@ -86,7 +86,7 @@ describe('Smaller functions', () => {
       expect(eventReceived.type).toBe('service_update_status')
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = changeType<ObjectWithStringKeysAnyValues<any>>(eventReceived.payload)
+      const result = changeType<StringKeyObject<any>>(eventReceived.payload)
 
       let keysValuesCheck = true
 

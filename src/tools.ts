@@ -1,6 +1,6 @@
-import { validateObject, validateArray, checkIf } from './validators'
-import { ObjectWithStringKeysAnyValues, Sendable, QueryOptions, Address, Responses } from './types'
-import { assoc, isNil, filter, not, map } from 'ramda'
+import { validateObject, validateArray, } from './validators'
+import { StringKeyObject, Sendable, QueryOptions, Address, Responses } from './types'
+import { assoc, isNil, not, map } from 'ramda'
 import { v4 as generateId } from 'uuid'
 
 // export function not(value: boolean): boolean {
@@ -26,7 +26,7 @@ export const capitalize = (text: string): string => {
   return reassign(splitText(text), 0, splitText(text)[0].toUpperCase()).join('')
 }
 
-export const makeStringFromTemplate = (template: string, params: string[]): string => {
+export const makeString = (template: string, params: string[]): string => {
   if (typeof template !== 'string') return ''
 
   if (!validateArray(params, ['string', 'number'])) return ''
@@ -41,8 +41,8 @@ export const makeStringFromTemplate = (template: string, params: string[]): stri
 }
 
 export const compareBasicObjects = (
-  objOne: ObjectWithStringKeysAnyValues<unknown>,
-  objTwo: ObjectWithStringKeysAnyValues<unknown>,
+  objOne: StringKeyObject<unknown>,
+  objTwo: StringKeyObject<unknown>,
 ): boolean => {
   let result = true
 

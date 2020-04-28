@@ -3,7 +3,7 @@ import dotenv from 'dotenv'
 
 import Service, { Responses, Event, SwitchActions, AuthDetails } from '../src'
 import { TEXT, validBitcoinAddresses } from '../src/data'
-import { makeStringFromTemplate } from '../src/tools'
+import { makeString } from '../src/tools'
 
 dotenv.config()
 
@@ -68,7 +68,7 @@ describe('Collectables', () => {
         expect(error).toBeInstanceOf(Error)
         expect(error).toHaveProperty(
           'message',
-          makeStringFromTemplate(TEXT.errors.validation.malformedAddress, [validBitcoinAddresses[1]]),
+          makeString(TEXT.errors.validation.malformedAddress, [validBitcoinAddresses[1]]),
         )
       }
     })

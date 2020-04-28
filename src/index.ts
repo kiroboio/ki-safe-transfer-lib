@@ -28,7 +28,7 @@ import {
   Currencies,
   Networks,
 } from './types'
-import { makeStringFromTemplate, checkOwnerId, generateId, makeOptions, flattenAddresses, isDirect } from './tools'
+import { makeString, checkOwnerId, generateId, makeOptions, flattenAddresses, isDirect } from './tools'
 import {
   validateAddress,
   validateData,
@@ -285,12 +285,14 @@ class Service {
 
   public async getUtxos(addresses: string[], options?: QueryOptions): Promise<Results<Utxo> | void> {
     try {
-      if (isNil(addresses)) throw new TypeError(TEXT.errors.validation.missingArgument)
+      if (isNil(addresses)) throw new TypeError('Addresses are missing. Nothing to search.')
 
       if (!validateArray(addresses, ['string'])) throw new TypeError(TEXT.errors.validation.typeOfObject)
 
+      if (!addresses.length) return;
+
       if (options) {
-        validateObject(options)
+        validateObject(options, 'options')
         validateOptions(options, 'getUtxos')
       }
 
@@ -497,7 +499,7 @@ class Service {
             networkType: this._settings.network,
           })
         )
-          throw new Error(makeStringFromTemplate(TEXT.errors.validation.malformedAddress, [address]))
+          throw new Error(makeString(TEXT.errors.validation.malformedAddress, [address]))
       })
 
       /** validate options, if present */

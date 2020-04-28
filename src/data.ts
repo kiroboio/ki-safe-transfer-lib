@@ -1,6 +1,9 @@
-import { ObjectWithStringKeys, ObjectWithStringKeysAnyValues } from './types'
+import { StringKeyObject } from './types'
 
 export const TEXT = {
+  validation: {
+    cantBe: '%1 can\'t be %2. It should be: %3.'
+  },
   errors: {
     validation: {
       missingArgument: 'Data is missing',
@@ -27,7 +30,7 @@ export const TEXT = {
 
 export const listOfStatusKeys = ['height', 'online', 'fee']
 
-export const typeOfStatusValues: ObjectWithStringKeysAnyValues<string> = {
+export const typeOfStatusValues: StringKeyObject<string> = {
   height: 'number',
   online: 'boolean',
   fee: 'number',
@@ -35,7 +38,7 @@ export const typeOfStatusValues: ObjectWithStringKeysAnyValues<string> = {
 
 export const listOfSettingsKeys = ['debug', 'currency', 'network', 'eventBus', 'respondAs', 'authDetails']
 
-export const typeOfSettingsKeys: ObjectWithStringKeys = {
+export const typeOfSettingsKeys: StringKeyObject<string> = {
   debug: 'number',
   currency: 'string',
   network: 'string',
@@ -44,14 +47,14 @@ export const typeOfSettingsKeys: ObjectWithStringKeys = {
   authDetails: 'object',
 }
 
-export const valuesForSettings: ObjectWithStringKeys = {
+export const valuesForSettings: StringKeyObject<(string|number)[]> = {
   currency: ['btc'],
   network: ['testnet', 'regnet'],
   debug: [0, 1, 2],
   respondAs: ['callback', 'direct'],
 }
 
-export const authDetailsData: ObjectWithStringKeys = {
+export const authDetailsData: StringKeyObject<string> = {
   key: 'string',
   secret: 'string',
 }

@@ -202,11 +202,7 @@ export type validateReport = {
   errors: { [index: string]: string[] }
 }
 
-export type ObjectWithStringKeys = {
-  [index: string]: string[] | number[] | string
-}
-
-export type ObjectWithStringKeysAnyValues<T> = { [index: string]: T }
+export type StringKeyObject<T> = { [index: string]: T }
 
 // types of switch actions
 export enum SwitchActions {

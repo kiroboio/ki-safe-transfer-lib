@@ -3,7 +3,7 @@ import dotenv from 'dotenv'
 
 import Service, { DebugLevels, Currencies, Networks, Responses, Event, AuthDetails } from '../src'
 import { TEXT, valuesForSettings } from '../src/data'
-import { makeStringFromTemplate, compareBasicObjects } from '../src/tools'
+import { makeString, compareBasicObjects } from '../src/tools'
 
 dotenv.config()
 
@@ -141,7 +141,7 @@ describe('Library configuration', () => {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty(
           'message',
-          makeStringFromTemplate(TEXT.errors.validation.wrongValueType, ['debug', 'number']),
+          makeString(TEXT.errors.validation.wrongValueType, ['debug', 'number']),
         )
       }
     })
@@ -158,7 +158,7 @@ describe('Library configuration', () => {
 
         expect(error).toHaveProperty(
           'message',
-          makeStringFromTemplate(TEXT.errors.validation.wrongValue, ['5', 'debug', list.join(', ')]),
+          makeString(TEXT.errors.validation.wrongValue, ['5', 'debug', list.join(', ')]),
         )
       }
     })
