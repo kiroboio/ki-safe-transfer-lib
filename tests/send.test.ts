@@ -6,7 +6,7 @@ import { TEXT } from '../src/data'
 
 dotenv.config()
 
-const authDetails: AuthDetails = { key: process.env.AUTH_KEY ?? '', secret: process.env.AUTH_SECRET ?? '' }
+const authDetails = { key: process.env.AUTH_KEY ?? '', secret: process.env.AUTH_SECRET ?? '' }
 
 process.on('unhandledRejection', () => {
   return
@@ -14,6 +14,7 @@ process.on('unhandledRejection', () => {
 
 describe('Send', () => {
   let service: Service
+
   beforeAll(async () => {
     try {
       service = new Service({ debug: DebugLevels.MUTE, authDetails })

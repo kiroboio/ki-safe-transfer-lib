@@ -1,5 +1,5 @@
 import { validateObject, validateArray, checkIf } from './validators'
-import { ObjectWithStringKeysAnyValues, Sendable, QueryOptions, Address } from './types'
+import { ObjectWithStringKeysAnyValues, Sendable, QueryOptions, Address, Responses } from './types'
 import { assoc, isNil, filter, not, map } from 'ramda'
 import { v4 as generateId } from 'uuid'
 
@@ -116,4 +116,18 @@ export function flattenAddresses(data: Address[]): string[] {
   const mapperFn = (el: Address): string => el.address
 
   return map(mapperFn, data)
+}
+
+/** creates 'fnName function's options ' */
+export function makeLocation(fn: string, block: string): string {
+  return `${fn ? '\'' + fn + '\' function\'s ' : ''}${block ? block : ''}`
+}
+
+/** check if response is a direct one */
+export function isDirect(value: Responses | string | undefined): boolean {
+  if (!value) return false
+
+  if (value === Responses.Direct || value === 'direct') return true
+
+  return false
 }

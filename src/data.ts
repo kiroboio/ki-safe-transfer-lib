@@ -6,16 +6,17 @@ export const TEXT = {
       missingArgument: 'Data is missing',
       emptyObject: 'Settings object can\'t be empty.',
       emptyGenObject: '%1 object can\'t be empty',
-      extraKeys: 'Extra or missing keys present in settings.',
-      extraGenKeys: 'Extra or missing keys present in %1.',
+      extraKeys: 'Extra keys present in settings.',
+      extraGenKeys: 'Extra keys present in %1.',
       noArray: 'Argument can\'t be an Array.',
       noFunction: 'Argument can\'t be a function.',
       typeOfObject: 'Wrong type of argument',
       unknownKeys: 'Unknown key in settings: ',
-      unknownGenKeys: 'Unknown key in \'%1\': ',
+      unknownGenKeys: 'Unknown key in %1: ',
       wrongValueType: 'Key \'%1\' in settings has value of wrong type. Should be: %2.',
-      wrongGenValueType: 'Key \'%1\' in \'%2\' has value of wrong type. Should be: %3.',
+      wrongGenValueType: 'Key \'%1\' in %2 has value of wrong type: %3. Should be: %4.',
       wrongValue: 'Wrong value \'%1\' for key \'%2\' in settings. Should be one of: %3.',
+      wrongGenValue: 'Wrong value \'%1\' for key \'%2\' in %3. Should be: %4.',
       malformedData: 'Data is malformed.',
       malformedAddress: 'Malformed address: %1.',
       missingValues: 'Missing values: ',
@@ -62,7 +63,12 @@ export const validBitcoinAddresses = [
   'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq',
 ]
 
-export const validOptions: ObjectWithStringKeysAnyValues<number> = {
-  skip: 1,
-  limit: 1,
+interface ValidType {
+  [index: string]: { type: string; values?: string[] }
+}
+
+export const optionsValidValues: ValidType = {
+  skip: { type: 'number' },
+  limit: { type: 'number' },
+  respondDirect: { type: 'boolean' },
 }

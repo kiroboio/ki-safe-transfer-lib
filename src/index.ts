@@ -28,7 +28,7 @@ import {
   Currencies,
   Networks,
 } from './types'
-import { makeStringFromTemplate, checkOwnerId, generateId, makeOptions, flattenAddresses } from './tools'
+import { makeStringFromTemplate, checkOwnerId, generateId, makeOptions, flattenAddresses, isDirect } from './tools'
 import {
   validateAddress,
   validateData,
@@ -227,6 +227,14 @@ class Service {
         })
   }
 
+  private _shouldReturnDirect(options: QueryOptions | undefined): boolean {
+    if (options?.respondDirect) return true
+
+    if (this._settings.respondAs === Responses.Direct) return true
+
+    return false
+  }
+
   // get last addresses
   public getLastAddresses = (): string[] => this._lastAddresses
 
@@ -252,24 +260,26 @@ class Service {
    *
    * -
    */
-  public getStatus = async (): Promise<Status | void>=> {
+  public getStatus = async (options?: Omit<QueryOptions, 'limit' | 'skip'>): Promise<Status | void> => {
     try {
-        const response: NetworkTip = await this._networks.get(this._settings.network)
+      const response: NetworkTip = await this._networks.get(this._settings.network)
 
-        const payload: Status = {
-          height: response.height,
-          online: response.online,
-          fee: response.fee,
-        }
+      const payload: Status = {
+        height: response.height,
+        online: response.online,
+        fee: response.fee,
+      }
 
-        this._logger.info('Service (getStatus): ', payload)
-        return this._responder(EventTypes.UPDATE_STATUS, payload)
+      this._logger.info('Service (getStatus): ', payload)
+
+      /** return results */
+      if (this._shouldReturnDirect(options)) return payload
+
+      return this._responder(EventTypes.UPDATE_STATUS, payload)
     } catch (err) {
+      this._logger.error('Service (getStatus) got an error.', err.message)
 
       if (this._settings.respondAs === Responses.Direct) throw new Error(err.message)
-
-      this._logger.error('Service (getStatus) got an error.', err.message)
-      return undefined
     }
   }
 
@@ -281,12 +291,15 @@ class Service {
 
       if (options) {
         validateObject(options)
-        validateOptions(options)
+        validateOptions(options, 'getUtxos')
       }
 
       const payload = await this._utxos.find({
         query: { address: join(';', addresses), ...makeOptions(options) },
       })
+
+      /** return results */
+      if (this._shouldReturnDirect(options)) return payload
 
       return this._responder<Results<Utxo>>(EventTypes.GET_UTXOS, payload)
     } catch (err) {
@@ -304,7 +317,7 @@ class Service {
       /** validate options, if present */
       if (options) {
         validateObject(options)
-        validateOptions(options)
+        validateOptions(options, 'getUsed')
       }
 
       const payload = await this._exists.find({
@@ -312,6 +325,9 @@ class Service {
       })
 
       const usedAddresses = flattenAddresses(payload.data as Address[])
+
+      /** return the results */
+      if (this._shouldReturnDirect(options)) return assoc('data', usedAddresses, payload)
 
       return this._responder<Results<string[]>>(EventTypes.GET_USED, assoc('data', usedAddresses, payload))
     } catch (err) {
@@ -352,7 +368,7 @@ class Service {
       /** validate options, if present */
       if (options) {
         validateObject(options)
-        validateOptions(options)
+        validateOptions(options, 'getFresh')
       }
 
       /** request data from service */
@@ -369,6 +385,8 @@ class Service {
       const freshAddresses = filter(filterFn, addresses)
 
       /** return the results */
+      if (this._shouldReturnDirect(options)) return assoc('data', freshAddresses, payload)
+
       return this._responder<Results<string[]>>(EventTypes.GET_FRESH, assoc('data', freshAddresses, payload))
     } catch (err) {
 
@@ -381,16 +399,24 @@ class Service {
   }
 
   // get retrievable by ID
-  public async getRetrievable(id: string): Promise<Retrievable | void> {
+  public async getRetrievable(id: string, options?: QueryOptions): Promise<Retrievable | void> {
     try {
       // validate props
       if (!id) throw new TypeError(TEXT.errors.validation.missingArgument)
 
       if (typeof id !== 'string') throw new TypeError(TEXT.errors.validation.typeOfObject)
 
+      /** validate options, if present */
+      if (options) {
+        validateObject(options)
+        validateOptions(options, 'getRetrievable')
+      }
+
       const payload: Retrievable = await this._transfers.get(id)
 
-      this._logger.info('Service (getRetrievable): ', payload)
+      /** return the results */
+      if (this._shouldReturnDirect(options)) return payload
+
       return this._responder<Retrievable>(EventTypes.GET_RETRIEVABLE, payload)
     } catch (err) {
       this._logger.error('Service (getRetrievable) got an error.', err.message)
@@ -429,7 +455,7 @@ class Service {
       /** validate options, if present */
       if (options) {
         validateObject(options)
-        validateOptions(options)
+        validateOptions(options, 'getRetrievables')
       }
 
       /** request data from service */
@@ -440,6 +466,8 @@ class Service {
       this._logger.info('Service (getRetrievables): ', payload)
 
       /** return the results */
+      if (this._shouldReturnDirect(options)) return payload
+
       return this._responder<Retrievable[]>(EventTypes.GET_RETRIEVABLES, payload)
     } catch (err) {
 
@@ -452,7 +480,7 @@ class Service {
   }
 
   // get all collectables by recipient address
-  public async getCollectables(addresses: string[]): Promise<Collectable[] | void> {
+  public async getCollectables(addresses: string[], options?: QueryOptions): Promise<Collectable[] | void> {
     try {
       // validate props
       if (!addresses) throw new TypeError(TEXT.errors.validation.missingArgument)
@@ -472,13 +500,20 @@ class Service {
           throw new Error(makeStringFromTemplate(TEXT.errors.validation.malformedAddress, [address]))
       })
 
+      /** validate options, if present */
+      if (options) {
+        validateObject(options)
+        validateOptions(options, 'getCollectables')
+      }
+
       const payload: ResponseCollectable = await this._inbox.find({
         query: { to: addresses.join(';') },
       })
 
       this._lastAddresses = addresses
 
-      this._logger.info('Service (getCollectables): ', payload.data)
+      /** return the results */
+      if (this._shouldReturnDirect(options)) return payload.data
 
       return this._responder<Collectable[]>(EventTypes.GET_COLLECTABLES, payload.data)
     } catch (err) {
@@ -488,7 +523,7 @@ class Service {
   }
 
   // send retrievable/collectable transaction
-  public async send(transaction: Sendable): Promise<Retrievable | void> {
+  public async send(transaction: Sendable, options?: QueryOptions): Promise<Retrievable | void> {
     try {
       // validate props
       if (isNullOrUndefined(transaction)) throw new Error(TEXT.errors.validation.missingArgument)
@@ -496,7 +531,16 @@ class Service {
       validateObject(transaction)
       validateData(transaction, this._settings.currency, this._settings.network)
 
+      /** validate options, if present */
+      if (options) {
+        validateObject(options)
+        validateOptions(options, 'send')
+      }
+
       const payload = await this._transfers.create(checkOwnerId(transaction))
+
+      /** return the results */
+      if (this._shouldReturnDirect(options)) return payload
 
       return this._responder<Retrievable>(EventTypes.SEND_TRANSACTION, payload)
     } catch (err) {
@@ -506,28 +550,40 @@ class Service {
   }
 
   // collect transaction
-  public collect(request: CollectRequest): Promise<Message | void> {
-    return this._collect
-      .create({ ...request })
-      .then((payload: ResponseCollect) => {
-        this._logger.info('Service (collect): ', payload)
+  public async collect(request: CollectRequest, options?: QueryOptions): Promise<Message | void> {
+    try {
 
-        return this._responder<Message>(EventTypes.COLLECT_TRANSACTION, {
-          text: 'Request submitted.',
-          isError: false,
-          data: payload,
-        })
-      })
-      .catch((e: ApiResponseError) => {
-        if (this._settings.respondAs === Responses.Direct) throw new Error(e.message)
+      /** validate options, if present */
+      if (options) {
+        validateObject(options)
+        validateOptions(options, 'send')
+      }
 
-        this._logger.error(`Service (collect) got an error. ${e.message}`, e.message)
+      const payload = await this._collect.create({ ...request })
 
-        return this._responder(EventTypes.SEND_MESSAGE, {
-          text: e.message,
-          isError: true,
-        })
-      })
+      /** return the results */
+      const returnObject = {
+        text: 'Request submitted.',
+        isError: false,
+        data: payload,
+      }
+
+      if (this._shouldReturnDirect(options)) return returnObject
+
+      return this._responder<Message>(EventTypes.COLLECT_TRANSACTION, returnObject)
+    } catch (err) {
+      if (this._shouldReturnDirect(options)) throw new Error(err.message)
+
+      this._logger.error(`Service (collect) got an error. ${err.message}`, err)
+
+      const response = {
+        text: 'Request submitted.',
+        isError: false,
+        data: err,
+      }
+
+      return this._responder<Message>(EventTypes.COLLECT_TRANSACTION, response)
+    }
   }
 
   // connection
@@ -537,9 +593,8 @@ class Service {
 
       return result
     } catch (e) {
-      if (this._settings.respondAs === Responses.Direct) throw new Error(e.message)
-
       this._logger.error(`Service (switch) got an error. ${e.message}`, e.message)
+
       return this._responder<Message>(EventTypes.SEND_MESSAGE, {
         text: e.message,
         isError: true,

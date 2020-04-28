@@ -267,8 +267,9 @@ export interface Results<T> extends Paging {
 }
 
 export interface QueryOptions {
-  limit: number
-  skip: number
+  limit?: number
+  skip?: number
+  respondDirect?: boolean
 }
 
 /**

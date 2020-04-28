@@ -1,12 +1,24 @@
 import validator from 'multicoin-address-validator'
 
-import { Sendable, validateReport, ObjectWithStringKeys, QueryOptions } from './types'
-import { listOfSettingsKeys, typeOfSettingsKeys, valuesForSettings, TEXT, authDetailsData, validOptions } from './data'
-import { makeStringFromTemplate, changeType } from './tools'
-import { filter, is as isOf, isNil, isEmpty, keys, forEach, pipe } from 'ramda'
-import { is } from './mode'
+import { Sendable, validateReport, ObjectWithStringKeys, ObjectWithStringKeysAnyValues } from './types'
+import {
+  listOfSettingsKeys,
+  typeOfSettingsKeys,
+  valuesForSettings,
+  TEXT,
+  authDetailsData,
+  optionsValidValues,
+} from './data'
+import { makeStringFromTemplate, changeType, makeLocation, isDirect } from './tools'
+import { filter, is as isOf, isNil, isEmpty, keys, forEach, pipe, not } from 'ramda'
 
 const isString = (data: unknown): boolean => typeof data === 'string'
+
+export function isOfType(value: unknown, type: string): boolean {
+  if (isNil(value) || !type) return false
+
+  return typeof value === type
+}
 
 interface Props {
   address: string
@@ -204,32 +216,53 @@ export function checkIf(
 }
 
 // TODO: test
-export function validateOptions(options: unknown): void {
+export function validateOptions(options: unknown, fnName: string): void {
 
   /** if empty */
   if (isEmpty(options)) throw new TypeError(makeStringFromTemplate(TEXT.errors.validation.emptyGenObject, ['Options']))
 
   /** if length is different */
-  if (keys(options).length !== keys(validOptions).length) throw new TypeError(makeStringFromTemplate(TEXT.errors.validation.extraGenKeys,['Options']))
+  if (keys(options).length > keys(optionsValidValues).length)
+    throw new TypeError(makeStringFromTemplate(TEXT.errors.validation.extraGenKeys, ['Options']))
 
   /** check keys */
-  const validKeys = keys(validOptions)
+  const validKeys = keys(optionsValidValues)
 
   const checkFn = (key: string): void => {
 
     /** if key doesn't exist */
     if (!validKeys.includes(key))
-      throw new TypeError(`${makeStringFromTemplate(TEXT.errors.validation.unknownGenKeys, ['Options'])}${key}`)
+      throw new TypeError(
+        makeStringFromTemplate(TEXT.errors.validation.unknownGenKeys, [makeLocation(fnName, 'options')]) + key,
+      )
 
-    /** if key is of wrong type */
-    if (typeof changeType<ObjectWithStringKeys>(options)[key] !== typeof validOptions[key])
+    const value = changeType<ObjectWithStringKeysAnyValues<string>>(options)[key]
+
+    /** if value is of wrong type */
+    if (!isOfType(value, optionsValidValues[key].type))
       throw new TypeError(
         `${makeStringFromTemplate(TEXT.errors.validation.wrongGenValueType, [
           key,
-          'Options',
-          typeof validOptions[key],
+          makeLocation(fnName, 'options'),
+          typeof value,
+          optionsValidValues[key].type,
         ])}`,
       )
+
+    const acceptableValues = optionsValidValues[key].values
+
+    // wrongGenValue: 'Wrong value \'%1\' for key \'%2\' in %3. Should be one of: %4.',
+    /** if value is not acceptable */
+    if (acceptableValues && !acceptableValues.includes(value))
+      throw new TypeError(
+        `${makeStringFromTemplate(TEXT.errors.validation.wrongGenValue, [
+          value,
+          key,
+          'Options',
+          acceptableValues.join(' or '),
+        ])}`,
+      )
+
   }
 
   pipe(keys, forEach(checkFn))(options)
