@@ -1,6 +1,6 @@
-import { TEXT, authDetailsData } from 'src/data'
+import { TEXT, authDetailsData } from '../data'
 import { validateObject } from './object'
-import { StringKeyObject } from 'src'
+import { StringKeyObject } from '..'
 
 export function validateAuthDetails(details: unknown): void {
   if (!details) throw new TypeError(`${TEXT.errors.validation.missingArgument}: authDetails.`)

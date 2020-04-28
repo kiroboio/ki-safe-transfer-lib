@@ -37,7 +37,7 @@ describe('Send', () => {
         await service.send([])
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
-        expect(error).toHaveProperty('message', TEXT.errors.validation.noArray)
+        expect(error).toHaveProperty('message', 'Transaction can\'t be array. It should be: object {}.')
       }
     })
     test('- throws TypeError on function as argument', async () => {

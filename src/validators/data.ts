@@ -1,5 +1,5 @@
-import { Sendable, validateReport, validateAddress } from 'src'
-import { TEXT } from 'src/data'
+import { Sendable, validateReport, validateAddress } from '..'
+import { TEXT } from '../data'
 
 export const validateData = (data: Sendable, currency: string, networkType: string): void => {
   const validate: validateReport = {

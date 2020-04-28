@@ -362,14 +362,14 @@ class Service {
     try {
 
       /** throw error if main argument is _null_ or _undefined_ */
-      if (isNil(addresses)) throw new TypeError(TEXT.errors.validation.missingArgument)
+      if (isNil(addresses)) throw new TypeError('Addresses are missing. Nothing to search.')
 
       /** validate main argument */
       if (!validateArray(addresses, ['string'])) throw new TypeError(TEXT.errors.validation.typeOfObject)
 
       /** validate options, if present */
       if (options) {
-        validateObject(options)
+        validateObject(options, 'options')
         validateOptions(options, 'getFresh')
       }
 
@@ -530,12 +530,12 @@ class Service {
       // validate props
       if (isNullOrUndefined(transaction)) throw new Error(TEXT.errors.validation.missingArgument)
 
-      validateObject(transaction)
+      validateObject(transaction, 'transaction')
       validateData(transaction, this._settings.currency, this._settings.network)
 
       /** validate options, if present */
       if (options) {
-        validateObject(options)
+        validateObject(options, 'options')
         validateOptions(options, 'send')
       }
 
