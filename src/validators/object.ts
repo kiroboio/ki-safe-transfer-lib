@@ -1,4 +1,4 @@
-import { isNil, keys } from 'ramda'
+import { isNil, keys, forEach } from 'ramda'
 import { TEXT } from '../data'
 import { makeString, capitalize, changeType } from '../tools/tools'
 import { StringKeyObject } from 'src/types'
@@ -17,13 +17,22 @@ function validateObject(data: unknown, argName?: string): void {
 }
 
 function validateObjectWithStrings(params: {}, paramName: string, method: string): void {
+  if (!paramName || !method)
+    throw new TypeError(
+      makeString(TEXT.validation.cantBe, [
+        paramName || 'paramName or method',
+        'empty for "validateObjectWithStrings" method',
+        'paramName: string, method: string',
+      ]),
+    )
+
   if (isNil(params))
     throw new TypeError(
       makeString(TEXT.validation.params, [
         paramName,
         method,
         'missing or undefined/null',
-        'object {[index:string]:string}',
+        '{ [index:string]: string }',
       ]),
     )
 
@@ -55,6 +64,8 @@ function validateObjectWithStrings(params: {}, paramName: string, method: string
         makeString(TEXT.validation.params, [`Element ${key}`, method, 'empty', 'value in string form']),
       )
   }
+
+  forEach(fn, keys(data) as string[])
 }
 
 export { validateObjectWithStrings, validateObject }

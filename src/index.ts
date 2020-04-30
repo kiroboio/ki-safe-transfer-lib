@@ -27,7 +27,6 @@ import {
   Networks,
 } from './types'
 import {
-  makeString,
   checkOwnerId,
   generateId,
   makeOptions,
@@ -35,7 +34,7 @@ import {
   makeApiResponseError,
   makePropsResponseError,
   makeReturnError,
-  stackErrors,
+  tryCatch,
 } from './tools'
 import {
   validateAddress,
@@ -178,7 +177,7 @@ class Service {
       validateSettings(settings)
       validateAuthDetails((settings as ServiceProps).authDetails)
     } catch (err) {
-      new Logger({ debug: DebugLevels.MUTE }).disaster(`Service (validateProps) got an error. ${err.message}`)
+      new Logger({ debug: DebugLevels.MUTE }).error(`Service (validateProps) got an error. ${err.message}`)
 
       throw new TypeError(err.message)
     }
@@ -222,7 +221,7 @@ class Service {
       let data
 
       try {
-        data = await this._inbox.find({ query: { to: this._lastAddresses.join(';') } }).data
+        data = await this._inbox.find({ query: { to: this._lastAddresses.join(';') } })
       } catch (err) {
         throw makeApiResponseError(err)
       }
@@ -297,7 +296,6 @@ class Service {
     try {
       validatePropsArray(addresses, 'string', 'addresses', 'getUtxos')
 
-
       /** validate options, if present */
       if (options) {
         validateOptions(options, 'getUtxos')
@@ -343,7 +341,6 @@ class Service {
     /** validate props */
     try {
       validatePropsArray(addresses, 'string', 'addresses', 'getUsed')
-
 
       /** validate options, if present */
       if (options) {
@@ -417,7 +414,6 @@ class Service {
     try {
       validatePropsArray(addresses, 'string', 'addresses', 'getFresh')
 
-
       /** validate options, if present */
       if (options) {
         validateOptions(options, 'getFresh')
@@ -482,7 +478,6 @@ class Service {
     try {
       validatePropsString(ownerId, 'ownerId', 'getOwnerById')
 
-
       /** validate options, if present */
       if (options) {
         validateOptions(options, 'getOwnerById')
@@ -532,7 +527,6 @@ class Service {
     /** validate props */
     try {
       validatePropsString(id, 'ownerId', 'getRetrievable')
-
 
       /** validate options, if present */
       if (options) {
@@ -597,7 +591,6 @@ class Service {
     try {
       validatePropsArray(ids, 'string', 'ids', 'getRetrievables')
 
-
       /** validate options, if present */
       if (options) {
         validateOptions(options, 'getRetrievables')
@@ -645,7 +638,6 @@ class Service {
     try {
       validatePropsAddresses(addresses, 'addresses', 'getCollectables', this._settings)
 
-
       /** validate options, if present */
       if (options) {
         validateOptions(options, 'getCollectables')
@@ -665,7 +657,7 @@ class Service {
     try {
       response = await this._inbox.find({
         query: { to: addresses.join(';') },
-      }).data
+      })
     } catch (err) {
 
       /** log error */
@@ -723,7 +715,9 @@ class Service {
       this._logger.error('Service (collect) caught [request] error.', err.message)
 
       /** throw error */
-      throw makeApiResponseError(err)
+      throw makeApiResponseError(
+        tryCatch<{}, string, {}>(JSON.parse, err.message, { returnValue: err }),
+      )
     }
 
     try {

@@ -3,6 +3,7 @@ import dotenv from 'dotenv'
 
 import Service, { DebugLevels, SwitchActions } from '../src'
 import { TEXT } from '../src/data'
+import { wait } from './tools'
 
 dotenv.config()
 
@@ -23,38 +24,41 @@ describe('Send', () => {
       return
     }
   })
-  afterAll(() => {
-    service.connect({ action: SwitchActions.CONNECT, value: false })
-  })
-  describe('- empty/incorrect argument validation', () => {
-    test('- throws Error on missing argument', async () => {
+   afterAll(async () => {
+     service.connect({ action: SwitchActions.CONNECT, value: false })
+     await wait(2000)
+   })
+  describe('empty/incorrect argument validation:', () => {
+    it('throws Error on missing argument', async () => {
+      expect.assertions(3)
+
       try {
         // @ts-ignore
         await service.send()
-      } catch (error) {
-        expect(error).toBeInstanceOf(Error)
-        expect(error).toHaveProperty('message', TEXT.errors.validation.missingArgument)
+      } catch (err) {
+        expect(err).toBeInstanceOf(Object)
+        expect(err).toHaveProperty('name', 'BadProps')
+        expect(err).toHaveProperty('message', 'Data is missing')
       }
     })
-    test('- throws TypeError argument with wrong type', async () => {
+    it('throws TypeError argument with wrong type', async () => {
       try {
         // @ts-ignore
         await service.send(1234)
-      } catch (error) {
-        expect(error).toBeInstanceOf(TypeError)
-        expect(error).toHaveProperty('message', TEXT.errors.validation.typeOfObject)
+      } catch (err) {
+         expect(err).toBeInstanceOf(Object)
+         expect(err).toHaveProperty('name', 'BadProps')
+         expect(err).toHaveProperty('message', 'Wrong type of argument')
       }
     })
-    test('- throws TypeError argument with empty object', async () => {
+    it('throws TypeError argument with empty object', async () => {
       try {
         // @ts-ignore
         await service.send({})
-      } catch (error) {
-        expect(error).toBeInstanceOf(TypeError)
-        expect(error).toHaveProperty(
-          'message',
-          `${TEXT.errors.validation.malformedData} ${TEXT.errors.validation.missingValues}to, amount, collect, deposit.`,
-        )
+      } catch (err) {
+         expect(err).toBeInstanceOf(Object)
+         expect(err).toHaveProperty('name', 'BadProps')
+         expect(err).toHaveProperty('message', 'Data is malformed. Missing values: to, amount, collect, deposit.')
       }
     })
   })

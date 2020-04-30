@@ -1,11 +1,14 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 import dotenv from 'dotenv'
 
-import Service, { Responses, Event, SwitchActions, AuthDetails } from '../src'
-import { TEXT, validBitcoinAddresses } from '../src/data'
-import { makeString } from '../src/tools/tools'
+import Service, { Responses, Event, SwitchActions, AuthDetails, Results } from '../src'
+import { validBitcoinAddresses } from '../src/data'
+import { changeType } from '../src/tools'
+import { wait } from './tools'
 
 dotenv.config()
+
+const { log } = console
 
 const authDetails: AuthDetails = { key: process.env.AUTH_KEY ?? '', secret: process.env.AUTH_SECRET ?? '' }
 
@@ -29,59 +32,29 @@ describe('Collectables', () => {
       return
     }
   })
-  afterAll(() => {
+  afterAll(async () => {
     service.connect({ action: SwitchActions.CONNECT, value: false })
+    await wait(2000)
   })
-  describe('- empty/incorrect argument validation', () => {
-    test('- throws Error on missing argument', async () => {
-      try {
-        // @ts-ignore
-        await service.getCollectables()
-      } catch (error) {
-        expect(error).toBeInstanceOf(Error)
-        expect(error).toHaveProperty('message', TEXT.errors.validation.missingArgument)
-      }
-    })
-    test('- throws TypeError argument with wrong type', async () => {
-      try {
-        // @ts-ignore
-        await service.getCollectables(1234)
-      } catch (error) {
-        expect(error).toBeInstanceOf(TypeError)
-        expect(error).toHaveProperty('message', TEXT.errors.validation.typeOfObject)
-      }
-    })
-    test('- argument with wrong types', async () => {
-      try {
-        // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        await service.getCollectables([1, (): void => {}, {}])
-      } catch (error) {
-        expect(error).toBeInstanceOf(TypeError)
-        expect(error).toHaveProperty('message', TEXT.errors.validation.typeOfObject)
-      }
-    })
-    test('- address, that belongs to different network throws error', async () => {
-      try {
-        await service.getCollectables([validBitcoinAddresses[1]])
-      } catch (error) {
-        expect(error).toBeInstanceOf(Error)
-        expect(error).toHaveProperty(
-          'message',
-          makeString(TEXT.errors.validation.malformedAddress, [validBitcoinAddresses[1]]),
-        )
-      }
-    })
-  })
-  test('get an array as a result of proper request', async () => {
-    const result = await service.getCollectables([validBitcoinAddresses[2]])
+  it('provides response as a result of proper request', async () => {
+    try {
+      expect.assertions(3)
 
-    expect(Array.isArray(result)).toBe(true)
-  })
-  test('get an array through eventBus, if used', async () => {
-    expect.assertions(3)
+      const response = await service.getCollectables([validBitcoinAddresses[2]], { respondDirect: true })
 
-    service = new Service({ eventBus, respondAs: Responses.Callback, authDetails})
+      const data = changeType<Results<unknown>>(response)
+
+      expect(response).toBeInstanceOf(Object)
+      expect(data.total).toEqual(0)
+      expect(data.data.length).toEqual(0)
+    } catch (err) {
+      log(err)
+    }
+  })
+  it('provides response through eventBus, if used', async () => {
+    expect.assertions(4)
+
+    service = new Service({ eventBus, respondAs: Responses.Callback, authDetails })
 
     await service.getStatus()
 
@@ -91,7 +64,10 @@ describe('Collectables', () => {
 
     const event = storedEvent.filter(el => el.type === 'service_get_collectables')
 
-    expect(event.length).toBe(1)
-    expect(Array.isArray(event[0].payload)).toBe(true)
+    const data = changeType<Results<unknown>>(event[0].payload)
+
+    expect(data).toBeInstanceOf(Object)
+    expect(data.total).toEqual(0)
+    expect(data.data.length).toEqual(0)
   })
 })

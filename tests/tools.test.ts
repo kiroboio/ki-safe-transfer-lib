@@ -1,11 +1,18 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 import { capitalize, makeString, compareBasicObjects } from '../src/tools/tools'
+import { tryCatch } from '../src/tools'
+import { wait } from './tools'
+
+const { log } = console
 
 process.on('unhandledRejection', () => {
   return
 })
 
 describe('Tools', () => {
+    afterAll(async () => {
+      await wait(2000)
+    })
   describe('- "capitalize"', () => {
     test('- doesn\'t crash at non-string, and returns empty string', () => {
       // @ts-ignore
@@ -66,6 +73,23 @@ describe('Tools', () => {
     })
     test('- objects with same basic values match', () => {
       expect(compareBasicObjects({ key: 'qwerty', keyTwo: 2 }, { key: 'qwerty', keyTwo: 2 })).toBe(true)
+    })
+  })
+  describe('tryCatch', () => {
+    it('doesn\'t crash when using crashable function', () => {
+      const crashableFn = (...params: []): void => {
+        throw new Error()
+      }
+
+      expect.assertions(1)
+
+      try {
+        const result = tryCatch(crashableFn, [], { returnValue: 'test' })
+
+        expect(result).toEqual('test')
+      } catch (err) {
+        log(err)
+      }
     })
   })
 })

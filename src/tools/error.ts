@@ -12,6 +12,7 @@ function makeApiResponseError(error: unknown): ResponseError {
 
   const fn = (key: string): void => {
     if (data[key] && data[key] !== changeType<StringKeyObject<unknown>>(response)[key])
+
       response = assoc(key, data[key], response)
   }
 

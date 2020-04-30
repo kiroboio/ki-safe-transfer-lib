@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 
 import Service, { SwitchActions } from '../src'
 import { TEXT } from '../src/data'
+import { wait } from './tools'
 
 dotenv.config()
 
@@ -23,6 +24,10 @@ describe('Connect', () => {
       return
     }
   })
+    afterAll(async () => {
+      service.connect({ action: SwitchActions.CONNECT, value: false })
+      await wait(2000)
+    })
   it('should not connect without authentication details', async () => {
     expect.assertions(2)
 

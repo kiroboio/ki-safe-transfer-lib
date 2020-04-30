@@ -4,8 +4,6 @@ export * from './auth_details'
 
 export * from './settings'
 
-export * from './check_if'
-
 export * from './options'
 
 export * from './array'

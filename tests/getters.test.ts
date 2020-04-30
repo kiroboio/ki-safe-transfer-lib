@@ -7,6 +7,8 @@ import { keys } from 'ramda'
 
 dotenv.config()
 
+const { log } = console
+
 const authDetails = { key: process.env.AUTH_KEY ?? '', secret: process.env.AUTH_SECRET ?? '' }
 
 let result: Event = { type: EventTypes.SEND_MESSAGE, payload: [] }
@@ -18,182 +20,112 @@ function eventBus(event: Event): void {
 const service = new Service({ respondAs: Responses.Callback, eventBus, authDetails })
 
 describe('Getters', () => {
+  afterEach(() => {
+    result = { type: EventTypes.SEND_MESSAGE, payload: [] }
+  })
   afterAll(async () => {
     service.connect({ action: SwitchActions.CONNECT, value: false })
     await wait(2000)
   })
-   describe(' getByOwnerId:', () => {
-    //  it('- sends result through eventBus', async () => {
-    //    expect.assertions(2)
 
-    //    try {
-    //      await service.getByOwnerId('xxx')
+  it('getByOwnerId: sends result through eventBus', async () => {
+    expect.assertions(2)
 
-    //      const { type, payload } = result
+    try {
+      await service.getByOwnerId('xxx')
 
-    //      expect(type).toEqual('service_get_fresh')
-    //      expect(keys(payload).length).toBe(4)
-    //    } catch (err) {
-    //      console.log(err)
-    //    }
-    //  })
-     it('- returns result directly with "respondDirect" option override', async () => {
-       expect.assertions(1)
+      const { type, payload } = result
 
-       try {
-         const response = await service.getByOwnerId('xxx', { respondDirect: true })
+      expect(type).toEqual(EventTypes.GET_BY_OWNER_ID)
+      expect(keys(payload).length).toBe(4)
+    } catch (err) {
+      log(err)
+    }
+  })
+  it('getByOwnerId: returns result directly with "respondDirect" option override', async () => {
+    expect.assertions(1)
 
-         expect(keys(response).length).toBe(4)
-       } catch (err) {
-         console.log('t_err',err)
-       }
-     })
-   })
-  // describe(' getUsed:', () => {
-  //   it('- throws if parameter are not provided', async () => {
-  //     expect.assertions(2)
+    try {
+      const response = await service.getByOwnerId('xxx', { respondDirect: true })
 
-  //     try {
-  //       // @ts-ignore
-  //       await service.getFresh()
-  //     } catch (err) {
-  //       expect(err).toBeInstanceOf(TypeError)
-  //       expect(err).toHaveProperty('message', 'Addresses are missing. Nothing to search.')
-  //     }
-  //   })
-  //   it('- throws if parameter are of wrong type', async () => {
-  //     expect.assertions(2)
+      expect(keys(response).length).toBe(4)
+    } catch (err) {
+      log(err)
+    }
+  })
+  it('getUsed: sends result through eventBus', async () => {
+    expect.assertions(2)
 
-  //     try {
-  //       // @ts-ignore
-  //       await service.getFresh(0)
-  //     } catch (err) {
-  //       expect(err).toBeInstanceOf(TypeError)
-  //       expect(err).toHaveProperty('message', 'Wrong type of argument')
-  //     }
-  //   })
-  //   it('- sends result through eventBus', async () => {
-  //     expect.assertions(2)
+    try {
+      await service.getUsed(['xxx'])
 
-  //     try {
-  //       await service.getFresh(['xxx'])
+      const { type, payload } = result
 
-  //       const { type, payload } = result
+      expect(type).toEqual(EventTypes.GET_USED)
+      expect(keys(payload).length).toBe(4)
+    } catch (err) {
+      log(err)
+    }
+  })
+  it('getUsed: returns result directly with "respondDirect" option override', async () => {
+    expect.assertions(1)
 
-  //       expect(type).toEqual('service_get_fresh')
-  //       expect(keys(payload).length).toBe(4)
-  //     } catch (err) {
-  //       console.log(err)
-  //     }
-  //   })
-  //   it('- returns result directly with "respondDirect" option override', async () => {
-  //     expect.assertions(1)
+    try {
+      const response = await service.getUsed(['xxx'], { respondDirect: true })
 
-  //     try {
-  //       const response = await service.getFresh(['xxx'], { respondDirect: true })
+      expect(keys(response).length).toBe(4)
+    } catch (err) {
+      log(err)
+    }
+  })
+  it('getFresh: sends result through eventBus', async () => {
+    expect.assertions(2)
 
-  //       expect(keys(response).length).toBe(4)
-  //     } catch (err) {
-  //       console.log(err)
-  //     }
-  //   })
-  // })
-  // describe(' getFresh:', () => {
-  //   it('- throws if parameter are not provided', async () => {
-  //     expect.assertions(2)
+    try {
+      await service.getFresh(['xxx'])
 
-  //     try {
-  //       // @ts-ignore
-  //       await service.getFresh()
-  //     } catch (err) {
-  //       expect(err).toBeInstanceOf(TypeError)
-  //       expect(err).toHaveProperty('message', 'Addresses are missing. Nothing to search.')
-  //     }
-  //   })
-  //   it('- throws if parameter are of wrong type', async () => {
-  //     expect.assertions(2)
+      const { type, payload } = result
 
-  //     try {
-  //       // @ts-ignore
-  //       await service.getFresh(0)
-  //     } catch (err) {
-  //       expect(err).toBeInstanceOf(TypeError)
-  //       expect(err).toHaveProperty('message', 'Wrong type of argument')
-  //     }
-  //   })
-  //   it('- sends result through eventBus', async () => {
-  //     expect.assertions(2)
+      expect(type).toEqual(EventTypes.GET_FRESH)
+      expect(keys(payload).length).toBe(4)
+    } catch (err) {
+      log(err)
+    }
+  })
+  it('getFresh: returns result directly with "respondDirect" option override', async () => {
+    expect.assertions(1)
 
-  //     try {
-  //       await service.getFresh(['xxx'])
+    try {
+      const response = await service.getFresh(['xxx'], { respondDirect: true })
 
-  //       const { type, payload } = result
+      expect(keys(response).length).toBe(4)
+    } catch (err) {
+      log(err)
+    }
+  })
+  it('getUtxos: sends result through eventBus', async () => {
+    expect.assertions(2)
 
-  //       expect(type).toEqual('service_get_fresh')
-  //       expect(keys(payload).length).toBe(4)
-  //     } catch (err) {
-  //       console.log(err)
-  //     }
-  //   })
-  //   it('- returns result directly with "respondDirect" option override', async () => {
-  //     expect.assertions(1)
+    try {
+      await service.getUtxos(['xxx'])
 
-  //     try {
-  //       const response = await service.getFresh(['xxx'], { respondDirect: true })
+      const { type, payload } = result
 
-  //       expect(keys(response).length).toBe(4)
-  //     } catch (err) {
-  //       console.log(err)
-  //     }
-  //   })
-  // })
-  // describe(' getUtxos:', () => {
-  //   it('- throws if parameter are not provided', async () => {
-  //     expect.assertions(2)
+      expect(type).toEqual(EventTypes.GET_UTXOS)
+      expect(keys(payload).length).toBe(4)
+    } catch (err) {
+      log(err)
+    }
+  })
+  it('getUtxos: returns result directly with "respondDirect" option override', async () => {
+    expect.assertions(1)
 
-  //     try {
-  //       // @ts-ignore
-  //       await service.getUtxos()
-  //     } catch (err) {
-  //       expect(err).toBeInstanceOf(TypeError)
-  //       expect(err).toHaveProperty('message', 'Addresses are missing. Nothing to search.')
-  //     }
-  //   })
-  //   it('- throws if parameter are of wrong type', async () => {
-  //     expect.assertions(2)
+    try {
+      const response = await service.getUtxos(['xxx'], { respondDirect: true })
 
-  //     try {
-  //       // @ts-ignore
-  //       await service.getUtxos(0)
-  //     } catch (err) {
-  //       expect(err).toBeInstanceOf(TypeError)
-  //       expect(err).toHaveProperty('message', 'Wrong type of argument')
-  //     }
-  //   })
-  //   it('- sends result through eventBus', async () => {
-  //     expect.assertions(2)
-
-  //     try {
-  //       await service.getUtxos(['xxx'])
-
-  //       const { type, payload } = result
-
-  //       expect(type).toEqual('service_get_utxos')
-  //       expect(keys(payload).length).toBe(4)
-  //     } catch (err) {
-  //       console.log(err)
-  //     }
-  //   })
-  //   it('- returns result directly with "respondDirect" option override', async () => {
-  //     expect.assertions(1)
-
-  //     try {
-  //       const response = await service.getUtxos(['xxx'], { respondDirect: true })
-
-  //       expect(keys(response).length).toBe(4)
-  //     } catch (err) {
-  //       console.log(err)
-  //     }
-  //   })
-  // })
+      expect(keys(response).length).toBe(4)
+    } catch (err) {
+      log(err)
+    }
+  })
 })

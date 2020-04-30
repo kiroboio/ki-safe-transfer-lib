@@ -5,8 +5,11 @@ import { validBitcoinAddresses, listOfStatusKeys, typeOfStatusValues } from '../
 import { StringKeyObject, Status, AuthDetails, SwitchActions } from '../src/types'
 import { changeType } from '../src/tools/tools'
 import { validateObject } from '../src/validators'
+import { wait } from './tools'
 
 dotenv.config()
+
+const { log } = console
 
 const authDetails: AuthDetails = { key: process.env.AUTH_KEY ?? '', secret: process.env.AUTH_SECRET ?? '' }
 
@@ -19,13 +22,18 @@ function eventBus(event: Event): void {
 let service: Service
 
 async function setAsync(): Promise<Status | void> {
+  try {
   service = new Service({
     debug: DebugLevels.MUTE,
     eventBus,
     respondAs: Responses.Callback,
     authDetails,
   })
-  return await service.getStatus()
+    return await service.getStatus()
+  }
+  catch (err) {
+    log(err)
+  }
 }
 
 process.on('unhandledRejection', () => {
@@ -45,11 +53,12 @@ describe('Smaller functions', () => {
     storedEvent = {}
   })
 
-  afterAll(() => {
+  afterAll(async () => {
     service.connect({ action: SwitchActions.CONNECT, value: false })
+    await wait(2000)
   })
-  describe('- getStatus', () => {
-    test('- returns information in "Direct" mode', async () => {
+  describe(' getStatus:', () => {
+    it('returns information in "Direct" mode', async () => {
       // await setDirect()
 
       const result = await service.getStatus()
@@ -76,7 +85,7 @@ describe('Smaller functions', () => {
 
       expect(keysValuesCheck).toBe(true)
     })
-    test('- returns information in "Callback" mode', async () => {
+    it('- returns information in "Callback" mode', async () => {
       expect.assertions(2)
       await setAsync()
       await service.getStatus()
@@ -111,7 +120,7 @@ describe('Smaller functions', () => {
   })
   describe('- cached addresses functions', () => {
     // eslint-disable-next-line @typescript-eslint/quotes
-    test(`- doesn't cache address in case of incorrect request`, async () => {
+    it(`- doesn't cache address in case of incorrect request`, async () => {
       expect.assertions(2)
 
       try {
@@ -119,19 +128,19 @@ describe('Smaller functions', () => {
 
         service.getLastAddresses()
       } catch (error) {
-        expect(error).toBeInstanceOf(Error)
-        expect(error).toHaveProperty('message', `Malformed address: ${validBitcoinAddresses[1]}.`)
+        expect(error).toBeInstanceOf(Object)
+        expect(error).toHaveProperty('name', 'BadProps')
       }
     })
 
-    test('- caches address in case of correct request', async () => {
+    it('- caches address in case of correct request', async () => {
       await service.getCollectables([validBitcoinAddresses[2]])
 
       const result = service.getLastAddresses()[0]
 
       expect(result).toBe(validBitcoinAddresses[2])
     })
-    test('- clears cache', async () => {
+    it('- clears cache', async () => {
       expect.assertions(2)
       await service.getCollectables([validBitcoinAddresses[2]])
 

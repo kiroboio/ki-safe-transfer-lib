@@ -1,4 +1,4 @@
-import { validateObject, } from '../validators'
+import { validateObject } from '../validators'
 import { StringKeyObject, Sendable, QueryOptions, Address, Responses } from '../types'
 import { assoc, isNil, not, map } from 'ramda'
 import { v4 as generateId } from 'uuid'
@@ -26,17 +26,17 @@ export const capitalize = (text: string): string => {
   return reassign(splitText(text), 0, splitText(text)[0].toUpperCase()).join('')
 }
 
- function validateArray(arr: unknown[], type: string[]): boolean {
-   if (!Array.isArray(arr)) return false
+function validateArray(arr: unknown[], type: string[]): boolean {
+  if (!Array.isArray(arr)) return false
 
-   let result = true
+  let result = true
 
-   arr.forEach(el => {
-     if (!type.includes(typeof el)) result = false
-   })
+  arr.forEach(el => {
+    if (!type.includes(typeof el)) result = false
+  })
 
-   return result
- }
+  return result
+}
 
 export const makeString = (template: string, params: string[]): string => {
   if (typeof template !== 'string') return ''
@@ -52,10 +52,7 @@ export const makeString = (template: string, params: string[]): string => {
   return result
 }
 
-export const compareBasicObjects = (
-  objOne: StringKeyObject<unknown>,
-  objTwo: StringKeyObject<unknown>,
-): boolean => {
+export const compareBasicObjects = (objOne: StringKeyObject<unknown>, objTwo: StringKeyObject<unknown>): boolean => {
   let result = true
 
   try {

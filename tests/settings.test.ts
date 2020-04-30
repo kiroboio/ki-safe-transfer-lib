@@ -1,50 +1,55 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 import dotenv from 'dotenv'
+import { is } from 'ramda'
 
-import Service, { DebugLevels, Currencies, Networks, Responses, Event, AuthDetails } from '../src'
+import Service, { DebugLevels, Currencies, Networks, Responses, AuthDetails, SwitchActions } from '../src'
 import { TEXT, valuesForSettings } from '../src/data'
-import { makeString, compareBasicObjects } from '../src/tools/tools'
+import { makeString, compareBasicObjects } from '../src/tools'
+import { wait } from './tools'
 
 dotenv.config()
 
-const authDetails: AuthDetails = { key: process.env.AUTH_KEY ?? '', secret: process.env.AUTH_SECRET ?? '' }
+const { log } = console
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function eventBus(event: Event): void {
-  return
-}
+const authDetails: AuthDetails = { key: process.env.AUTH_KEY ?? '', secret: process.env.AUTH_SECRET ?? '' }
 
 process.on('unhandledRejection', () => {
   return
 })
 
-describe('Library configuration', () => {
+let service: Service
 
-  test('service runs without settings', async () => {
-    new Service({ authDetails })
-  })
-  describe('- incorrect settings', () => {
-    test('- null not considered as settings', async () => {
-      try {
-        // @ts-ignore
-        new Service(null)
-      } catch (error) {
-        expect(error).toBeInstanceOf(TypeError)
-        expect(error).toHaveProperty('message', `${TEXT.errors.validation.missingArgument}: authDetails.`)
+describe('Library configuration', () => {
+  describe(' incorrect settings:', () => {
+    afterAll(async () => {
+      if (service) {
+        service.connect({ action: SwitchActions.CONNECT, value: false })
+        await wait(2000)
       }
     })
-    test('- no string', async () => {
+    it('doesn\'t take null as settings', async () => {
       expect.assertions(2)
 
       try {
         // @ts-ignore
-        new Service('string')
+        service = new Service(null)
+      } catch (error) {
+        expect(error).toBeInstanceOf(TypeError)
+        expect(error).toHaveProperty('message', 'Data is missing: authDetails.')
+      }
+    })
+    it('doesn\'t take wrong type of params', async () => {
+      expect.assertions(2)
+
+      try {
+        // @ts-ignore
+        service = new Service('string')
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', TEXT.errors.validation.typeOfObject)
       }
     })
-    test('- no multiple parameters', async () => {
+    it('doesn\'t take multiple parameters', async () => {
       expect.assertions(2)
 
       try {
@@ -55,54 +60,19 @@ describe('Library configuration', () => {
         expect(error).toHaveProperty('message', TEXT.errors.validation.typeOfObject)
       }
     })
-    test('- no functions', async () => {
+
+    it('doesn\'t take empty object', async () => {
       expect.assertions(2)
 
       try {
         // @ts-ignore
-        new Service(() => {
-          return
-        })
-      } catch (error) {
-        expect(error).toBeInstanceOf(TypeError)
-        expect(error).toHaveProperty('message', TEXT.errors.validation.noFunction)
-      }
-    })
-    test('- no numbers', async () => {
-      expect.assertions(2)
-
-      try {
-        // @ts-ignore
-        new Service(7)
-      } catch (error) {
-        expect(error).toBeInstanceOf(TypeError)
-        expect(error).toHaveProperty('message', TEXT.errors.validation.typeOfObject)
-      }
-    })
-    test('- no booleans', async () => {
-      expect.assertions(2)
-
-      try {
-        // @ts-ignore
-        new Service(true)
-      } catch (error) {
-        expect(error).toBeInstanceOf(TypeError)
-        expect(error).toHaveProperty('message', TEXT.errors.validation.typeOfObject)
-      }
-    })
-    test('- no empty object', async () => {
-      expect.assertions(2)
-
-      try {
-        // @ts-ignore
-        new Service({})
+        service = new Service({})
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', TEXT.errors.validation.emptyObject)
       }
     })
-
-    test('- no extra keys', async () => {
+    it('doesn\'t take settings with extra keys', async () => {
       expect.assertions(2)
 
       try {
@@ -120,7 +90,7 @@ describe('Library configuration', () => {
         expect(error).toHaveProperty('message', `${TEXT.errors.validation.unknownKeys}key1.`)
       }
     })
-    test('- no unknown keys', async () => {
+    it('doesn\'t take settings with unknown keys', async () => {
       expect.assertions(2)
 
       try {
@@ -131,7 +101,7 @@ describe('Library configuration', () => {
         expect(error).toHaveProperty('message', `${TEXT.errors.validation.unknownKeys}key1.`)
       }
     })
-    test('- wrong value type', async () => {
+    it('doesn\'t take settings with wrong value type', async () => {
       expect.assertions(2)
 
       try {
@@ -139,13 +109,10 @@ describe('Library configuration', () => {
         new Service({ debug: '1' })
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
-        expect(error).toHaveProperty(
-          'message',
-          makeString(TEXT.errors.validation.wrongValueType, ['debug', 'number']),
-        )
+        expect(error).toHaveProperty('message', makeString(TEXT.errors.validation.wrongValueType, ['debug', 'number']))
       }
     })
-    test('- wrong value', async () => {
+    it('doesn\'t take settings with wrong values', async () => {
       expect.assertions(2)
 
       try {
@@ -163,8 +130,22 @@ describe('Library configuration', () => {
       }
     })
   })
-  describe('- correct settings', () => {
-    test('- correct value provided & retrieved', async () => {
+  describe(' correct settings:', () => {
+    afterAll(async () => {
+      if (service) {
+        service.connect({ action: SwitchActions.CONNECT, value: false })
+        await wait(2000)
+      }
+    })
+    it('runs without settings (auth is required)', async () => {
+      try {
+        service = new Service({ authDetails })
+        expect(is(Object, service)).toBe(true)
+      } catch (err) {
+        log(err)
+      }
+    })
+    it('provided correct settings', async () => {
       const settings = {
         debug: DebugLevels.VERBOSE,
         currency: Currencies.Bitcoin,
@@ -172,13 +153,15 @@ describe('Library configuration', () => {
         respondAs: Responses.Direct,
       }
 
-      const service = new Service({ ...settings, authDetails })
+      try {
+        service = new Service({ ...settings, authDetails })
 
-      const result = service.getSettings()
+        const compare = compareBasicObjects(service.getSettings(), { ...settings, version: 'v1' })
 
-      const compare = compareBasicObjects(result, { ...settings, version: 'v1' })
-
-      expect(compare).toBe(true)
+        expect(compare).toBe(true)
+      } catch (err) {
+        log(err)
+      }
     })
   })
 })
