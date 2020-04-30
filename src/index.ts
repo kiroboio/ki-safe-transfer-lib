@@ -1,7 +1,6 @@
 import { Config } from './config'
 
 import {
-  ApiResponseError,
   ApiService,
   Collectable,
   CollectRequest,
@@ -10,7 +9,6 @@ import {
   Event,
   EventTypes,
   NetworkTip,
-  ResponseCollect,
   ResponseCollectable,
   Responses,
   Retrievable,
@@ -28,19 +26,31 @@ import {
   Currencies,
   Networks,
 } from './types'
-import { makeString, checkOwnerId, generateId, makeOptions, flattenAddresses, isDirect } from './tools'
+import {
+  makeString,
+  checkOwnerId,
+  generateId,
+  makeOptions,
+  flattenAddresses,
+  makeApiResponseError,
+  makePropsResponseError,
+  makeReturnError,
+  stackErrors,
+} from './tools'
 import {
   validateAddress,
   validateData,
   validateObject,
   validateSettings,
   validateAuthDetails,
-  validateArray,
   validateOptions,
+  validatePropsString,
+  validatePropsArray,
+  validatePropsAddresses,
+  validateObjectWithStrings,
 } from './validators'
 import { TEXT } from './data'
 import { Logger } from './logger'
-import { isNullOrUndefined } from 'util'
 import { join, isNil, map, filter, assoc } from 'ramda'
 
 /**
@@ -123,62 +133,54 @@ class Service {
     this._networks.on('patched', (data: NetworkTip) => {
       const { height, online, fee } = data
 
-      this._eventBus({
-        type: EventTypes.UPDATE_STATUS,
-        payload: { height, online, fee },
-      })
+      this._useEventBus(EventTypes.UPDATE_STATUS, { height, online, fee })
     })
 
     // retrievable updated
     this._transfers.on('patched', (payload: Retrievable) => {
-      this._eventBus({
-        type: EventTypes.UPDATED_RETRIEVABLE,
-        payload,
-      })
+      this._useEventBus(EventTypes.UPDATED_RETRIEVABLE, payload)
     })
 
     // collectable removed
     this._transfers.on('removed', (payload: Collectable) => {
-      this._eventBus({
-        type: EventTypes.REMOVED_RETRIEVABLE,
-        payload,
-      })
+      this._useEventBus(EventTypes.REMOVED_RETRIEVABLE, payload)
     })
 
     // new collectable has been created for the previously requested address
     this._inbox.on('created', (payload: Collectable) => {
-      this._eventBus({
-        type: EventTypes.CREATED_COLLECTABLE,
-        payload,
-      })
+      this._useEventBus(EventTypes.CREATED_COLLECTABLE, payload)
     })
 
     // collectable patched
     this._inbox.on('patched', (payload: Collectable) => {
-      this._eventBus({
-        type: EventTypes.UPDATED_COLLECTABLE,
-        payload,
-      })
+      this._useEventBus(EventTypes.UPDATED_COLLECTABLE, payload)
     })
 
     // collectable removed
     this._inbox.on('removed', (payload: Collectable) => {
+      this._useEventBus(EventTypes.REMOVED_COLLECTABLE, payload)
+    })
+  }
+
+  private _useEventBus(type: EventTypes, payload: unknown): void {
+    try {
       this._eventBus({
-        type: EventTypes.REMOVED_COLLECTABLE,
+        type,
         payload,
       })
-    })
+    } catch (err) {
+      this._logger.disaster(`Service: eventBus caught error, when emitting event (${type}), with payload: `, payload)
+    }
   }
 
   private _validateProps(settings: unknown): void {
     try {
       validateSettings(settings)
       validateAuthDetails((settings as ServiceProps).authDetails)
-    } catch (e) {
-      if (!this._isTest)
-        new Logger({ debug: DebugLevels.MUTE }).error(`Service (validateProps) got an error. ${e.message}`)
+    } catch (err) {
+      new Logger({ debug: DebugLevels.MUTE }).disaster(`Service (validateProps) got an error. ${err.message}`)
 
-      throw new TypeError(e.message)
+      throw new TypeError(err.message)
     }
   }
 
@@ -210,21 +212,23 @@ class Service {
     // calling provided function as eventBus might result in error
     try {
       if (this._settings.respondAs === Responses.Callback) this._eventBus({ type, payload })
-    } catch (e) {
-      this._logger.error(`eventBus got an error. ${e}`)
+    } catch (err) {
+      throw makeReturnError('eventBus caught error.', err)
     }
   }
 
-  private _refreshInbox = (): void => {
-    if (this._lastAddresses.length)
-      return this._inbox
-        .find({ query: { to: this._lastAddresses.join(';') } })
-        .then((payload: ResponseCollectable) => {
-          this._eventBus({ type: EventTypes.GET_COLLECTABLES, payload: payload.data })
-        })
-        .catch((e: ApiResponseError) => {
-          this._logger.error(`Service (getCollectables) got an error: ${e.message || 'unknown'}`)
-        })
+  private async _refreshInbox(): Promise<void> {
+    if (this._lastAddresses && this._lastAddresses.length) {
+      let data
+
+      try {
+        data = await this._inbox.find({ query: { to: this._lastAddresses.join(';') } }).data
+      } catch (err) {
+        throw makeApiResponseError(err)
+      }
+
+      this._useEventBus(EventTypes.GET_COLLECTABLES, data)
+    }
   }
 
   private _shouldReturnDirect(options: QueryOptions | undefined): boolean {
@@ -257,84 +261,133 @@ class Service {
    * ```typescript
    * service.getStatus()
    * ```
+   * or
    *
+   * ```typescript
+   * service.getStatus({respondDirect: true})
+   * ```*
    * -
    */
   public getStatus = async (options?: Omit<QueryOptions, 'limit' | 'skip'>): Promise<Status | void> => {
+    let response: NetworkTip
+
+    /** make request */
     try {
-      const response: NetworkTip = await this._networks.get(this._settings.network)
-
-      const payload: Status = {
-        height: response.height,
-        online: response.online,
-        fee: response.fee,
-      }
-
-      this._logger.info('Service (getStatus): ', payload)
-
-      /** return results */
-      if (this._shouldReturnDirect(options)) return payload
-
-      return this._responder(EventTypes.UPDATE_STATUS, payload)
+      response = await this._networks.get(this._settings.network)
     } catch (err) {
-      this._logger.error('Service (getStatus) got an error.', err.message)
-
-      if (this._settings.respondAs === Responses.Direct) throw new Error(err.message)
+      throw makeReturnError(err.message, err)
     }
+
+    /** return results */
+    const payload: Status = {
+      height: response.height,
+      online: response.online,
+      fee: response.fee,
+    }
+
+    if (this._shouldReturnDirect(options)) return payload
+
+    this._useEventBus(EventTypes.UPDATE_STATUS, payload)
   }
 
+  // TODO: add desc
   public async getUtxos(addresses: string[], options?: QueryOptions): Promise<Results<Utxo> | void> {
+
+    /** validate props */
     try {
-      if (isNil(addresses)) throw new TypeError('Addresses are missing. Nothing to search.')
+      validatePropsArray(addresses, 'string', 'addresses', 'getUtxos')
 
-      if (!validateArray(addresses, ['string'])) throw new TypeError(TEXT.errors.validation.typeOfObject)
 
-      if (!addresses.length) return;
-
+      /** validate options, if present */
       if (options) {
-        validateObject(options, 'options')
         validateOptions(options, 'getUtxos')
       }
+    } catch (err) {
 
-      const payload = await this._utxos.find({
+      /** log error */
+      this._logger.error('Service (getUtxos) caught [validation] error.', err.message)
+
+      /** throw appropriate error */
+      throw makePropsResponseError(err)
+    }
+
+    let response
+
+    /** make request */
+    try {
+      response = await this._utxos.find({
         query: { address: join(';', addresses), ...makeOptions(options) },
       })
-
-      /** return results */
-      if (this._shouldReturnDirect(options)) return payload
-
-      return this._responder<Results<Utxo>>(EventTypes.GET_UTXOS, payload)
     } catch (err) {
-      this._logger.error('Service (getUtxos) caught error.', err.message)
-      throw err instanceof TypeError ? new TypeError(err.message) : new Error(err.message)
+
+      /** log error */
+      this._logger.error('Service (getUtxos) caught [request] error.', err.message)
+
+      /** throw error */
+      throw makeApiResponseError(err)
+    }
+
+    try {
+
+      /** return the results */
+      if (this._shouldReturnDirect(options)) return response
+
+      this._useEventBus(EventTypes.GET_UTXOS, response)
+    } catch (err) {
+      throw makeReturnError(err.message, err)
     }
   }
 
   public async getUsed(addresses: string[], options?: QueryOptions): Promise<Results<string[]> | void> {
-    try {
-      if (isNil(addresses)) throw new TypeError(TEXT.errors.validation.missingArgument)
 
-      if (!validateArray(addresses, ['string'])) throw new TypeError(TEXT.errors.validation.typeOfObject)
+    /** validate props */
+    try {
+      validatePropsArray(addresses, 'string', 'addresses', 'getUsed')
+
 
       /** validate options, if present */
       if (options) {
-        validateObject(options)
-        validateOptions(options, 'getUsed')
+        validateOptions(options, 'getUtxos')
       }
+    } catch (err) {
 
-      const payload = await this._exists.find({
-        query: { address: join(';', addresses), ...makeOptions(options) },
+      /** log error */
+      this._logger.error('Service (getUsed) caught [validation] error.', err.message)
+
+      /** throw appropriate error */
+      throw makePropsResponseError(err)
+    }
+
+    let response
+
+    /** make request */
+    try {
+      response = await this._exists.find({
+        query: {
+          address: join(';', addresses),
+          ...makeOptions(options),
+        },
       })
+    } catch (err) {
 
-      const usedAddresses = flattenAddresses(payload.data as Address[])
+      /** log error */
+      this._logger.error('Service (getUsed) caught [request] error.', err.message)
+
+      /** throw error */
+      throw makeApiResponseError(err)
+    }
+
+    try {
 
       /** return the results */
-      if (this._shouldReturnDirect(options)) return assoc('data', usedAddresses, payload)
+      const usedAddresses = flattenAddresses(response.data as Address[])
 
-      return this._responder<Results<string[]>>(EventTypes.GET_USED, assoc('data', usedAddresses, payload))
+      /** return the results */
+      if (this._shouldReturnDirect(options)) return assoc('data', usedAddresses, response)
+
+      this._useEventBus(EventTypes.GET_USED, assoc('data', usedAddresses, response))
     } catch (err) {
-      this._logger.error('Service (getUsed) caught error.', err.message)
-      throw err instanceof TypeError ? new TypeError(err.message) : new Error(err.message)
+      throw makeReturnError(err.message, err)
     }
   }
 
@@ -359,27 +412,45 @@ class Service {
    * -
    */
   public async getFresh(addresses: string[], options?: QueryOptions): Promise<Results<string[]> | void> {
+
+    /** validate props */
     try {
+      validatePropsArray(addresses, 'string', 'addresses', 'getFresh')
 
-      /** throw error if main argument is _null_ or _undefined_ */
-      if (isNil(addresses)) throw new TypeError('Addresses are missing. Nothing to search.')
-
-      /** validate main argument */
-      if (!validateArray(addresses, ['string'])) throw new TypeError(TEXT.errors.validation.typeOfObject)
 
       /** validate options, if present */
       if (options) {
-        validateObject(options, 'options')
         validateOptions(options, 'getFresh')
       }
+    } catch (err) {
 
-      /** request data from service */
-      const payload = await this._exists.find({
+      /** log error */
+      this._logger.error('Service (getFresh) caught [validation] error.', err.message)
+
+      /** throw appropriate error */
+      throw makePropsResponseError(err)
+    }
+
+    let response
+
+    /** make request */
+    try {
+      response = await this._exists.find({
         query: { address: join(';', addresses), ...makeOptions(options) },
       })
+    } catch (err) {
+
+      /** log error */
+      this._logger.error('Service (getUtxos) caught [request] error.', err.message)
+
+      /** throw error */
+      throw makeApiResponseError(err)
+    }
+
+    try {
 
       /** flatten the results */
-      const usedAddresses = flattenAddresses(payload.data as Address[])
+      const usedAddresses = flattenAddresses(response.data as Address[])
 
       /** filter out used ones */
       const filterFn = (address: string): boolean => !usedAddresses.includes(address)
@@ -387,42 +458,117 @@ class Service {
       const freshAddresses = filter(filterFn, addresses)
 
       /** return the results */
-      if (this._shouldReturnDirect(options)) return assoc('data', freshAddresses, payload)
+      if (this._shouldReturnDirect(options)) return assoc('data', freshAddresses, response)
 
-      return this._responder<Results<string[]>>(EventTypes.GET_FRESH, assoc('data', freshAddresses, payload))
+      this._useEventBus(EventTypes.GET_FRESH, assoc('data', freshAddresses, response))
+    } catch (err) {
+      throw makeReturnError(err.message, err)
+    }
+  }
+
+  /**
+   * Function to request data using the 'ownerId' set before, when sending safe transfer
+   *
+   * @param [String] id - owner ID
+   * @param [QueryOptions] [options] - options set (paging & etc.)
+   *
+   * @returns Promise | void
+   *
+   *
+   */
+  public async getByOwnerId(ownerId: string, options?: QueryOptions): Promise<Results<unknown> | void> {
+
+    /** validate props */
+    try {
+      validatePropsString(ownerId, 'ownerId', 'getOwnerById')
+
+
+      /** validate options, if present */
+      if (options) {
+        validateOptions(options, 'getOwnerById')
+      }
     } catch (err) {
 
       /** log error */
-      this._logger.error('Service (getFresh) caught error.', err.message)
+      this._logger.error('Service (getOwnerById) caught [validation] error.', err.message)
 
       /** throw appropriate error */
-      throw err instanceof TypeError ? new TypeError(err.message) : new Error(err.message)
+      throw makePropsResponseError(err)
+    }
+
+    let response
+
+    /** make request */
+    try {
+      response = await this._transfers.find({
+        query: {
+          owner: ownerId,
+          ...makeOptions(options),
+        },
+      })
+    } catch (err) {
+
+      /** log error */
+      this._logger.error('Service (getOwnerById) caught [request] error.', err.message)
+
+      /** throw error */
+      throw makeApiResponseError(err)
+    }
+
+    try {
+
+      /** return the results */
+      if (this._shouldReturnDirect(options)) return response
+
+      this._useEventBus(EventTypes.GET_BY_OWNER_ID, response)
+    } catch (err) {
+      throw makeReturnError(err.message, err)
     }
   }
 
   // get retrievable by ID
-  public async getRetrievable(id: string, options?: QueryOptions): Promise<Retrievable | void> {
-    try {
-      // validate props
-      if (!id) throw new TypeError(TEXT.errors.validation.missingArgument)
+  public async getRetrievable(id: string, options?: QueryOptions): Promise<Results<Retrievable> | void> {
 
-      if (typeof id !== 'string') throw new TypeError(TEXT.errors.validation.typeOfObject)
+    /** validate props */
+    try {
+      validatePropsString(id, 'ownerId', 'getRetrievable')
+
 
       /** validate options, if present */
       if (options) {
-        validateObject(options)
         validateOptions(options, 'getRetrievable')
       }
+    } catch (err) {
 
-      const payload: Retrievable = await this._transfers.get(id)
+      /** log error */
+      this._logger.error('Service (getRetrievable) caught [validation] error.', err.message)
+
+      /** throw appropriate error */
+      throw makePropsResponseError(err)
+    }
+
+    let response: Results<Retrievable>
+
+    /** make request */
+    try {
+      response = await this._transfers.get(id)
+    } catch (err) {
+
+      /** log error */
+      this._logger.error('Service (getRetrievable) caught [request] error.', err.message)
+
+      /** throw error */
+      throw makeApiResponseError(err)
+    }
+
+    try {
 
       /** return the results */
-      if (this._shouldReturnDirect(options)) return payload
+      if (this._shouldReturnDirect(options)) return response
 
-      return this._responder<Retrievable>(EventTypes.GET_RETRIEVABLE, payload)
+      this._useEventBus(EventTypes.GET_RETRIEVABLE, response)
     } catch (err) {
-      this._logger.error('Service (getRetrievable) got an error.', err.message)
-      throw err instanceof TypeError ? new TypeError(err.message) : new Error(err.message)
+      throw makeReturnError(err.message, err)
     }
   }
 
@@ -445,162 +591,207 @@ class Service {
    *
    * -
    */
-  public async getRetrievables(ids: string[], options?: QueryOptions): Promise<Retrievable[] | void> {
+  public async getRetrievables(ids: string[], options?: QueryOptions): Promise<Results<Retrievable[]> | void> {
+
+    /** validate props */
     try {
+      validatePropsArray(ids, 'string', 'ids', 'getRetrievables')
 
-      /** throw error if main argument is _null_ or _undefined_ */
-      if (isNil(ids)) throw new TypeError(TEXT.errors.validation.missingArgument)
-
-      /** validate main argument */
-      if (!validateArray(ids, ['string'])) throw new TypeError(TEXT.errors.validation.typeOfObject)
 
       /** validate options, if present */
       if (options) {
-        validateObject(options)
         validateOptions(options, 'getRetrievables')
       }
-
-      /** request data from service */
-      const payload: Retrievable[] = await this._transfers.find({
-        query: { id: ids.join(';'), ...makeOptions(options) },
-      })
-
-      this._logger.info('Service (getRetrievables): ', payload)
-
-      /** return the results */
-      if (this._shouldReturnDirect(options)) return payload
-
-      return this._responder<Retrievable[]>(EventTypes.GET_RETRIEVABLES, payload)
     } catch (err) {
 
       /** log error */
-      this._logger.error('Service (getRetrievables) got an error.', err.message)
+      this._logger.error('Service (getRetrievables) caught [validation] error.', err.message)
 
       /** throw appropriate error */
-      throw err instanceof TypeError ? new TypeError(err.message) : new Error(err.message)
+      throw makePropsResponseError(err)
+    }
+
+    let response: Results<Retrievable[]>
+
+    /** make request */
+    try {
+      response = await this._transfers.find({
+        query: { id: ids.join(';'), ...makeOptions(options) },
+      })
+    } catch (err) {
+
+      /** log error */
+      this._logger.error('Service (getRetrievables) caught [request] error.', err.message)
+
+      /** throw error */
+      throw makeApiResponseError(err)
+    }
+
+    try {
+
+      /** return the results */
+      if (this._shouldReturnDirect(options)) return response
+
+      this._useEventBus(EventTypes.GET_RETRIEVABLES, response)
+    } catch (err) {
+      throw makeReturnError(err.message, err)
     }
   }
 
   // get all collectables by recipient address
-  public async getCollectables(addresses: string[], options?: QueryOptions): Promise<Collectable[] | void> {
+  public async getCollectables(addresses: string[], options?: QueryOptions): Promise<Results<Collectable> | void> {
+
+    /** validate props */
     try {
-      // validate props
-      if (!addresses) throw new TypeError(TEXT.errors.validation.missingArgument)
+      validatePropsAddresses(addresses, 'addresses', 'getCollectables', this._settings)
 
-      if (!Array.isArray(addresses)) throw new TypeError(TEXT.errors.validation.typeOfObject)
-
-      addresses.forEach(address => {
-        if (typeof address !== 'string') throw new TypeError(TEXT.errors.validation.typeOfObject)
-
-        if (
-          !validateAddress({
-            address,
-            currency: this._settings.currency,
-            networkType: this._settings.network,
-          })
-        )
-          throw new Error(makeString(TEXT.errors.validation.malformedAddress, [address]))
-      })
 
       /** validate options, if present */
       if (options) {
-        validateObject(options)
         validateOptions(options, 'getCollectables')
       }
+    } catch (err) {
 
-      const payload: ResponseCollectable = await this._inbox.find({
+      /** log error */
+      this._logger.error('Service (getCollectables) caught [validation] error.', err.message)
+
+      /** throw appropriate error */
+      throw makePropsResponseError(err)
+    }
+
+    let response: Results<Collectable>
+
+    /** make request */
+    try {
+      response = await this._inbox.find({
         query: { to: addresses.join(';') },
-      })
+      }).data
+    } catch (err) {
 
-      this._lastAddresses = addresses
+      /** log error */
+      this._logger.error('Service (getCollectables) caught [request] error.', err.message)
+
+      /** throw error */
+      throw makeApiResponseError(err)
+    }
+
+    /** cache addresses */
+    this._lastAddresses = addresses
+
+    try {
 
       /** return the results */
-      if (this._shouldReturnDirect(options)) return payload.data
+      if (this._shouldReturnDirect(options)) return response
 
-      return this._responder<Collectable[]>(EventTypes.GET_COLLECTABLES, payload.data)
+      this._useEventBus(EventTypes.GET_COLLECTABLES, response)
     } catch (err) {
-      this._logger.error('Service (getCollectables) got an error.', err.message)
-      throw err instanceof TypeError ? new TypeError(err.message) : new Error(err.message)
+      throw makeReturnError(err.message, err)
     }
   }
 
   // send retrievable/collectable transaction
-  public async send(transaction: Sendable, options?: QueryOptions): Promise<Retrievable | void> {
+  public async send(transaction: Sendable, options?: QueryOptions): Promise<Results<Retrievable> | void> {
+
+    /** validate props */
     try {
-      // validate props
-      if (isNullOrUndefined(transaction)) throw new Error(TEXT.errors.validation.missingArgument)
+      if (isNil(transaction)) throw new Error(TEXT.errors.validation.missingArgument)
 
       validateObject(transaction, 'transaction')
       validateData(transaction, this._settings.currency, this._settings.network)
 
       /** validate options, if present */
       if (options) {
-        validateObject(options, 'options')
         validateOptions(options, 'send')
       }
+    } catch (err) {
 
-      const payload = await this._transfers.create(checkOwnerId(transaction))
+      /** log error */
+      this._logger.error('Service (collect) caught [validation] error.', err.message)
+
+      /** throw appropriate error */
+      throw makePropsResponseError(err)
+    }
+
+    let response
+
+    /** make request */
+    try {
+      response = await this._transfers.create(checkOwnerId(transaction))
+    } catch (err) {
+
+      /** log error */
+      this._logger.error('Service (collect) caught [request] error.', err.message)
+
+      /** throw error */
+      throw makeApiResponseError(err)
+    }
+
+    try {
 
       /** return the results */
-      if (this._shouldReturnDirect(options)) return payload
+      if (this._shouldReturnDirect(options)) return response
 
-      return this._responder<Retrievable>(EventTypes.SEND_TRANSACTION, payload)
+      this._useEventBus(EventTypes.SEND_TRANSACTION, response)
     } catch (err) {
-      this._logger.error('Service (send) got an error.', err.message)
-      throw err instanceof TypeError ? new TypeError(err.message) : new Error(err.message)
+      throw makeReturnError(err.message, err)
     }
   }
 
   // collect transaction
-  public async collect(request: CollectRequest, options?: QueryOptions): Promise<Message | void> {
+  public async collect(request: CollectRequest, options?: QueryOptions): Promise<Results<Message> | void> {
+
+    /** validate props */
     try {
+      validateObjectWithStrings(request, 'request', 'collect')
 
       /** validate options, if present */
       if (options) {
-        validateObject(options)
-        validateOptions(options, 'send')
+        validateOptions(options, 'collect')
       }
-
-      const payload = await this._collect.create({ ...request })
-
-      /** return the results */
-      const returnObject = {
-        text: 'Request submitted.',
-        isError: false,
-        data: payload,
-      }
-
-      if (this._shouldReturnDirect(options)) return returnObject
-
-      return this._responder<Message>(EventTypes.COLLECT_TRANSACTION, returnObject)
     } catch (err) {
-      if (this._shouldReturnDirect(options)) throw new Error(err.message)
 
-      this._logger.error(`Service (collect) got an error. ${err.message}`, err)
+      /** log error */
+      this._logger.error('Service (collect) caught [validation] error.', err.message)
 
-      const response = {
-        text: 'Request submitted.',
-        isError: false,
-        data: err,
-      }
+      /** throw appropriate error */
+      throw makePropsResponseError(err)
+    }
 
-      return this._responder<Message>(EventTypes.COLLECT_TRANSACTION, response)
+    let response
+
+    /** make request */
+    try {
+      response = await this._collect.create({ ...request })
+    } catch (err) {
+
+      /** log error */
+      this._logger.error('Service (collect) caught [request] error.', err.message)
+
+      /** throw error */
+      throw makeApiResponseError(err)
+    }
+
+    try {
+      if (this._shouldReturnDirect(options)) return response
+
+      this._useEventBus(EventTypes.COLLECT_TRANSACTION, response)
+    } catch (err) {
+      throw makeReturnError(err.message, err)
     }
   }
 
-  // connection
-  public connect(props: Switch): boolean | Message | void {
+  // TODO: desc
+  // TODO: test
+  public connect(props: Switch, options?: Omit<QueryOptions, 'limit' | 'skip'>): boolean | Message | void {
     try {
       const result = this._switch(props)
 
-      return result
-    } catch (e) {
-      this._logger.error(`Service (switch) got an error. ${e.message}`, e.message)
+      /** return the results */
+      if (this._shouldReturnDirect(options)) return result
 
-      return this._responder<Message>(EventTypes.SEND_MESSAGE, {
-        text: e.message,
-        isError: true,
-      })
+      this._useEventBus(EventTypes.SEND_MESSAGE, result)
+    } catch (err) {
+      throw makeReturnError(err.message, err)
     }
   }
 }

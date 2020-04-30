@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
-import { capitalize, makeString, compareBasicObjects } from '../src/tools'
+import { capitalize, makeString, compareBasicObjects } from '../src/tools/tools'
 
 process.on('unhandledRejection', () => {
   return

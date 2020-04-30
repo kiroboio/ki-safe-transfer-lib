@@ -3,7 +3,7 @@ import dotenv from 'dotenv'
 
 import Service, { Responses, Event, SwitchActions, AuthDetails } from '../src'
 import { TEXT, validBitcoinAddresses } from '../src/data'
-import { makeString } from '../src/tools'
+import { makeString } from '../src/tools/tools'
 
 dotenv.config()
 

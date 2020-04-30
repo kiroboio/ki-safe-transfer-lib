@@ -143,21 +143,22 @@ export interface LoggerProps {
 }
 
 export enum EventTypes {
+  COLLECT_TRANSACTION = 'service_collect_transaction',
+  CREATED_COLLECTABLE = 'service_created_collectable',
+  GET_BY_OWNER_ID = 'service_get_by_owner_id',
+  GET_COLLECTABLES = 'service_get_collectables',
+  GET_FRESH = 'service_get_fresh',
   GET_RETRIEVABLE = 'service_get_retrievable',
   GET_RETRIEVABLES = 'service_get_retrievables',
-  GET_COLLECTABLES = 'service_get_collectables',
-  UPDATE_STATUS = 'service_update_status',
-  SEND_TRANSACTION = 'service_send_transaction',
-  COLLECT_TRANSACTION = 'service_collect_transaction',
-  UPDATED_RETRIEVABLE = 'service_updated_retrievable',
-  REMOVED_RETRIEVABLE = 'service_removed_retrievable',
-  UPDATED_COLLECTABLE = 'service_updated_collectable',
-  REMOVED_COLLECTABLE = 'service_removed_collectable',
-  CREATED_COLLECTABLE = 'service_created_collectable',
-  SEND_MESSAGE = 'service_message',
-  GET_UTXOS = 'service_get_utxos',
   GET_USED = 'service_get_used',
-  GET_FRESH = 'service_get_fresh',
+  GET_UTXOS = 'service_get_utxos',
+  REMOVED_COLLECTABLE = 'service_removed_collectable',
+  REMOVED_RETRIEVABLE = 'service_removed_retrievable',
+  SEND_MESSAGE = 'service_message',
+  SEND_TRANSACTION = 'service_send_transaction',
+  UPDATE_STATUS = 'service_update_status',
+  UPDATED_COLLECTABLE = 'service_updated_collectable',
+  UPDATED_RETRIEVABLE = 'service_updated_retrievable',
 }
 
 export type Message = {
@@ -276,4 +277,18 @@ export interface QueryOptions {
  */
 export interface Address {
   address: string
+}
+
+export interface ResponseError {
+  message: string
+  code?: number
+  name: string
+  data?: unknown[]
+}
+
+export interface ApiError {
+  name: string
+  message: string
+  code: number
+  data: unknown[]
 }

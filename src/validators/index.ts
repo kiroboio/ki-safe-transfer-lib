@@ -15,3 +15,5 @@ export * from './data'
 export * from './address'
 
 export * from './type'
+
+export * from './string'

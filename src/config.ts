@@ -60,9 +60,7 @@ class Config {
     this._debug = this._debugLevelSelector(debug)
     this._currency = currency ? currency : Currencies.Bitcoin
     this._network = network ? network : Networks.Testnet
-    this._getStatus = getStatus
-      ? getStatus
-      : undefined
+    this._getStatus = getStatus ? getStatus : undefined
 
     this._logger = logger ? logger : new Logger({ debug: DebugLevels.MUTE })
     this._auth = authDetails
@@ -166,7 +164,13 @@ class Config {
   private _onConnect = (): void => {
     this._logger.info('Service (connect) is ON.')
 
-    if (this._getStatus) this._getStatus()
+    if (this._getStatus) {
+      try {
+        this._getStatus()
+      } catch (err) {
+        this._logger.error('Service (onConnect) caught error when calling (getStatus).', err)
+      }
+    }
 
     if (this._refresh) this._refresh()
   }

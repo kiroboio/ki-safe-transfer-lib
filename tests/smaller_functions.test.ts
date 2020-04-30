@@ -3,7 +3,7 @@ import dotenv from 'dotenv'
 import Service, { DebugLevels, Responses, Event } from '../src'
 import { validBitcoinAddresses, listOfStatusKeys, typeOfStatusValues } from '../src/data'
 import { StringKeyObject, Status, AuthDetails, SwitchActions } from '../src/types'
-import { changeType } from '../src/tools'
+import { changeType } from '../src/tools/tools'
 import { validateObject } from '../src/validators'
 
 dotenv.config()

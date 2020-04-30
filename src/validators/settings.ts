@@ -2,7 +2,7 @@ import { TEXT, listOfSettingsKeys, typeOfSettingsKeys, valuesForSettings } from 
 import { validateObject, } from './object'
 import {validateAuthDetails} from './auth_details'
 import { StringKeyObject } from '../'
-import { makeString } from '../tools'
+import { makeString } from '../tools/tools'
 
 export const validateSettings = (settings: unknown): void => {
   if (!settings) throw new TypeError(`${TEXT.errors.validation.missingArgument}: authDetails.`)

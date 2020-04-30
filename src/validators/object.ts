@@ -1,14 +1,60 @@
-import { isNil } from 'ramda'
+import { isNil, keys } from 'ramda'
 import { TEXT } from '../data'
-import { makeString, capitalize } from '../tools'
+import { makeString, capitalize, changeType } from '../tools/tools'
+import { StringKeyObject } from 'src/types'
 
-export const validateObject = (data: unknown, argName?: string): void => {
+function validateObject(data: unknown, argName?: string): void {
   if (isNil(data)) throw new TypeError(TEXT.errors.validation.missingArgument)
 
   if (data !== Object(data)) throw new TypeError(TEXT.errors.validation.typeOfObject)
 
   if (Array.isArray(data))
-    throw new TypeError(makeString(TEXT.validation.cantBe, [argName ? capitalize(argName) : 'Argument', 'array', 'object {}']))
+    throw new TypeError(
+      makeString(TEXT.validation.cantBe, [argName ? capitalize(argName) : 'Argument', 'array', 'object {}']),
+    )
 
   if (typeof data === 'function') throw new TypeError(TEXT.errors.validation.noFunction)
 }
+
+function validateObjectWithStrings(params: {}, paramName: string, method: string): void {
+  if (isNil(params))
+    throw new TypeError(
+      makeString(TEXT.validation.params, [
+        paramName,
+        method,
+        'missing or undefined/null',
+        'object {[index:string]:string}',
+      ]),
+    )
+
+  if (Array.isArray(params))
+    throw new TypeError(
+      makeString(TEXT.validation.params, [paramName, method, 'array', 'object {[index:string]:string}']),
+    )
+
+  if (typeof params === 'function')
+    throw new TypeError(
+      makeString(TEXT.validation.params, [paramName, method, 'function', 'object {[index:string]:string}']),
+    )
+
+  if (params !== Object(params))
+    throw new TypeError(
+      makeString(TEXT.validation.params, [paramName, method, typeof params, 'object {[index:string]:string}']),
+    )
+
+  if (!keys(params).length) throw new TypeError(makeString(TEXT.validation.empty, [paramName, method]))
+
+  const data = changeType<StringKeyObject<string>>(params)
+
+  const fn = (key: string): void => {
+    if (typeof data[key] !== 'string')
+      throw new TypeError(makeString(TEXT.validation.params, [`Element ${key}`, method, typeof data[key], 'string']))
+
+    if (!data[key])
+      throw new TypeError(
+        makeString(TEXT.validation.params, [`Element ${key}`, method, 'empty', 'value in string form']),
+      )
+  }
+}
+
+export { validateObjectWithStrings, validateObject }

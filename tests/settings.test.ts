@@ -3,7 +3,7 @@ import dotenv from 'dotenv'
 
 import Service, { DebugLevels, Currencies, Networks, Responses, Event, AuthDetails } from '../src'
 import { TEXT, valuesForSettings } from '../src/data'
-import { makeString, compareBasicObjects } from '../src/tools'
+import { makeString, compareBasicObjects } from '../src/tools/tools'
 
 dotenv.config()
 

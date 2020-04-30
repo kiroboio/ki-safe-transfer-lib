@@ -2,7 +2,6 @@ import { DebugLevels, LoggerProps } from './types'
 import { is } from './mode'
 import { not } from 'ramda'
 
-
 class Logger {
   debug: DebugLevels
 
@@ -26,6 +25,10 @@ class Logger {
 
   error(message: string, payload?: unknown): void {
     if (this.shouldShowError()) this.log.error(message, payload ?? '')
+  }
+
+  disaster(message: string, payload?: unknown): void {
+    this.log.error(message, payload ?? '')
   }
 
   warning(message: string, payload?: unknown): void {
