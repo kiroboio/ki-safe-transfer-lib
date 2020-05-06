@@ -71,7 +71,7 @@ class Config {
 
 
     const connect = feathers().configure(socketio(this._socket, {
-      timeout: 2000,
+      timeout: 10000,
     }))
 
     this._connect = connect.configure(auth({ storageKey: 'auth' }))
