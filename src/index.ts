@@ -1,3 +1,5 @@
+import { join, isNil, filter, assoc } from 'ramda'
+
 import { Config } from './config'
 
 import {
@@ -49,7 +51,6 @@ import {
 } from './validators'
 import { TEXT } from './data'
 import { Logger } from './logger'
-import { join, isNil, map, filter, assoc } from 'ramda'
 
 /**
  * Kirobo Retrievable Transfer library class to provide convenient
