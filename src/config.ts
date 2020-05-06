@@ -69,7 +69,10 @@ class Config {
     // setup
     this._socket = io(this._url)
 
-    const connect = feathers().configure(socketio(this._socket))
+
+    const connect = feathers().configure(socketio(this._socket, {
+      timeout: 2000,
+    }))
 
     this._connect = connect.configure(auth({ storageKey: 'auth' }))
 
@@ -136,7 +139,7 @@ class Config {
     return path + `${this._network}/${this._endpoints[endpoint]}`
   }
 
-  public _authSocket(): Promise<AuthenticationResult | void> | undefined {
+  private _authSocket(): Promise<AuthenticationResult | void> | undefined {
     try {
       return (
         this._connect

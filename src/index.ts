@@ -9,7 +9,6 @@ import {
   Event,
   EventTypes,
   NetworkTip,
-  ResponseCollectable,
   Responses,
   Retrievable,
   Sendable,
@@ -83,8 +82,6 @@ class Service {
   private _lastAddresses: string[] = [] // caching last addresses request
 
   private _switch: (config: Switch) => boolean | void
-
-  private _isTest = process.env.NODE_ENV === 'test'
 
   constructor(settings: ServiceProps) {
     this._validateProps(settings)
@@ -183,39 +180,6 @@ class Service {
     }
   }
 
-  /**
-   * Function to select respond method according to the settings and respond
-   * with type (if needed) and payload provided
-   *
-   * @private
-   * @function
-   * @name _responder
-   * @param T - type of payload
-   * @param [EventTypes] type - type of event - string which will be sent
-   * through eventBus
-   * @param [T] payload - payload to be either returned (if in _Direct_ mode)
-   * or sent through eventBus
-   *
-   * @returns T | void
-   *
-   * #### Example
-   *
-   * ```typescript
-   * this._responder<Results<Utxo>>(EventTypes.GET_UTXOS, payload)
-   * ```
-   * _
-   */
-  private _responder<T>(type: EventTypes, payload: T): T | void {
-    if (this._settings.respondAs === Responses.Direct) return payload
-
-    // calling provided function as eventBus might result in error
-    try {
-      if (this._settings.respondAs === Responses.Callback) this._eventBus({ type, payload })
-    } catch (err) {
-      throw makeReturnError('eventBus caught error.', err)
-    }
-  }
-
   private async _refreshInbox(): Promise<void> {
     if (this._lastAddresses && this._lastAddresses.length) {
       let data
@@ -247,6 +211,30 @@ class Service {
   // show settings
   public getSettings = (): Settings => this._settings
 
+  // TODO: add desc
+  // public getNetworks = async () => {
+  //   let response: NetworkTip
+  //
+  //   /** make request */
+  //   try {
+  //     response = await this._networks
+  //     console.log(response)
+  //   } catch (err) {
+  //     throw makeReturnError(err.message, err)
+  //   }
+  //
+  //   /** return results */
+  //   const payload: Status = {
+  //     height: response.height,
+  //     online: response.online,
+  //     fee: response.fee,
+  //   }
+  //
+  //   if (this._shouldReturnDirect(options)) return payload
+  //
+  //   this._useEventBus(EventTypes.UPDATE_STATUS, payload)
+  // }
+  //
   /**
    * Function to get current status from API - if API is online, block height,
    * average fee for the previous block

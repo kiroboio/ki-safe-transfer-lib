@@ -6,8 +6,8 @@ export enum Currencies {
 
 export enum Networks {
   Testnet = 'testnet',
-  Regnet = 'regnet',
-  Mainnet = 'mainnet',
+  Regnet = 'regtest',
+  Mainnet = 'main',
 }
 
 // debug:

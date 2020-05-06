@@ -5,7 +5,7 @@ export const TEXT = {
     cantBe: '%1 can\'t be %2. It should be %3.',
     params: '%1 in params of "%2" method can\'t be %3. It should be %4.',
     empty: '%1 in params of "%2" method can\'t be empty.',
-    notAddress: '%1 in param of "%2" method is not a valid address. Crypto settings: %3'
+    notAddress: '%1 in param of "%2" method is not a valid address. Crypto settings: %3',
   },
   errors: {
     validation: {
@@ -50,9 +50,9 @@ export const typeOfSettingsKeys: StringKeyObject<string> = {
   authDetails: 'object',
 }
 
-export const valuesForSettings: StringKeyObject<(string|number)[]> = {
+export const valuesForSettings: StringKeyObject<(string | number)[]> = {
   currency: ['btc'],
-  network: ['testnet', 'regnet'],
+  network: ['testnet', 'regtest', 'main'],
   debug: [0, 1, 2],
   respondAs: ['callback', 'direct'],
 }
