@@ -5,7 +5,7 @@ import socketio from '@feathersjs/socketio-client'
 import { AuthenticationResult } from '@feathersjs/authentication'
 import auth from '@feathersjs/authentication-client'
 
-import { capitalize } from './tools'
+import { capitalize, makeApiResponseError } from './tools'
 
 import {
   ConfigProps,
@@ -23,6 +23,8 @@ import {
 } from './types'
 import { Logger } from './logger'
 import { is } from './mode'
+import { o } from 'ramda'
+import { LogApiError, LogApiWarning } from './tools/log'
 
 class Config {
   // fixed
@@ -78,7 +80,8 @@ class Config {
 
     this._connect = connect.configure(auth({ storageKey: 'auth' }))
 
-    this._authSocket()
+    // TODO: refactor
+    this._authSocket()?.catch(e => console.log('auth', e))
 
     // connect/disconnect
     try {
@@ -87,16 +90,16 @@ class Config {
           .then(() => this._onConnect())
           .catch(e => console.log('Service (auth) got an error', e))
       })
-    } catch (e) {
-      this._logger.error(`Service (connect) got an error. ${e.message || ''}`)
+    } catch (err) {
+      new LogApiError('Service (connect) got an error.', err).make()
     }
 
     try {
       this._connect.io.on('disconnect', (payload: string) =>
-        this._logger.warning('Service (disconnect) is OFF.', capitalize(payload)),
+        new LogApiWarning('Service (disconnect) is OFF.', capitalize(payload)).make(),
       )
-    } catch (e) {
-      this._logger.error(`Service (disconnect) got an error. ${e.message || ''}`)
+    } catch (err) {
+      new LogApiError('Service (disconnect) got an error.', err).make()
     }
 
     // set internet connection check
@@ -134,13 +137,12 @@ class Config {
   }
 
   private _isDirect(endpoint: Endpoints): boolean {
-if (endpoint === Endpoints.Networks) return true
+    if (endpoint === Endpoints.Networks) return true
 
     if (endpoint === Endpoints.RateToUsd) return true
 
     return false
   }
-
 
   private _makeEndpointPath = (endpoint: Endpoints): string => {
     const path = `/${this._VERSION}/${this._currency}/`
@@ -163,14 +165,17 @@ if (endpoint === Endpoints.Networks) return true
                 key: this._auth.key || '',
                 secret: this._auth.secret || '',
               })
-              .catch((err: { message: string }) => {
+              .catch(err => {
                 // if not
-                this._logger.error(`Authentication error (${err.message}).`)
+                new LogApiError(
+                  'Service (authSocket > authenticate) caught error when calling (getStatus).',
+                  err,
+                ).make()
               })
           })
       )
     } catch (err) {
-      this._logger.error('Service (authStocket) caught error', err.message)
+      new LogApiError('Service (authSocket) caught error.', err).make()
       return undefined
     }
   }
@@ -179,11 +184,9 @@ if (endpoint === Endpoints.Networks) return true
     this._logger.info('Service (connect) is ON.')
 
     if (this._getStatus) {
-      try {
-        this._getStatus()
-      } catch (err) {
-        this._logger.error('Service (onConnect) caught error when calling (getStatus).', err)
-      }
+      this._getStatus().catch(err => {
+        new LogApiError('Service (onConnect) caught error when calling (getStatus).', err).make()
+      })
     }
 
     if (this._refresh) this._refresh()
