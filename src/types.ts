@@ -35,6 +35,7 @@ export enum Endpoints {
   Networks = 'networks',
   Utxos = 'utxos',
   Exists = 'exists',
+  RateToUsd = 'to/usd',
 }
 
 export interface ApiService {
@@ -159,6 +160,7 @@ export enum EventTypes {
   UPDATE_STATUS = 'service_update_status',
   UPDATED_COLLECTABLE = 'service_updated_collectable',
   UPDATED_RETRIEVABLE = 'service_updated_retrievable',
+  GET_BTC_TO_USD_RATES = 'service_get_btc_to_usd_rates',
 }
 
 export type Message = {

@@ -19,6 +19,7 @@ import {
   AuthDetails,
   ApiService,
   Status,
+  StringKeyObject,
 } from './types'
 import { Logger } from './logger'
 import { is } from './mode'
@@ -29,7 +30,7 @@ class Config {
 
   protected _url = 'https://api.kirobo.me'
 
-  protected _endpoints = {
+  protected _endpoints: StringKeyObject<string> = {
     collect: 'transfer/action/collect',
     inbox: 'transfer/inbox',
     transfers: 'transfers',
@@ -69,10 +70,11 @@ class Config {
     // setup
     this._socket = io(this._url)
 
-
-    const connect = feathers().configure(socketio(this._socket, {
-      timeout: 10000,
-    }))
+    const connect = feathers().configure(
+      socketio(this._socket, {
+        timeout: 10000,
+      }),
+    )
 
     this._connect = connect.configure(auth({ storageKey: 'auth' }))
 
@@ -131,10 +133,19 @@ class Config {
     return DebugLevels.QUIET
   }
 
+  private _isDirect(endpoint: Endpoints): boolean {
+if (endpoint === Endpoints.Networks) return true
+
+    if (endpoint === Endpoints.RateToUsd) return true
+
+    return false
+  }
+
+
   private _makeEndpointPath = (endpoint: Endpoints): string => {
     const path = `/${this._VERSION}/${this._currency}/`
 
-    if (endpoint === Endpoints.Networks) return path + endpoint
+    if (this._isDirect(endpoint)) return path + endpoint
 
     return path + `${this._network}/${this._endpoints[endpoint]}`
   }

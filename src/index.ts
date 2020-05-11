@@ -80,6 +80,8 @@ class Service {
 
   private _exists: ApiService
 
+  private _rateBtcToUsd: ApiService
+
   private _lastAddresses: string[] = [] // caching last addresses request
 
   private _switch: (config: Switch) => boolean | void
@@ -123,6 +125,7 @@ class Service {
     this._collect = config.getService(Endpoints.Collect)
     this._utxos = config.getService(Endpoints.Utxos)
     this._exists = config.getService(Endpoints.Exists)
+    this._rateBtcToUsd = config.getService(Endpoints.RateToUsd)
 
     // event listeners
 
@@ -236,6 +239,30 @@ class Service {
   //   this._useEventBus(EventTypes.UPDATE_STATUS, payload)
   // }
   //
+
+  public async getRates() {
+    let response
+
+    /** make request */
+    try {
+      response = await this._rateBtcToUsd.find({})
+    } catch (err) {
+      throw makeReturnError(err.message, err)
+    }
+
+    // console.log(response)
+    // /** return results */
+    // const payload: Status = {
+    //   height: response.height,
+    //   online: response.online,
+    //   fee: response.fee,
+    // }
+
+    // if (this._shouldReturnDirect(options)) return payload
+
+    this._useEventBus(EventTypes.GET_BTC_TO_USD_RATES, response.data)
+  }
+
   /**
    * Function to get current status from API - if API is online, block height,
    * average fee for the previous block
