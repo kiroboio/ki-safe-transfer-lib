@@ -2,7 +2,6 @@
 import dotenv from 'dotenv'
 
 import Service, { DebugLevels, SwitchActions } from '../src'
-import { TEXT } from '../src/data'
 import { wait } from './tools'
 
 dotenv.config()
@@ -58,7 +57,7 @@ describe('Send', () => {
       } catch (err) {
          expect(err).toBeInstanceOf(Object)
          expect(err).toHaveProperty('name', 'BadProps')
-         expect(err).toHaveProperty('message', 'Data is malformed. Missing values: to, amount, collect, deposit.')
+         expect(err).toHaveProperty('message', 'Data is malformed. Missing values: to, amount, collect, deposit, owner.')
       }
     })
   })

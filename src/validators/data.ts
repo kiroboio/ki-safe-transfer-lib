@@ -21,6 +21,8 @@ export const validateData = (data: Sendable, currency: string, networkType: stri
 
   if (!data.deposit) pushMissing('deposit')
 
+  if (!data.owner) pushMissing('owner')
+
   // if all keys present, check for malformed values
   if (!validate.errors[TEXT.errors.validation.missingValues].length) {
     if (!validateAddress({ address: data.to, currency, networkType })) pushMalformed('to')
@@ -30,6 +32,8 @@ export const validateData = (data: Sendable, currency: string, networkType: stri
     if (typeof data.deposit !== 'string') pushMalformed('deposit')
 
     if (typeof data.amount !== 'number') pushMalformed('amount')
+
+    if (typeof data.owner !== 'string') pushMalformed('owner')
 
     if (data.from && typeof data.from !== 'string') pushMalformed('from')
 

@@ -1,4 +1,5 @@
 import { Logger } from './logger'
+import { o } from 'ramda'
 
 export enum Currencies {
   Bitcoin = 'btc',
@@ -161,6 +162,8 @@ export enum EventTypes {
   UPDATED_COLLECTABLE = 'service_updated_collectable',
   UPDATED_RETRIEVABLE = 'service_updated_retrievable',
   GET_BTC_TO_USD_RATES = 'service_get_btc_to_usd_rates',
+  GET_BTC_TO_USD_RATE = 'service_get_btc_to_usd_rate',
+  GET_ONLINE_NETWORKS = 'service_get_online_networks'
 }
 
 export type Message = {
@@ -192,7 +195,7 @@ export type Sendable = {
   hint?: string
   id?: string
   to: string
-  owner?: string
+  owner: string
 }
 
 export type CollectRequest = {
@@ -293,4 +296,31 @@ export interface ApiError {
   message: string
   code: number
   data: unknown[]
+}
+
+export enum RatesProviders {
+  BITFINEX = 'bitfinex.com',
+  BLOCKCHAIN = 'blockchain.info',
+  COINGECKO = 'coingecko.com',
+}
+
+ export interface GetRatesProps {
+   provider?: RatesProviders
+   options?: Omit<QueryOptions, 'limit' | 'skip'>
+ }
+
+export interface ExchangeRate {
+  source: RatesProviders
+  timestamp: number,
+  online: boolean,
+  value: number
+}
+
+export interface NetworkItem {
+  height: number
+  online: boolean
+  netId: string
+  timestamp: number
+  fee: number
+  updatedAt: string
 }

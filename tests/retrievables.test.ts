@@ -68,8 +68,6 @@ describe('Retrievables', () => {
       const newService = await callbackService()
 
       await newService.getRetrievables(ids)
-      service.connect({ action: SwitchActions.CONNECT, value: false })
-      await wait(2000)
 
       const data = changeType<Results<unknown>>(result.payload)
 

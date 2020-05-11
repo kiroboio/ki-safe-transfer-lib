@@ -26,6 +26,10 @@ import {
   Address,
   Currencies,
   Networks,
+  RatesProviders,
+  GetRatesProps,
+  ExchangeRate,
+  NetworkItem,
 } from './types'
 import {
   checkOwnerId,
@@ -51,6 +55,7 @@ import {
 } from './validators'
 import { TEXT } from './data'
 import { Logger } from './logger'
+import { LogError } from './tools/log'
 
 /**
  * Kirobo Retrievable Transfer library class to provide convenient
@@ -215,52 +220,165 @@ class Service {
   // show settings
   public getSettings = (): Settings => this._settings
 
-  // TODO: add desc
-  // public getNetworks = async () => {
-  //   let response: NetworkTip
-  //
-  //   /** make request */
-  //   try {
-  //     response = await this._networks
-  //     console.log(response)
-  //   } catch (err) {
-  //     throw makeReturnError(err.message, err)
-  //   }
-  //
-  //   /** return results */
-  //   const payload: Status = {
-  //     height: response.height,
-  //     online: response.online,
-  //     fee: response.fee,
-  //   }
-  //
-  //   if (this._shouldReturnDirect(options)) return payload
-  //
-  //   this._useEventBus(EventTypes.UPDATE_STATUS, payload)
-  // }
-  //
+  /**
+   * Function to get the list of networks with online status for the API
+   *
+   * @param [QueryOptions] [options] - optional paging options to modify
+   * the default ones
+   *
+   * @returns Promise - promise can contain results,if in _Direct_ mode -
+   * array of strings. If in _Callback_ mode, the function returns void
+   * in Promise
+   *
+   * #### Example
+   *
+   * ```typescript
+   * service.getOnlineNetworks()
+   * ```
+   * -
+   */
+  public async getOnlineNetworks(options?: QueryOptions): Promise<Results<NetworkItem[]> | void> {
 
-  public async getRates() {
-    let response
+    /** validate options, if present */
+    try {
+      if (options) {
+        validateOptions(options, 'getOnlineNetworks')
+      }
+    } catch (err) {
+
+      /** log error */
+      new LogError('Service (getOnlineNetworks) caught [validation] error.', err).make()
+
+      /** throw appropriate error */
+      throw makePropsResponseError(err)
+    }
+
+    let response: Results<NetworkItem[]>
 
     /** make request */
+    try {
+      response = await this._networks.find({
+        query: {
+          online: true,
+          ...makeOptions(options),
+        },
+      })
+    } catch (err) {
+      throw makeReturnError(err.message, err)
+    }
+
+    /** return results */
+
+    if (this._shouldReturnDirect(options)) return response
+
+    this._useEventBus(EventTypes.GET_ONLINE_NETWORKS, response)
+  }
+
+  /**
+   * Function to get all available rate for BTC/USD pair
+   *
+   * @param [QueryOptions] [options] - optional paging options to modify
+   * the default ones
+   *
+   * @returns Promise - promise can contain results,if in _Direct_ mode -
+   * array of strings. If in _Callback_ mode, the function returns void
+   * in Promise
+   *
+   * #### Example
+   *
+   * ```typescript
+   * service.getRates()
+   * ```
+   * -
+   */
+  public async getRates(options?: QueryOptions): Promise<Results<ExchangeRate[]> | void> {
+
+    /** validate options, if present */
+    try {
+      if (options) {
+        validateOptions(options, 'getRates')
+      }
+    } catch (err) {
+
+      /** log error */
+      new LogError('Service (getRates) caught [validation] error.', err).make()
+
+      /** throw appropriate error */
+      throw makePropsResponseError(err)
+    }
+
+    /** make request */
+    let response: Results<ExchangeRate[]>
+
     try {
       response = await this._rateBtcToUsd.find({})
     } catch (err) {
       throw makeReturnError(err.message, err)
     }
 
-    // console.log(response)
-    // /** return results */
-    // const payload: Status = {
-    //   height: response.height,
-    //   online: response.online,
-    //   fee: response.fee,
-    // }
+    /** return results */
 
-    // if (this._shouldReturnDirect(options)) return payload
+    if (this._shouldReturnDirect(options)) return response
 
-    this._useEventBus(EventTypes.GET_BTC_TO_USD_RATES, response.data)
+    this._useEventBus(EventTypes.GET_BTC_TO_USD_RATES, response)
+  }
+
+  /**
+   * Function to get all available rate for BTC/USD pair
+   *
+   * @param [Object] GetRatesProps
+   * @param [RatesProviders] [GetRatesProps.provide] - optional provider to get data
+   * from; default => BITFINEX
+   * @param [QueryOptions] [GetRatesProps.options] - optional paging options to modify
+   * the default ones
+   *
+   * @returns Promise - promise can contain results,if in _Direct_ mode -
+   * array of strings. If in _Callback_ mode, the function returns void
+   * in Promise
+   *
+   * #### Example
+   *
+   * ```typescript
+   * service.getRate({provider: RatesProviders.COINGECKO })
+   * ```
+   * -
+   */
+  public async getRate(props?: GetRatesProps): Promise<ExchangeRate | void> {
+    if (props) {
+      const { provider, options } = props
+
+      /** validate props */
+      try {
+        if (provider) validatePropsString(provider, 'Provider', 'getRate')
+
+        /** validate options, if present */
+        if (options) {
+          validateOptions(options, 'getRate')
+        }
+      } catch (err) {
+
+        /** log error */
+        new LogError('Service (getRate) caught [validation] error.', err).make()
+
+        /** throw appropriate error */
+        throw makePropsResponseError(err)
+      }
+    }
+
+    let response: ExchangeRate
+
+    /** make request */
+    try {
+      response = await this._rateBtcToUsd.get(props?.provider ?? RatesProviders.BITFINEX)
+    } catch (err) {
+      throw makeReturnError(err.message, err)
+    }
+
+    /** return results */
+
+    if (this._shouldReturnDirect(props?.options)) return response
+
+    this._useEventBus(EventTypes.GET_BTC_TO_USD_RATE, response)
   }
 
   /**
@@ -720,7 +838,7 @@ class Service {
       throw makePropsResponseError(err)
     }
 
-    let response
+    let response: Results<Retrievable>
 
     /** make request */
     try {

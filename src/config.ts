@@ -24,7 +24,7 @@ import {
 import { Logger } from './logger'
 import { is } from './mode'
 import { o } from 'ramda'
-import { LogApiError, LogApiWarning } from './tools/log'
+import { LogError, LogApiWarning } from './tools/log'
 
 class Config {
   // fixed
@@ -91,7 +91,7 @@ class Config {
           .catch(e => console.log('Service (auth) got an error', e))
       })
     } catch (err) {
-      new LogApiError('Service (connect) got an error.', err).make()
+      new LogError('Service (connect) got an error.', err).make()
     }
 
     try {
@@ -99,7 +99,7 @@ class Config {
         new LogApiWarning('Service (disconnect) is OFF.', capitalize(payload)).make(),
       )
     } catch (err) {
-      new LogApiError('Service (disconnect) got an error.', err).make()
+      new LogError('Service (disconnect) got an error.', err).make()
     }
 
     // set internet connection check
@@ -167,7 +167,7 @@ class Config {
               })
               .catch(err => {
                 // if not
-                new LogApiError(
+                new LogError(
                   'Service (authSocket > authenticate) caught error when calling (getStatus).',
                   err,
                 ).make()
@@ -175,7 +175,7 @@ class Config {
           })
       )
     } catch (err) {
-      new LogApiError('Service (authSocket) caught error.', err).make()
+      new LogError('Service (authSocket) caught error.', err).make()
       return undefined
     }
   }
@@ -185,7 +185,7 @@ class Config {
 
     if (this._getStatus) {
       this._getStatus().catch(err => {
-        new LogApiError('Service (onConnect) caught error when calling (getStatus).', err).make()
+        new LogError('Service (onConnect) caught error when calling (getStatus).', err).make()
       })
     }
 

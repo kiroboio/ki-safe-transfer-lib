@@ -30,13 +30,13 @@ class Log {
     }
   }
 }
-class LogApiError extends Log {
+class LogError extends Log {
   constructor(message: string,error?: ApiError|undefined) {
     super(LogTypes.ERROR, message, makeApiResponseError(error))
-
     this._message = message || 'Unknown API Error'
   }
 }
+
 
 class LogApiWarning extends Log {
   constructor(message: string, payload: unknown | undefined) {
@@ -46,4 +46,4 @@ class LogApiWarning extends Log {
   }
 }
 
-export { LogApiError, LogApiWarning}
+export { LogError, LogApiWarning}
