@@ -41,7 +41,7 @@ describe('Validators', () => {
 
       try {
         // @ts-ignore
-        validateObject(() => {})
+        validateObject(() => { return })
       } catch (err) {
         expect(err).toBeInstanceOf(TypeError)
         expect(err).toHaveProperty('message', 'Argument can\'t be a function.')
@@ -83,7 +83,7 @@ describe('Validators', () => {
 
         try {
           // @ts-ignore
-          validateObjectWithStrings(() => {}, 'Props', 'test')
+          validateObjectWithStrings(() => { return }, 'Props', 'test')
         } catch (err) {
           expect(err).toBeInstanceOf(TypeError)
           expect(err).toHaveProperty(
@@ -134,5 +134,5 @@ describe('Validators', () => {
       })
     })
   })
-  describe('validatePropsString',()=>{})
+  describe('validatePropsString',()=>{ return })
 })

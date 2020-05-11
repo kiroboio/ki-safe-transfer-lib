@@ -55,7 +55,7 @@ import {
 } from './validators'
 import { TEXT } from './data'
 import { Logger } from './logger'
-import { LogError } from './tools/log'
+import { LogError, LogApiError } from './tools/log'
 
 /**
  * Kirobo Retrievable Transfer library class to provide convenient
@@ -843,26 +843,20 @@ class Service {
     /** make request */
     try {
       response = await this._transfers.create(checkOwnerId(transaction))
+      // console.log('res',response)
     } catch (err) {
 
       /** log error */
-      this._logger.error('Service (collect) caught [request] error.', err.message)
+      new LogApiError('Service (collect) caught [request] error.', err).make()
 
-      /** throw error */
-      throw makeApiResponseError(
-        tryCatch<{}, string, {}>(JSON.parse, err.message, { returnValue: err }),
-      )
+      /** throw appropriate error */
+      throw makeApiResponseError(err)
     }
 
-    try {
+    /** return the results */
+    if (this._shouldReturnDirect(options)) return response
 
-      /** return the results */
-      if (this._shouldReturnDirect(options)) return response
-
-      this._useEventBus(EventTypes.SEND_TRANSACTION, response)
-    } catch (err) {
-      throw makeReturnError(err.message, err)
-    }
+    this._useEventBus(EventTypes.SEND_TRANSACTION, response)
   }
 
   // collect transaction

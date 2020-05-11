@@ -8,6 +8,8 @@ import { wait } from './tools'
 
 dotenv.config()
 
+const { log } = console
+
 const authDetails = { key: process.env.AUTH_KEY ?? '', secret: process.env.AUTH_SECRET ?? '' }
 
 process.on('unhandledRejection', () => {
@@ -21,18 +23,19 @@ describe('Connect', () => {
       service = new Service({ authDetails })
       await service.getStatus()
     } catch (e) {
-      console.log(e)
+      log(e)
       return
     }
   })
-    afterAll(async () => {
-      try{
+  afterAll(async () => {
+    try {
       service.connect({ action: SwitchActions.CONNECT, value: false })
-      await wait(2000) } catch (e) {
-      console.log(e)
+      await wait(2000)
+    } catch (e) {
+      log(e)
       return
     }
-    })
+  })
   it('should not connect without authentication details', async () => {
     expect.assertions(2)
 
@@ -51,9 +54,12 @@ describe('Connect', () => {
     expect.assertions(2)
 
     try {
-    expect(service.connect({ action: SwitchActions.STATUS })).toBe(true)
-    service.connect({ action: SwitchActions.CONNECT, value: false })
-    expect(service.connect({ action: SwitchActions.STATUS })).toBe(false) }catch (e) { console.log(e) }
+      expect(service.connect({ action: SwitchActions.STATUS })).toBe(true)
+      service.connect({ action: SwitchActions.CONNECT, value: false })
+      expect(service.connect({ action: SwitchActions.STATUS })).toBe(false)
+    } catch (e) {
+      log(e)
+    }
   })
   afterAll(() => {
     service.connect({ action: SwitchActions.CONNECT, value: false })

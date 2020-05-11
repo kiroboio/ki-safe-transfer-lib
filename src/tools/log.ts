@@ -1,10 +1,13 @@
-import { ApiError } from 'src/types'
+import { not } from 'ramda'
+
+import { ApiError } from '../types'
+import { is } from '../mode'
 import { makeApiResponseError } from './error'
 
 enum LogTypes {
   ERROR = 'error',
   INFO = 'info',
-  WARNING = 'warn'
+  WARNING = 'warn',
 }
 class Log {
   _payload: unknown | undefined
@@ -25,18 +28,25 @@ class Log {
   public make(): void {
     switch (this._type) {
       case LogTypes.ERROR:
-        this._log.error(this._message, this._payload ?? '')
+        if (not(is('test'))) this._log.error(this._message, this._payload ?? '')
+
         break
     }
   }
 }
 class LogError extends Log {
-  constructor(message: string,error?: ApiError|undefined) {
+  constructor(message: string, error?: ApiError | undefined) {
     super(LogTypes.ERROR, message, makeApiResponseError(error))
     this._message = message || 'Unknown API Error'
   }
 }
 
+class LogApiError extends Log {
+  constructor(message: string, error?: ApiError | undefined) {
+    super(LogTypes.ERROR, message, makeApiResponseError(error))
+    this._message = message || 'Unknown API Error'
+  }
+}
 
 class LogApiWarning extends Log {
   constructor(message: string, payload: unknown | undefined) {
@@ -46,4 +56,4 @@ class LogApiWarning extends Log {
   }
 }
 
-export { LogError, LogApiWarning}
+export { LogError, LogApiError, LogApiWarning }

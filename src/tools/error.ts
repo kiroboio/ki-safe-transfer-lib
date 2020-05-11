@@ -1,22 +1,55 @@
-import { assoc, forEach, omit, concat } from 'ramda'
+import { assoc, forEach, omit, concat, isNil, isEmpty } from 'ramda'
 
 import { ResponseError, StringKeyObject } from '../types'
 import { changeType } from '.'
 
+/**
+ * Function to make errors from caught API error objects. Will check argument
+ * and try to extract only readable and usable data.
+ *
+ * @param [unknown] error - object to process with unknown structure
+ *
+ * @return ResponseError object
+ */
 function makeApiResponseError(error: unknown): ResponseError {
+
+  /** set default error object */
   let response: ResponseError = { name: 'BadRequest', code: 400, message: 'Unknown API request error' }
 
-  if (!error) return response
+  /** if no error provided or it is empty -> return default  */
+  if (isNil(error) || isEmpty(error)) return response
 
-  const data = changeType<StringKeyObject<unknown>>(error)
+  /** function to check if new data should be assign to the default object */
+  function shouldAssign(data: unknown, key: string): boolean {
 
-  const fn = (key: string): void => {
-    if (data[key] && data[key] !== changeType<StringKeyObject<unknown>>(response)[key])
+    /** not if missing */
+    if (isNil(data)) return false
 
-      response = assoc(key, data[key], response)
+    /** not if empty */
+    if (isEmpty(data)) return false
+
+    /** not if the same */
+    if (data === changeType<StringKeyObject<unknown>>(response)[key]) return false
+
+    return true
   }
 
-  forEach(fn, ['name', 'message', 'code', 'data'])
+  /** assigner function */
+  const assignerFn = (data: StringKeyObject<unknown>) => (key: string): void => {
+    if (shouldAssign(data[key], key)) response = assoc(key, data[key], response)
+  }
+
+  /** run for each of default fields */
+  forEach(assignerFn(changeType<StringKeyObject<unknown>>(error)), ['name', 'message', 'code', 'data', 'errors'])
+
+  /** try to parse message, in case it has some object inside */
+  try {
+    const convert = JSON.parse(response.message)
+
+    forEach(assignerFn(convert), Object.keys(convert))
+  } catch (err) {
+    // No need to do anything
+  }
 
   return response
 }
@@ -47,11 +80,10 @@ function makeReturnError(message: string, error?: unknown): ResponseError {
 
   if (!message) return response
 
-  if (error) response = assoc('data',[error],response)
+  if (error) response = assoc('data', [error], response)
 
   return assoc('message', message, response)
 }
-
 
 function isResponseError(error: ResponseError): boolean {
   if (!error.name || !error.message) return false
@@ -60,8 +92,7 @@ function isResponseError(error: ResponseError): boolean {
 }
 
 function stackErrors(newError: ResponseError, prevError?: ResponseError): ResponseError {
-  if (!newError || !isResponseError(newError))
-    throw new Error('Unknown error in service. Unable to form error object.')
+  if (!newError || !isResponseError(newError)) throw new Error('Unknown error in service. Unable to form error object.')
 
   if (!prevError || !isResponseError(prevError)) return newError
 
@@ -78,4 +109,4 @@ function stackErrors(newError: ResponseError, prevError?: ResponseError): Respon
   return error
 }
 
-export { makeApiResponseError, makePropsResponseError, makeReturnError,stackErrors }
+export { makeApiResponseError, makePropsResponseError, makeReturnError, stackErrors }
