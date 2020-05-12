@@ -197,6 +197,7 @@ describe('Send', () => {
           collect: 'qwerty',
           deposit: 'qwerty',
           owner: '0123456789012345678901234567890',
+          depositPath: 'string',
         })
       } catch (err) {
         expect(err).toBeInstanceOf(Object)

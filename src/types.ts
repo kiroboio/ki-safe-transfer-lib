@@ -79,6 +79,9 @@ export type Retrievable = {
   deposit: {
     txid: string
     vout: number
+    value: number
+    address: string
+    path?: string
   }
   expires: { at: string }
   id: string
@@ -191,6 +194,7 @@ export type Sendable = {
   amount: number
   collect: string
   deposit: string
+  depositPath?: string
   from?: string
   hint?: string
   id?: string
