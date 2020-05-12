@@ -10,11 +10,11 @@ enum LogTypes {
   WARNING = 'warn',
 }
 class Log {
-  _payload: unknown | undefined
+  private _payload: unknown | undefined
 
-  _message: string
+  private _message: string
 
-  _type: LogTypes
+  private _type: LogTypes
 
   private readonly _log = console
 
@@ -26,34 +26,35 @@ class Log {
   }
 
   public make(): void {
-    switch (this._type) {
-      case LogTypes.ERROR:
-        if (not(is('test'))) this._log.error(this._message, this._payload ?? '')
-
-        break
-    }
+    try {
+      if (not(is('test'))) this._log[this._type](this._message, this._payload ?? '')
+    } catch (err) {
+      return
+     }
   }
 }
 class LogError extends Log {
-  constructor(message: string, error?: ApiError | undefined) {
-    super(LogTypes.ERROR, message, makeApiResponseError(error))
-    this._message = message || 'Unknown API Error'
+  constructor(message: string, error?: Error | undefined) {
+    super(LogTypes.ERROR, message || 'Unknown Error', makeApiResponseError(error))
   }
 }
 
 class LogApiError extends Log {
   constructor(message: string, error?: ApiError | undefined) {
-    super(LogTypes.ERROR, message, makeApiResponseError(error))
-    this._message = message || 'Unknown API Error'
+    super(LogTypes.ERROR, message || 'Unknown API Error', makeApiResponseError(error))
   }
 }
 
 class LogApiWarning extends Log {
   constructor(message: string, payload: unknown | undefined) {
-    super(LogTypes.WARNING, message, payload)
-
-    this._message = message || 'Unknown Warning'
+    super(LogTypes.WARNING, message || 'Unknown Warning', payload)
   }
 }
 
-export { LogError, LogApiError, LogApiWarning }
+class LogInfo extends Log {
+  constructor(message: string, payload: unknown | undefined) {
+    super(LogTypes.INFO, message || '', payload)
+  }
+}
+
+export { LogError, LogApiError, LogApiWarning, LogInfo }
