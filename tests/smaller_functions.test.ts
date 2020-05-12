@@ -23,15 +23,14 @@ let service: Service
 
 async function setAsync(): Promise<Status | void> {
   try {
-  service = new Service({
-    debug: DebugLevels.MUTE,
-    eventBus,
-    respondAs: Responses.Callback,
-    authDetails,
-  })
+    service = new Service({
+      debug: DebugLevels.MUTE,
+      eventBus,
+      respondAs: Responses.Callback,
+      authDetails,
+    })
     return await service.getStatus()
-  }
-  catch (err) {
+  } catch (err) {
     log(err)
   }
 }
@@ -59,9 +58,7 @@ describe('Smaller functions', () => {
   })
   describe(' getStatus:', () => {
     it('returns information in "Direct" mode', async () => {
-      // await setDirect()
-
-      const result = await service.getStatus()
+      const result = await service.getStatus({ respondDirect: true })
 
       let keysValuesCheck = true
 

@@ -1,5 +1,16 @@
 # Changelog
 
+##### v2.1 2020-05-12
+
+  New:
+
+  - Rates - getRates, getRate
+  - Networks - getNetworks
+
+  Updated:
+
+  - Made 'owner' a required setting
+
 ##### v2 2020-04-23
 
   New:

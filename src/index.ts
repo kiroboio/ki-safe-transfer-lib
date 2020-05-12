@@ -203,8 +203,18 @@ class Service {
     }
   }
 
+  /**
+   * Function to determine if the reply shoul dbe sent directly back or through the eventBus
+   *
+   * @param [(QueryOptions | undefined)] options - options object
+   *
+   * @returns boolean
+   *
+   */
   private _shouldReturnDirect(options: QueryOptions | undefined): boolean {
     if (options?.respondDirect) return true
+
+    if (!this._settings.respondAs) return true
 
     if (this._settings.respondAs === Responses.Direct) return true
 
@@ -317,7 +327,6 @@ class Service {
     }
 
     /** return results */
-
     if (this._shouldReturnDirect(options)) return response
 
     this._useEventBus(EventTypes.GET_BTC_TO_USD_RATES, response)
@@ -843,7 +852,6 @@ class Service {
     /** make request */
     try {
       response = await this._transfers.create(checkOwnerId(transaction))
-      // console.log('res',response)
     } catch (err) {
 
       /** log error */
