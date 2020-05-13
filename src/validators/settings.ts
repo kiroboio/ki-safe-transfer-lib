@@ -1,15 +1,15 @@
 import { TEXT, listOfSettingsKeys, typeOfSettingsKeys, valuesForSettings } from '../data'
 import { validateObject, } from './object'
 import {validateAuthDetails} from './auth_details'
-import { StringKeyObject } from '../'
-import { makeString } from '../tools/tools'
+import { makeString } from '../tools'
+import { KeyObject } from '../types'
 
 export const validateSettings = (settings: unknown): void => {
   if (!settings) throw new TypeError(`${TEXT.errors.validation.missingArgument}: authDetails.`)
 
   validateObject(settings)
 
-  const setObj = settings as StringKeyObject<string>
+  const setObj = settings as KeyObject<string>
 
   const objKeys = Object.keys(setObj)
 

@@ -1,8 +1,12 @@
-import { Sendable, validateReport, validateAddress } from '..'
 import { TEXT } from '../data'
+import { Sendable, ValidateReport, Retrieve } from '../types'
+import { validateAddress } from './address'
+import { not, is, includes, forEach } from 'ramda'
+import { makeString } from '../tools'
+import { ERRORS } from '../text'
 
-export const validateData = (data: Sendable, currency: string, networkType: string): void => {
-  const validate: validateReport = {
+ const validateData = (data: Sendable, currency: string, networkType: string): void => {
+  const validate: ValidateReport = {
     message: TEXT.errors.validation.malformedData,
     errors: { [TEXT.errors.validation.missingValues]: [], [TEXT.errors.validation.malformedValues]: [] },
   }
@@ -40,6 +44,8 @@ export const validateData = (data: Sendable, currency: string, networkType: stri
     if (data.hint && typeof data.hint !== 'string') pushMalformed('hint')
 
     if (data.id && typeof data.id !== 'string') pushMalformed('id')
+
+    if (data.depositPath && typeof data.depositPath !== 'string') pushMalformed('depositPath')
   } else delete validate.errors[TEXT.errors.validation.malformedValues]
 
   const throwError = (): boolean =>
@@ -56,3 +62,24 @@ export const validateData = (data: Sendable, currency: string, networkType: stri
     throw new TypeError(validate.message)
   }
 }
+
+function validateRetrieve(data: Retrieve,argName: string, fnName: string): void {
+
+  const allowedKeys = ['id','raw']
+
+  const checkFn = (key: string): void => {
+    if (!allowedKeys.includes(key)) throw new Error(makeString(ERRORS.validation.extraKey,[key,argName,fnName]))
+  }
+
+  forEach(checkFn,Object.keys(data))
+
+  if (!data.id ) throw new Error(makeString(ERRORS.validation.missingKey,['id', argName, fnName]))
+
+  if (!data.raw) throw new Error(makeString(ERRORS.validation.missingKey, ['raw', argName, fnName]))
+
+  if (not(is(String,data.id))) throw new TypeError(makeString(ERRORS.validation.wrongTypeKey, ['id', argName, fnName,'string']))
+
+  if (not(is(String,data.raw))) throw new TypeError(makeString(ERRORS.validation.wrongTypeKey, ['raw', argName, fnName,'string']))
+}
+
+export {validateRetrieve, validateData}

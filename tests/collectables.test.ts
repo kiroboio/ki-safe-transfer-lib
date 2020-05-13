@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 import dotenv from 'dotenv'
 
-import Service, { Responses, Event, SwitchActions, AuthDetails, Results } from '../src'
-import { validBitcoinAddresses } from '../src/data'
+import Service, { Responses, Event, AuthDetails, Results } from '../src'
 import { changeType } from '../src/tools'
 import { wait } from './tools'
+import { validBitcoinAddresses } from './test_data'
 
 dotenv.config()
 
@@ -33,7 +33,7 @@ describe('Collectables', () => {
     }
   })
   afterAll(async () => {
-    service.connect({ action: SwitchActions.CONNECT, value: false })
+    service.disconnect()
     await wait(2000)
   })
   it('provides response as a result of proper request', async () => {

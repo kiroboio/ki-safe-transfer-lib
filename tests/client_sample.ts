@@ -3,6 +3,8 @@
  * run it with 'npm run dev'
  *
  * */
+import prettyFormat from 'pretty-format'
+
 import Service, { DebugLevels, Responses, Event } from '../src'
 import dotenv from 'dotenv'
 
@@ -12,7 +14,7 @@ const authDetails = { key: process.env.AUTH_KEY || '', secret: process.env.AUTH_
 
 function eventBus(event: Event): void {
   // eslint-disable-next-line no-console
-  console.log('event fired: ', event)
+  console.log('event fired: ', prettyFormat(event))
 }
 
 const service = new Service({

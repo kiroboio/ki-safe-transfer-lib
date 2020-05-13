@@ -1,4 +1,4 @@
-import { StringKeyObject } from './types'
+import { KeyObject } from './types'
 
 export const TEXT = {
   validation: {
@@ -33,7 +33,7 @@ export const TEXT = {
 
 export const listOfStatusKeys = ['height', 'online', 'fee']
 
-export const typeOfStatusValues: StringKeyObject<string> = {
+export const typeOfStatusValues: KeyObject<string> = {
   height: 'number',
   online: 'boolean',
   fee: 'number',
@@ -41,7 +41,7 @@ export const typeOfStatusValues: StringKeyObject<string> = {
 
 export const listOfSettingsKeys = ['debug', 'currency', 'network', 'eventBus', 'respondAs', 'authDetails']
 
-export const typeOfSettingsKeys: StringKeyObject<string> = {
+export const typeOfSettingsKeys: KeyObject<string> = {
   debug: 'number',
   currency: 'string',
   network: 'string',
@@ -50,24 +50,18 @@ export const typeOfSettingsKeys: StringKeyObject<string> = {
   authDetails: 'object',
 }
 
-export const valuesForSettings: StringKeyObject<(string | number)[]> = {
+export const valuesForSettings: KeyObject<(string | number)[]> = {
   currency: ['btc'],
   network: ['testnet', 'regtest', 'main'],
-  debug: [0, 1, 2],
+  debug: [0, 1, 2, 4],
   respondAs: ['callback', 'direct'],
 }
 
-export const authDetailsData: StringKeyObject<string> = {
+export const authDetailsData: KeyObject<string> = {
   key: 'string',
   secret: 'string',
 }
 
-export const validBitcoinAddresses = [
-  '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2',
-  '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy',
-  '2N83Bu4MbzxDscNCtx5qFQHpV5VhpgghzVn',
-  'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq',
-]
 
 interface ValidType {
   [index: string]: { type: string; values?: string[] }

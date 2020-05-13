@@ -1,7 +1,7 @@
 import { not } from 'ramda'
 
 import { ApiError } from '../types'
-import { is } from '../mode'
+import { modeIs } from '../mode'
 import { makeApiResponseError } from './error'
 
 enum LogTypes {
@@ -27,12 +27,13 @@ class Log {
 
   public make(): void {
     try {
-      if (not(is('test'))) this._log[this._type](this._message, this._payload ?? '')
+      if (not(modeIs('test'))) this._log[this._type](this._message, this._payload ?? '')
     } catch (err) {
       return
      }
   }
 }
+
 class LogError extends Log {
   constructor(message: string, error?: Error | undefined) {
     super(LogTypes.ERROR, message || 'Unknown Error', makeApiResponseError(error))

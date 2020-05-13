@@ -1,4 +1,4 @@
-import { AuthDetails } from './type';
+import { AuthDetails } from './types';
 
 const authDetailsDefaults: AuthDetails = { key: '', secret: '' }
 

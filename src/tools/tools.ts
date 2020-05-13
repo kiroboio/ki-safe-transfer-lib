@@ -1,17 +1,8 @@
-import { validateObject } from '../validators'
-import { StringKeyObject, Sendable, QueryOptions, Address, Responses } from '../types'
 import { assoc, isNil, not, map } from 'ramda'
 import { v4 as generateId } from 'uuid'
 
-// export function not(value: boolean): boolean {
-//   if (typeof value === undefined) return false
-
-//   if (typeof value === null) return false
-
-//   if (typeof value !== 'boolean') return false
-
-//   return !value
-// }
+import { validateObject, validateArray } from '../validators'
+import { Sendable, QueryOptions, KeyObject, Address } from '../types'
 
 const splitText = (text: string): string[] => text.split('')
 
@@ -24,18 +15,6 @@ export const capitalize = (text: string): string => {
   if (typeof text !== 'string') return ''
 
   return reassign(splitText(text), 0, splitText(text)[0].toUpperCase()).join('')
-}
-
-function validateArray(arr: unknown[], type: string[]): boolean {
-  if (!Array.isArray(arr)) return false
-
-  let result = true
-
-  arr.forEach(el => {
-    if (!type.includes(typeof el)) result = false
-  })
-
-  return result
 }
 
 export const makeString = (template: string, params: string[]): string => {
@@ -52,7 +31,7 @@ export const makeString = (template: string, params: string[]): string => {
   return result
 }
 
-export const compareBasicObjects = (objOne: StringKeyObject<unknown>, objTwo: StringKeyObject<unknown>): boolean => {
+export const compareBasicObjects = (objOne: KeyObject<unknown>, objTwo: KeyObject<unknown>): boolean => {
   let result = true
 
   try {
@@ -130,13 +109,4 @@ export function flattenAddresses(data: Address[]): string[] {
 /** creates 'fnName function's options ' */
 export function makeLocation(fn: string, block: string): string {
   return `${fn ? '\'' + fn + '\' function\'s ' : ''}${block ? block : ''}`
-}
-
-/** check if response is a direct one */
-export function isDirect(value: Responses | string | undefined): boolean {
-  if (!value) return false
-
-  if (value === Responses.Direct || value === 'direct') return true
-
-  return false
 }

@@ -13,6 +13,13 @@ const ERRORS = {
       },
     },
   },
+  validation: {
+    extraKey: 'Extra key (%1) found in %2 argument of [%3] function.',
+    missingArgument: 'Required argument %1 in %2 argument of [%3] function is missing.',
+    missingKey: 'Required key %1 in %2 argument of [%3] function is missing.',
+    wrongTypeArgument: 'Type of argument %1 in function [%2] is wrong - %3. Should be %4.',
+    wrongTypeKey: 'Type of key %1 in function [%2] is wrong - %3. Should be %4.'
+  }
 }
 
 const WARNINGS = {

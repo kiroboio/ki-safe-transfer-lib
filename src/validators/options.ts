@@ -2,8 +2,8 @@ import { isEmpty, keys, pipe, forEach } from 'ramda'
 
 import { makeString, makeLocation, changeType } from '../tools/tools'
 import { TEXT, optionsValidValues } from '../data'
-import { StringKeyObject } from '..'
 import { isOfType } from '../validators'
+import { KeyObject } from '../types'
 
 export function validateOptions(options: unknown, fnName: string): void {
 
@@ -23,7 +23,7 @@ export function validateOptions(options: unknown, fnName: string): void {
     if (!validKeys.includes(key))
       throw new TypeError(makeString(TEXT.errors.validation.unknownGenKeys, [makeLocation(fnName, 'options')]) + key)
 
-    const value = changeType<StringKeyObject<string>>(options)[key]
+    const value = changeType<KeyObject<string>>(options)[key]
 
     /** if value is of wrong type */
     if (!isOfType(value, optionsValidValues[key].type))

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 import dotenv from 'dotenv'
 
-import { Service, DebugLevels, Responses, Event, AuthDetails, SwitchActions } from '../src'
+import { Service, DebugLevels, Responses, Event, AuthDetails } from '../src'
 import { wait } from './tools'
 
 dotenv.config()
@@ -36,7 +36,7 @@ describe('Retrievable', () => {
   })
 
   afterAll(async () => {
-    service.connect({ action: SwitchActions.CONNECT, value: false })
+    service.disconnect()
     await wait(2000)
   })
 

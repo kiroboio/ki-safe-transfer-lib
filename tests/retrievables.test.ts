@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 import dotenv from 'dotenv'
 
-import { Service, DebugLevels, Responses, Event, AuthDetails, SwitchActions, Results } from '../src'
+import { Service, DebugLevels, Responses, Event, AuthDetails, Results } from '../src'
 import { wait } from './tools'
 import { changeType } from '../src/tools'
 
@@ -43,7 +43,7 @@ describe('Retrievables', () => {
     }
   })
   afterAll(async () => {
-    service.connect({ action: SwitchActions.CONNECT, value: false })
+    service.disconnect()
     await wait(2000)
   })
   it('provides "not found" error in case of correct request', async () => {

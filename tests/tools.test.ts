@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 import { capitalize, makeString, compareBasicObjects } from '../src/tools/tools'
-import { tryCatch } from '../src/tools'
 import { wait } from './tools'
 
 const { log } = console
@@ -75,21 +74,5 @@ describe('Tools', () => {
       expect(compareBasicObjects({ key: 'qwerty', keyTwo: 2 }, { key: 'qwerty', keyTwo: 2 })).toBe(true)
     })
   })
-  describe('tryCatch', () => {
-    it('doesn\'t crash when using crashable function', () => {
-      const crashableFn = (...params: []): void => {
-        throw new Error()
-      }
 
-      expect.assertions(1)
-
-      try {
-        const result = tryCatch(crashableFn, [], { returnValue: 'test' })
-
-        expect(result).toEqual('test')
-      } catch (err) {
-        log(err)
-      }
-    })
-  })
 })

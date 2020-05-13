@@ -1,13 +1,13 @@
 import { TEXT, authDetailsData } from '../data'
 import { validateObject } from './object'
-import { StringKeyObject } from '..'
+import { KeyObject } from '../types'
 
 export function validateAuthDetails(details: unknown): void {
   if (!details) throw new TypeError(`${TEXT.errors.validation.missingArgument}: authDetails.`)
 
   validateObject(details)
 
-  const objKeys = Object.keys(details as StringKeyObject<string>)
+  const objKeys = Object.keys(details as KeyObject<string>)
 
   if (objKeys.length !== 2) {
     throw new TypeError(`${TEXT.errors.validation.malformedData}: authDetails has less or extra keys.`)
@@ -18,7 +18,7 @@ export function validateAuthDetails(details: unknown): void {
   })
 
   objKeys.forEach(key => {
-    const value = (details as StringKeyObject<string>)[key]
+    const value = (details as KeyObject<string>)[key]
 
     if (!authDetailsData[key]) {
       throw new TypeError(`${TEXT.errors.validation.unknownKeys}${key} (authdetails).`)

@@ -7,3 +7,4 @@ client.ts
 .eslintcache
 dist
 .env
+backup
