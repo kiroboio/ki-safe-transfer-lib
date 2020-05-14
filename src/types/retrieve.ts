@@ -14,7 +14,7 @@ interface Retrievable {
     path?: string
   }
   expires: { at: string }
-  from: string
+  from?: string
   id: string
   state: string
   to: string
