@@ -5,7 +5,7 @@ interface Retrievable {
     confirmed: number
     txid: string
   }
-  createdAt: string
+  createdAt: string | Date
   deposit: {
     txid: string
     vout: number
@@ -13,18 +13,20 @@ interface Retrievable {
     address: string
     path?: string
   }
-  expires: { at: string }
+  expires: { at?: string; block?: number }
   from?: string
+  hint?: string
   id: string
   state: string
   to: string
-  updatedAt: string
+  updatedAt: string | Date
   owner: string
 }
 
-interface Retrieve {
+
+interface RetrieveRequest {
   id: string
   raw: string
 }
 
-export {Retrievable, Retrieve}
+export { Retrievable, RetrieveRequest }

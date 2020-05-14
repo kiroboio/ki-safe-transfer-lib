@@ -6,7 +6,6 @@ import {
   QueryOptions,
   CollectRequest,
   Message,
-  Sendable,
   Retrievable,
   Collectable,
   Utxo,
@@ -14,7 +13,9 @@ import {
   RatesProviders,
   GetRatesProps,
   Address,
-  Retrieve,
+  SendRequest,
+  Transfer,
+  RetrieveRequest,
 } from './types'
 import {
   validateOptions,
@@ -26,11 +27,12 @@ import {
   validatePropsString,
   validateRetrieve,
 } from './validators'
-import { checkOwnerId, flattenAddresses, makeOptions } from './tools'
+import { checkOwnerId, flattenAddresses, makeOptions, makeString } from './tools'
 import { makePropsResponseError, makeReturnError, makeApiResponseError } from './tools/error'
 import { shouldReturnDirect } from './tools/connect'
 import { isNil, join, assoc, filter } from 'ramda'
 import { TEXT } from './data'
+import { ERRORS, MESSAGES } from './text'
 
 class Service extends Connect {
 
@@ -134,7 +136,7 @@ class Service extends Connect {
 
   // TODO: add desc
 
-  public async send(transaction: Sendable, options?: QueryOptions): Promise<Results<Retrievable> | void> {
+  public async send(transaction: SendRequest, options?: QueryOptions): Promise<Transfer | void> {
 
     /** validate props */
     try {
@@ -156,7 +158,7 @@ class Service extends Connect {
       throw makePropsResponseError(err)
     }
 
-    let response: Results<Retrievable>
+    let response: Transfer
 
     /** make request */
     try {
@@ -523,19 +525,23 @@ class Service extends Connect {
    * -
    */
   public async getRetrievables(ids: string[], options?: QueryOptions): Promise<Results<Retrievable[]> | void> {
+    this._logTechnical(makeString(MESSAGES.technical.running, ['getRetrievables']))
+
 
     /** validate props */
     try {
+      this._logTechnical(makeString(MESSAGES.technical.checkingProps, ['getRetrievables']))
       validatePropsArray(ids, 'string', 'ids', 'getRetrievables')
 
       /** validate options, if present */
       if (options) {
+        this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['getRetrievables', 'options']))
         validateOptions(options, 'getRetrievables')
       }
     } catch (err) {
 
       /** log error */
-      this._logError('Service (getRetrievables) caught [validation] error.', err.message)
+      this._logError(makeString(ERRORS.service.gotError, ['getRetrievables', 'validation']), err)
 
       /** throw appropriate error */
       throw makePropsResponseError(err)
@@ -545,13 +551,15 @@ class Service extends Connect {
 
     /** make request */
     try {
+      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getRetrievables']))
       response = await this._transfers.find({
         query: { id: ids.join(';'), ...makeOptions(options) },
       })
+      this._log(makeString(MESSAGES.technical.gotResponse, ['getRetrievables']), response)
     } catch (err) {
 
       /** log error */
-      this._logApiError('Service (getRetrievables) caught [request] error.', err.message)
+      this._logApiError(makeString(ERRORS.service.gotError, ['getRetrievables', 'request']), err)
 
       /** throw error */
       throw makeApiResponseError(err)
@@ -560,7 +568,12 @@ class Service extends Connect {
     try {
 
       /** return the results */
+
+      this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getRetrievables', 'return']))
+
       if (shouldReturnDirect(options, this._respondAs)) return response
+
+      this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getRetrievables']))
 
       this._useEventBus(EventTypes.GET_RETRIEVABLES, response)
     } catch (err) {
@@ -586,16 +599,18 @@ class Service extends Connect {
    * -
    */
   public async getRates(options?: QueryOptions): Promise<Results<ExchangeRate[]> | void> {
+    this._logTechnical(makeString(MESSAGES.technical.running, ['getRates']))
 
     /** validate options, if present */
     try {
       if (options) {
+        this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['getRates', 'options']))
         validateOptions(options, 'getRates')
       }
     } catch (err) {
 
       /** log error */
-      this._logError('Service (getRates) caught [validation] error.', err)
+      this._logError(makeString(ERRORS.service.gotError, ['getRates', 'validation']), err)
 
       /** throw appropriate error */
       throw makePropsResponseError(err)
@@ -605,14 +620,21 @@ class Service extends Connect {
     let response: Results<ExchangeRate[]>
 
     try {
+      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getRates']))
       response = await this._rateBtcToUsd.find({})
+      this._log(makeString(MESSAGES.technical.gotResponse, ['getRates']), response)
     } catch (err) {
+      this._logApiError(makeString(ERRORS.service.gotError, ['getRates', 'request']), err)
       throw makeReturnError(err.message, err)
     }
 
     /** return results */
+
+    this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getRate', 'return']))
+
     if (shouldReturnDirect(options, this._respondAs)) return response
 
+    this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getRates']))
     this._useEventBus(EventTypes.GET_BTC_TO_USD_RATES, response)
   }
 
@@ -637,7 +659,11 @@ class Service extends Connect {
    * -
    */
   public async getRate(props?: GetRatesProps): Promise<ExchangeRate | void> {
+    this._logTechnical(makeString(MESSAGES.technical.running, ['getRate']))
+
     if (props) {
+      this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['getRate', 'props']), props)
+
       const { provider, options } = props
 
       /** validate props */
@@ -646,31 +672,41 @@ class Service extends Connect {
 
         /** validate options, if present */
         if (options) {
+          this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['getRate', 'options']))
           validateOptions(options, 'getRate')
         }
       } catch (err) {
 
         /** log error */
-        this._logError('Service (getRate) caught [validation] error.', err)
+        this._logError(makeString(ERRORS.service.gotError, ['getRate', 'validation']), err)
 
         /** throw appropriate error */
         throw makePropsResponseError(err)
       }
     }
 
+    if (!props?.provider)
+      this._logTechnical(makeString(MESSAGES.technical.requestWithDefault, ['getRate']), RatesProviders.BITFINEX)
+
     let response: ExchangeRate
 
     /** make request */
     try {
+      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getRate']))
       response = await this._rateBtcToUsd.get(props?.provider ?? RatesProviders.BITFINEX)
+      this._log(makeString(MESSAGES.technical.gotResponse, ['getRate']), response)
     } catch (err) {
+      this._logApiError(makeString(ERRORS.service.gotError, ['getRate', 'request']), err)
       throw makeReturnError(err.message, err)
     }
 
     /** return results */
 
+    this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getRate', 'return']))
+
     if (shouldReturnDirect(props?.options, this._respondAs)) return response
 
+    this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getRate']))
     this._useEventBus(EventTypes.GET_BTC_TO_USD_RATE, response)
   }
 
@@ -684,14 +720,14 @@ class Service extends Connect {
    * @param [Boolean] options.respondDirect - should method respond directly?
    */
   public async retrieve(
-    data: Retrieve,
+    data: RetrieveRequest,
     options?: Omit<QueryOptions, 'limit' | 'skip'>,
   ): Promise<Results<unknown> | void> {
-    this._logTechnical('Service (retrieve) is running.')
+    this._logTechnical(makeString(MESSAGES.technical.running, ['retrieve']))
 
     /** validate props */
     try {
-      this._logTechnical('Service (retrieve) checking the props...')
+      this._logTechnical(makeString(MESSAGES.technical.checkingProps, ['retrieve']))
 
       if (isNil(data)) throw new Error(TEXT.errors.validation.missingArgument)
 
@@ -700,13 +736,13 @@ class Service extends Connect {
 
       /** validate options, if present */
       if (options) {
-        this._logTechnical('Service (retrieve) found options and checking it...')
+        this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['retrieve', 'options']))
         validateOptions(options, 'retrieve')
       }
     } catch (err) {
 
       /** log error */
-      this._logError('Service (retrieve) caught [validation] error.', err)
+      this._logError(makeString(ERRORS.service.gotError, ['retrieve', 'validation']), err)
 
       /** throw appropriate error */
       throw makePropsResponseError(err)
@@ -716,22 +752,25 @@ class Service extends Connect {
 
     /** make request */
     try {
-      this._logTechnical('Service (retrieve) requesting service.')
+      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['retrieve']))
       response = await this._retrieve.create(data)
+      this._log(makeString(MESSAGES.technical.gotResponse, ['retrieve']), response)
     } catch (err) {
 
       /** log error */
-      this._logApiError('Service (retrieve) caught [request] error.', err)
+      this._logApiError(makeString(ERRORS.service.gotError, ['retrieve', 'request']), err)
 
       /** throw appropriate error */
       throw makeApiResponseError(err)
     }
 
-    this._logTechnical('Service (retrieve) proceeding with response...')
-
     /** return the results */
+
+    this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['retrieve', 'return']))
+
     if (shouldReturnDirect(options, this._respondAs)) return response
 
+    this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['retrieve']))
     this._useEventBus(EventTypes.RETRIEVE, response)
   }
 }

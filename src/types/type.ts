@@ -20,13 +20,13 @@ interface ConnectProps {
   respondAs?: Responses
 }
 
-
 interface NetworkTip {
   height: number
   online: boolean
   netId: string
   timestamp: number
   fee: number
+  updatedAt: string | Date
 }
 
 interface ApiService {
@@ -47,20 +47,19 @@ type Event = {
 type EventBus = (event: Event) => void
 
 // TODO: do we need it?s
- type Message = {
+type Message = {
   text: string
   isError: boolean
   data?: unknown
 }
 
- type Settings = {
+type Settings = {
   debug: DebugLevels
   currency: Currencies
   network: Networks
   version: string
   respondAs?: Responses
 }
-
 
 /**
  * Unspent transaction output (UTXO) fields
@@ -79,4 +78,16 @@ interface Utxo {
 }
 
 // eslint-disable-next-line max-len
-export { ApiService, AuthDetails, ConnectProps, Event, EventBus, KeyObject, NetworkTip, Status, Message, Settings,Utxo }
+export {
+  ApiService,
+  AuthDetails,
+  ConnectProps,
+  Event,
+  EventBus,
+  KeyObject,
+  NetworkTip,
+  Status,
+  Message,
+  Settings,
+  Utxo,
+}

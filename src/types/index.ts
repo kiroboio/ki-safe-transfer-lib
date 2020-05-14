@@ -16,3 +16,5 @@ export * from './validate'
 export * from './rates'
 
 export * from './error'
+
+export * from './transfer'

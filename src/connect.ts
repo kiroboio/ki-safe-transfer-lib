@@ -14,13 +14,13 @@ import {
   Endpoints,
   EventTypes,
   Collectable,
-  Retrievable,
+  Transfer,
 } from './types'
 import { Base } from './base'
 import { debugLevelSelector } from './tools/debug'
 import { apiUrl, version, endpoints, connectionTriesMax } from './config'
-import { capitalize } from './tools'
-import { WARNINGS, ERRORS } from './text'
+import { capitalize, makeString } from './tools'
+import { WARNINGS, ERRORS, MESSAGES } from './text'
 import { makeApiResponseError, makeReturnError, makePropsResponseError } from './tools/error'
 import { shouldReturnDirect, isDirect } from './tools/connect'
 import { validateOptions, validateSettings } from './validators'
@@ -103,17 +103,24 @@ class Connect extends Base {
     try {
       this._connect.io.on('connect', (): void => {
         this._logTechnical('Service is connected, proceeding with authorization...')
-        ;(this._authSocket() as Promise<AuthDetails>)
-          .then(() => {
-            this._logTechnical('Service is authed, resetting connectionCounter.')
-            this._connectionCounter = 0
-            this._onConnect()
-          })
-          .catch(err => {
-            this._logTechnical('Service failed to authenticate, updating connectionCounter.')
-            this._connectionCounter++
-            this._logApiError(ERRORS.connect.on.connect.authSocket, err)
-          })
+
+        if (this._connectionCounter <= connectionTriesMax) {
+          (this._authSocket() as Promise<AuthDetails>)
+            .then(() => {
+              this._logTechnical('Service is authed, resetting connectionCounter.')
+              this._connectionCounter = 0
+              this._onConnect()
+            })
+            .catch(err => {
+              this._logTechnical('Service failed to authenticate, updating connectionCounter.')
+              this._connectionCounter++
+              this._logApiError(ERRORS.connect.on.connect.authSocket, err)
+            })
+        } else {
+          this._logTechnical(
+            `Service (connect) exceeded MAX connection tries (${connectionTriesMax}) and will halt the reconnection efforts.`,
+          )
+        }
       })
     } catch (err) {
       this._logApiError(ERRORS.connect.on.connect.direct, err)
@@ -129,18 +136,16 @@ class Connect extends Base {
 
     // status update
     this._networks.on('patched', (data: NetworkTip) => {
-      const { height, online, fee } = data
-
-      this._useEventBus(EventTypes.UPDATE_STATUS, { height, online, fee })
+      this._useEventBus(EventTypes.UPDATE_STATUS, data)
     })
 
-    // retrievable updated
-    this._transfers.on('patched', (payload: Retrievable) => {
+    // transfer updated
+    this._transfers.on('patched', (payload: Transfer) => {
       this._useEventBus(EventTypes.UPDATED_RETRIEVABLE, payload)
     })
 
-    // collectable removed
-    this._transfers.on('removed', (payload: Collectable) => {
+    // transfer removed
+    this._transfers.on('removed', (payload: Transfer) => {
       this._useEventBus(EventTypes.REMOVED_RETRIEVABLE, payload)
     })
 
@@ -256,16 +261,21 @@ class Connect extends Base {
 
   // TODO: add desc
   private async _refreshInbox(): Promise<void> {
+    this._logTechnical(makeString(MESSAGES.technical.running, ['connect']))
+
     if (this._lastAddresses && this._lastAddresses.length) {
-      let data
+        this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['connect','']))
+      let response
 
       try {
-        data = await this._inbox.find({ query: { to: this._lastAddresses.join(';') } })
+         this._logTechnical(makeString(MESSAGES.technical.requestingData, ['connect']))
+        response = await this._inbox.find({ query: { to: this._lastAddresses.join(';') } })
+         this._log(makeString(MESSAGES.technical.gotResponse, ['connect']), response)
       } catch (err) {
         throw makeApiResponseError(err)
       }
 
-      this._useEventBus(EventTypes.GET_COLLECTABLES, data)
+      this._useEventBus(EventTypes.GET_COLLECTABLES, response)
     }
   }
 
@@ -273,7 +283,7 @@ class Connect extends Base {
    * Function to assign endpoints to a service
    */
   private _getService(endpoint: Endpoints): ApiService {
-    this._logTechnical('Service gets API service (getService):', endpoint)
+    this._logTechnical(makeString(MESSAGES.technical.service,['getService']), endpoint)
 
     return this._connect.service(this._makeEndpointPath(endpoint))
   }
@@ -286,7 +296,7 @@ class Connect extends Base {
    * @returns string
    */
   private _makeEndpointPath = (endpoint: Endpoints): string => {
-    this._logTechnical('Service is making endpoint (makeEndpointPath):', endpoint)
+    this._logTechnical(makeString(MESSAGES.technical.endpoint,['makeEndpointPath']), endpoint)
 
     const path = `/${version}/${this._currency}/`
 
@@ -316,41 +326,63 @@ class Connect extends Base {
    * -
    */
   public async getStatus(options?: Omit<QueryOptions, 'limit' | 'skip'>): Promise<Status | void> {
-    this._logTechnical('Service is requesting status (getStatus).')
-    let response: NetworkTip
-
-    /** make request */
-    try {
-      response = await this._networks.get(this._network)
-      this._log('Service (getStatus) got response:', response)
-    } catch (err) {
-      throw makeApiResponseError(err)
-    }
-
-    /** return results */
-    const payload: Status = {
-      height: response.height,
-      online: response.online,
-      fee: response.fee,
-    }
-
-    if (shouldReturnDirect(options, this._respondAs)) return payload
-
-    this._useEventBus(EventTypes.UPDATE_STATUS, payload)
-  }
-
-  public getConnectionStatus(options?: Omit<QueryOptions, 'limit' | 'skip'>): boolean | void {
-    this._logTechnical('Service is requesting connection status (getConnectionStatus).')
+    this._logTechnical(makeString(MESSAGES.technical.running, ['getStatus']))
 
     /** validate options, if present */
     try {
       if (options) {
+        this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['getStatus', 'options']))
+        validateOptions(options, 'getStatus')
+      }
+    } catch (err) {
+
+      /** log error */
+      this._logError(makeString(ERRORS.service.gotError, ['getStatus', 'validation']), err)
+
+      /** throw appropriate error */
+      throw makePropsResponseError(err)
+    }
+
+    let response: NetworkTip
+
+    /** make request */
+    try {
+      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getStatus']))
+      response = await this._networks.get(this._network)
+      this._log(makeString(MESSAGES.technical.gotResponse, ['getStatus']), response)
+    } catch (err) {
+
+      /** log error */
+      this._logApiError(makeString(ERRORS.service.gotError, ['getStatus', 'request']), err)
+
+      /** throw appropriate error */
+      throw makeApiResponseError(err)
+    }
+
+    /** return results */
+
+    this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getStatus', 'return']))
+
+    if (shouldReturnDirect(options, this._respondAs)) return response
+
+    this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getStatus']))
+
+    this._useEventBus(EventTypes.UPDATE_STATUS, response)
+  }
+
+  public getConnectionStatus(options?: Omit<QueryOptions, 'limit' | 'skip'>): boolean | void {
+    this._logTechnical(makeString(MESSAGES.technical.running, ['getConnectionStatus']))
+
+    /** validate options, if present */
+    try {
+      if (options) {
+        this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['getConnectionStatus', 'options']))
         validateOptions(options, 'getConnectionStatus')
       }
     } catch (err) {
 
       /** log error */
-      this._logError('Service (getConnectionStatus) caught [validation] error.', err)
+      this._logError(makeString(ERRORS.service.gotError, ['getConnectionStatus', 'validation']), err)
 
       /** throw appropriate error */
       throw makePropsResponseError(err)
@@ -360,31 +392,42 @@ class Connect extends Base {
 
     /** make request */
     try {
+      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getConnectionStatus']))
       response = this._socket.connected
-      this._logTechnical('Service (getConnectionStatus) got response:', response)
+      this._log(makeString(MESSAGES.technical.gotResponse, ['getConnectionStatus']), response)
     } catch (err) {
+
+      /** log error */
+      this._logApiError(makeString(ERRORS.service.gotError, ['getConnectionStatus', 'request']), err)
+
+      /** throw appropriate error */
       throw makeReturnError(err.message, err)
     }
 
     /** return results */
 
+    this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getConnectionStatus', 'return']))
+
     if (shouldReturnDirect(options, this._respondAs)) return response
+
+    this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getConnectionStatus']))
 
     this._useEventBus(EventTypes.GET_CONNECTION_STATUS, response)
   }
 
   public disconnect(options?: Omit<QueryOptions, 'limit' | 'skip'>): boolean | void {
-    this._logTechnical('Service is disconnecting (disconnect).')
+    this._logTechnical(makeString(MESSAGES.technical.running, ['disconnect']))
 
     /** validate options, if present */
     try {
       if (options) {
+        this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['disconnect', 'options']))
         validateOptions(options, 'disconnect')
       }
     } catch (err) {
 
       /** log error */
-      this._logError('Service (disconnect) caught [validation] error.', err)
+      this._logError(makeString(ERRORS.service.gotError, ['disconnect', 'validation']), err)
 
       /** throw appropriate error */
       throw makePropsResponseError(err)
@@ -394,31 +437,42 @@ class Connect extends Base {
 
     /** make request */
     try {
+      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['disconnect']))
       response = this._socket.disconnect().disconnected
-      this._logTechnical('Service (disconnect) got response:', response)
+      this._log(makeString(MESSAGES.technical.gotResponse, ['disconnect']), response)
     } catch (err) {
+
+      /** log error */
+      this._logApiError(makeString(ERRORS.service.gotError, ['disconnect', 'request']), err)
+
+      /** throw appropriate error */
       throw makeReturnError(err.message, err)
     }
 
     /** return results */
 
+    this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['disconnect', 'return']))
+
     if (shouldReturnDirect(options, this._respondAs)) return response
+
+    this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['disconnect']))
 
     this._useEventBus(EventTypes.DISCONNECT, response)
   }
 
   public connect(options?: Omit<QueryOptions, 'limit' | 'skip'>): boolean | void {
-    this._logTechnical('Service is connecting (connect).')
+    this._logTechnical(makeString(MESSAGES.technical.running, ['connect']))
 
     /** validate options, if present */
     try {
       if (options) {
+        this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['connect', 'options']))
         validateOptions(options, 'connect')
       }
     } catch (err) {
 
       /** log error */
-      this._logError('Service (connect) caught [validation] error.', err)
+      this._logError(makeString(ERRORS.service.gotError, ['connect', 'validation']), err)
 
       /** throw appropriate error */
       throw makePropsResponseError(err)
@@ -428,15 +482,25 @@ class Connect extends Base {
 
     /** make request */
     try {
+      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['connect']))
       response = this._socket.connect().connected
-      this._logTechnical('Service (connect) got response:', response)
+      this._log(makeString(MESSAGES.technical.gotResponse, ['connect']), response)
     } catch (err) {
+
+      /** log error */
+      this._logApiError(makeString(ERRORS.service.gotError, ['connect', 'request']), err)
+
+      /** throw appropriate error */
       throw makeReturnError(err.message, err)
     }
 
     /** return results */
 
+    this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['connect', 'return']))
+
     if (shouldReturnDirect(options, this._respondAs)) return response
+
+    this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['connect']))
 
     this._useEventBus(EventTypes.CONNECT, response)
   }

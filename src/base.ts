@@ -9,7 +9,7 @@ import {
   AuthDetails,
   Settings,
 } from './types'
-import { LogError, LogApiWarning, LogInfo } from './tools/log'
+import { LogError, LogApiWarning, LogInfo, LogApiError } from './tools/log'
 import { authDetailsDefaults } from './defaults'
 import { version } from './config'
 
@@ -35,7 +35,7 @@ class Base {
   }
 
   protected _logApiError(message: string, error?: ApiError | undefined): void {
-    if (this._debug !== DebugLevels.MUTE) new LogError(message, error).make()
+    if (this._debug !== DebugLevels.MUTE) new LogApiError(message, error).make()
   }
 
   protected _logError(message: string, error?: Error | undefined): void {
