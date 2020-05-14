@@ -31,12 +31,15 @@ export const TEXT = {
   },
 }
 
-export const listOfStatusKeys = ['height', 'online', 'fee']
+export const listOfStatusKeys = ['height', 'online', 'fee', 'netId', 'timestamp','updatedAt']
 
 export const typeOfStatusValues: KeyObject<string> = {
   height: 'number',
   online: 'boolean',
   fee: 'number',
+  netId: 'string',
+  timestamp: 'number',
+  updatedAt: 'string'
 }
 
 export const listOfSettingsKeys = ['debug', 'currency', 'network', 'eventBus', 'respondAs', 'authDetails']

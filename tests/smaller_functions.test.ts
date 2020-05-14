@@ -72,12 +72,13 @@ describe('Smaller functions', () => {
       if (result) {
         Object.keys(result).forEach(key => {
           if (!listOfStatusKeys.includes(key)) keysValuesCheck = false
+          else {
+            const resValType = typeof changeType<KeyObject<string | number | boolean>>(result)[key]
 
-          const resValType = typeof changeType<KeyObject<string | number | boolean>>(result)[key]
+            const reqValType = typeOfStatusValues[key]
 
-          const reqValType = typeOfStatusValues[key]
-
-          if (resValType !== reqValType) keysValuesCheck = false
+            if (resValType !== reqValType) keysValuesCheck = false
+          }
         })
       }
 
