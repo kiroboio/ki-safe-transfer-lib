@@ -2,7 +2,7 @@ import { assoc, isNil, not, map } from 'ramda'
 import { v4 as generateId } from 'uuid'
 
 import { validateObject, validateArray } from '../validators'
-import { Sendable, QueryOptions, KeyObject, Address } from '../types'
+import { QueryOptions, KeyObject, Address, SendRequest } from '../types'
 
 const splitText = (text: string): string[] => text.split('')
 
@@ -66,7 +66,7 @@ export function changeType<T>(object: unknown): T {
  *
  * @returns Sendable
  */
-export function checkOwnerId(transaction: Sendable): Sendable {
+export function checkOwnerId(transaction: SendRequest): SendRequest {
   if (transaction.owner) return transaction
 
   return assoc('owner', generateId(), transaction)

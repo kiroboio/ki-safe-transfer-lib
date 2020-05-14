@@ -1,11 +1,12 @@
+import { not, is, forEach } from 'ramda'
+
 import { TEXT } from '../data'
-import { Sendable, ValidateReport, Retrieve } from '../types'
+import { ValidateReport, SendRequest, RetrieveRequest} from '../types'
 import { validateAddress } from './address'
-import { not, is, includes, forEach } from 'ramda'
 import { makeString } from '../tools'
 import { ERRORS } from '../text'
 
- const validateData = (data: Sendable, currency: string, networkType: string): void => {
+ const validateData = (data: SendRequest, currency: string, networkType: string): void => {
   const validate: ValidateReport = {
     message: TEXT.errors.validation.malformedData,
     errors: { [TEXT.errors.validation.missingValues]: [], [TEXT.errors.validation.malformedValues]: [] },
@@ -63,7 +64,7 @@ import { ERRORS } from '../text'
   }
 }
 
-function validateRetrieve(data: Retrieve,argName: string, fnName: string): void {
+function validateRetrieve(data: RetrieveRequest,argName: string, fnName: string): void {
 
   const allowedKeys = ['id','raw']
 

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
-import { capitalize, makeString, compareBasicObjects } from '../src/tools/tools'
+import { capitalize, makeString, compareBasicObjects } from '../src/tools/other'
 import { wait } from './tools'
 
 const { log } = console

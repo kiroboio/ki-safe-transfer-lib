@@ -1,6 +1,6 @@
 import { isEmpty, keys, pipe, forEach } from 'ramda'
 
-import { makeString, makeLocation, changeType } from '../tools/tools'
+import { makeString, makeLocation, changeType } from '../tools/other'
 import { TEXT, optionsValidValues } from '../data'
 import { isOfType } from '../validators'
 import { KeyObject } from '../types'

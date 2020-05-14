@@ -1,4 +1,4 @@
-export * from './tools'
+export * from './other'
 
 export * from './error'
 
