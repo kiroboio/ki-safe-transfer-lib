@@ -1,5 +1,21 @@
 # Changelog
 
+##### v2.5 2020-05-13
+
+  New:
+
+  - 3 class layers to lower complexity - base, connect, service
+  - retrieve() method
+
+  Updated:
+
+  - split types into multiple files
+  - cleaned up tools, validations
+  - extracted config
+  - extract text
+  - extra tests
+  - faster tests
+
 ##### v2.1 2020-05-12
 
   New:

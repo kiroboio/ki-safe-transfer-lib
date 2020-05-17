@@ -1,6 +1,6 @@
 import dotenv from 'dotenv'
 
-import Service, { Event, SwitchActions, AuthDetails, RatesProviders, Responses } from '../src'
+import Service, { Event, AuthDetails, RatesProviders, Responses } from '../src'
 import { wait, getEventByType } from './tools'
 import { changeType } from '../src/tools'
 
@@ -32,7 +32,7 @@ describe('Rates', () => {
     events = []
   })
   afterAll(async () => {
-    service.connect({ action: SwitchActions.CONNECT, value: false })
+    service.disconnect()
     await wait(2000)
   })
   it('gets rates from three sources', async () => {

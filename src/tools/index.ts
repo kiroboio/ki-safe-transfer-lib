@@ -1,5 +1,5 @@
-export * from './tools'
+export * from './other'
 
 export * from './error'
 
-export * from './functions'
+export * from './time'

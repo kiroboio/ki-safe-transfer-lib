@@ -1,8 +1,7 @@
 import dotenv from 'dotenv'
 
-import Service, { Event, SwitchActions, AuthDetails, RatesProviders, Responses } from '../src'
-import { wait, getEventByType } from './tools'
-import { changeType } from '../src/tools'
+import Service, { Event, AuthDetails, Responses } from '../src'
+import { wait } from './tools'
 
 dotenv.config()
 
@@ -32,7 +31,7 @@ describe('Authentication', () => {
     events = []
   })
   afterAll(async () => {
-    incorrect.connect({ action: SwitchActions.CONNECT, value: false })
+    incorrect.connect()
     await wait(2000)
   })
   it('throws error on incorrect auth details', async () => {

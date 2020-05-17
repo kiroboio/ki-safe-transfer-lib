@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 import dotenv from 'dotenv'
 
-import Service, { DebugLevels, AuthDetails, SwitchActions } from '../src'
-import { validBitcoinAddresses } from '../src/data'
+import Service, { DebugLevels, AuthDetails } from '../src'
 import { wait } from './tools'
+import { validBitcoinAddresses } from './test_data'
 
 dotenv.config()
 
@@ -24,10 +24,10 @@ describe('Send', () => {
     }
   })
   afterAll(async () => {
-    service.connect({ action: SwitchActions.CONNECT, value: false })
+    service.disconnect()
     await wait(2000)
   })
-  describe('empty/incorrect argument validation:', () => {
+  describe('empty/incorrect argument object validation:', () => {
     it('throws Error on missing argument', async () => {
       try {
         // @ts-ignore
@@ -45,10 +45,10 @@ describe('Send', () => {
       } catch (err) {
         expect(err).toBeInstanceOf(Object)
         expect(err).toHaveProperty('name', 'BadProps')
-        expect(err).toHaveProperty('message', 'Transaction can\'t be array. It should be object {}.')
+        expect(err).toHaveProperty('message', "Transaction can't be array. It should be object {}.")
       }
     })
-    it('- throws TypeError on function as argument', async () => {
+    it('throws TypeError on function as argument', async () => {
       try {
         // @ts-ignore
         await service.send(() => {
@@ -57,10 +57,10 @@ describe('Send', () => {
       } catch (err) {
         expect(err).toBeInstanceOf(Object)
         expect(err).toHaveProperty('name', 'BadProps')
-        expect(err).toHaveProperty('message', 'Argument can\'t be a function.')
+        expect(err).toHaveProperty('message', "Argument can't be a function.")
       }
     })
-    it('- throws TypeError non-object argument', async () => {
+    it('throws TypeError non-object argument', async () => {
       try {
         // @ts-ignore
         await service.send(1234)
@@ -70,7 +70,7 @@ describe('Send', () => {
         expect(err).toHaveProperty('message', 'Wrong type of argument')
       }
     })
-    it('- throws Error on empty object', async () => {
+    it('throws Error on empty object', async () => {
       try {
         // @ts-ignore
         await service.send({})
@@ -80,7 +80,7 @@ describe('Send', () => {
         expect(err).toHaveProperty('message', 'Data is malformed. Missing values: to, amount, collect, deposit, owner.')
       }
     })
-    it('- throws Error on empty object', async () => {
+    it('throws Error on empty object', async () => {
       try {
         // @ts-ignore
         await service.send({})
@@ -91,8 +91,8 @@ describe('Send', () => {
       }
     })
   })
-  describe('- key/value validation', () => {
-    it('- doesn\'t validate values if at least one missing key or key with empty value', async () => {
+  describe('argument key/value validation:', () => {
+    it('throws if at least one missing required key or key with empty value', async () => {
       try {
         // @ts-ignore
         await service.send({ to: 123, amount: 123, collect: 123, deposit: '' })
@@ -102,7 +102,7 @@ describe('Send', () => {
         expect(err).toHaveProperty('message', 'Data is malformed. Missing values: deposit, owner.')
       }
     })
-    it('- doesn\'t validate values if at there is wrong key', async () => {
+    it('throws if at there is wrong key', async () => {
       try {
         // @ts-ignore
         await service.send({ to: 123, amount: 123, collect: 123, deposit: '', ownerId: 'string' })
@@ -112,7 +112,7 @@ describe('Send', () => {
         expect(err).toHaveProperty('message', 'Data is malformed. Missing values: deposit, owner.')
       }
     })
-    it('- except for amount, everything else should be \'string\', \'to\' - must be valid address', async () => {
+    it("throws if except for amount, everything else is not a 'string', 'to' - must be valid address", async () => {
       try {
         // @ts-ignore
         await service.send({ to: 123, amount: 123, collect: 123, deposit: 'qwerty', owner: 123 })
@@ -122,7 +122,7 @@ describe('Send', () => {
         expect(err).toHaveProperty('message', 'Data is malformed. Malformed values: to, collect, owner.')
       }
     })
-    it('- optional values are also tested for being \'string\'', async () => {
+    it('throws if optional values are not of right type', async () => {
       try {
         // @ts-ignore
         await service.send({
@@ -131,6 +131,8 @@ describe('Send', () => {
           amount: '123',
           collect: 'qwerty',
           owner: 'string',
+          // @ts-ignore
+          depositPath: 123,
           // @ts-ignore
           deposit: 123,
           // @ts-ignore
@@ -145,11 +147,11 @@ describe('Send', () => {
         expect(err).toHaveProperty('name', 'BadProps')
         expect(err).toHaveProperty(
           'message',
-          'Data is malformed. Malformed values: to, deposit, amount, from, hint, id.',
+          'Data is malformed. Malformed values: to, deposit, amount, from, hint, id, depositPath.',
         )
       }
     })
-    it('throws when "owner" length is shorter than 20 symbols', async () => {
+    it('throws if "owner" length is shorter than 20 symbols', async () => {
       expect.assertions(4)
 
       try {
@@ -159,15 +161,16 @@ describe('Send', () => {
           collect: 'qwerty',
           deposit: 'qwerty',
           owner: '12345678',
+          depositPath: 'qwerty',
         })
       } catch (err) {
         expect(err).toBeInstanceOf(Object)
         expect(err).toHaveProperty('name', 'BadRequest')
         expect(err).toHaveProperty('message', 'Data does not match schema')
-        expect(err).toHaveProperty('errors', ['\'owner\' should NOT be shorter than 20 characters'])
+        expect(err).toHaveProperty('errors', ["'owner' should NOT be shorter than 20 characters"])
       }
     })
-    it('throws when "owner" length is longer than 120 symbols', async () => {
+    it('throws if "owner" length is longer than 120 symbols', async () => {
       expect.assertions(4)
 
       try {
@@ -179,15 +182,16 @@ describe('Send', () => {
           owner: `01234567890123456789012345678901234567890123456789012
       345678901234567890123456789012345678901234567890123456
       7890123456789`,
+          depositPath: 'qwerty',
         })
       } catch (err) {
         expect(err).toBeInstanceOf(Object)
         expect(err).toHaveProperty('name', 'BadRequest')
         expect(err).toHaveProperty('message', 'Data does not match schema')
-        expect(err).toHaveProperty('errors', ['\'owner\' should NOT be longer than 120 characters'])
+        expect(err).toHaveProperty('errors', ["'owner' should NOT be longer than 120 characters"])
       }
     })
-    it('valid address in \'to\' passes validation', async () => {
+    it("doesn't throw if values are valid", async () => {
       expect.assertions(3)
 
       try {
@@ -197,12 +201,12 @@ describe('Send', () => {
           collect: 'qwerty',
           deposit: 'qwerty',
           owner: '0123456789012345678901234567890',
-          depositPath: 'string',
+          depositPath: 'qwerty',
         })
       } catch (err) {
         expect(err).toBeInstanceOf(Object)
         expect(err).toHaveProperty('name', 'BadRequest')
-        expect(err).toHaveProperty('message', '\'collect\' is not a valid BTC transaction.')
+        expect(err).toHaveProperty('message', "'collect' is not a valid BTC transaction.")
       }
     })
   })

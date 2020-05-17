@@ -2,7 +2,7 @@
 import dotenv from 'dotenv'
 import { is } from 'ramda'
 
-import Service, { DebugLevels, Currencies, Networks, Responses, AuthDetails, SwitchActions } from '../src'
+import Service, { DebugLevels, Currencies, Networks, Responses, AuthDetails } from '../src'
 import { TEXT, valuesForSettings } from '../src/data'
 import { makeString, compareBasicObjects } from '../src/tools'
 import { wait } from './tools'
@@ -20,13 +20,13 @@ process.on('unhandledRejection', () => {
 let service: Service
 
 describe('Library configuration', () => {
-  describe(' incorrect settings:', () => {
-    afterAll(async () => {
-      if (service) {
-        service.connect({ action: SwitchActions.CONNECT, value: false })
-        await wait(2000)
-      }
-    })
+  afterAll(async () => {
+    if (service) {
+      service.disconnect()
+      await wait(2000)
+    }
+  })
+  describe('incorrect settings:', () => {
     it('doesn\'t take null as settings', async () => {
       expect.assertions(2)
 
@@ -130,14 +130,8 @@ describe('Library configuration', () => {
       }
     })
   })
-  describe(' correct settings:', () => {
-    afterAll(async () => {
-      if (service) {
-        service.connect({ action: SwitchActions.CONNECT, value: false })
-        await wait(2000)
-      }
-    })
-    it('runs without settings (auth is required)', async () => {
+  describe('correct settings:', () => {
+    it('runs without settings (auth is always required)', async () => {
       try {
         service = new Service({ authDetails })
         expect(is(Object, service)).toBe(true)
@@ -145,7 +139,7 @@ describe('Library configuration', () => {
         log(err)
       }
     })
-    it('provided correct settings', async () => {
+    it('doesn\'t throw if provided correct settings', async () => {
       const settings = {
         debug: DebugLevels.VERBOSE,
         currency: Currencies.Bitcoin,

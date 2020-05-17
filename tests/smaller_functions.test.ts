@@ -1,11 +1,12 @@
 import dotenv from 'dotenv'
 
-import Service, { DebugLevels, Responses, Event } from '../src'
-import { validBitcoinAddresses, listOfStatusKeys, typeOfStatusValues } from '../src/data'
-import { StringKeyObject, Status, AuthDetails, SwitchActions } from '../src/types'
-import { changeType } from '../src/tools/tools'
+import Service, { DebugLevels, Responses, Event, KeyObject, Status, AuthDetails } from '../src'
+import { listOfStatusKeys, typeOfStatusValues } from '../src/data'
+
+import { changeType } from '../src/tools/other'
 import { validateObject } from '../src/validators'
 import { wait } from './tools'
+import { validBitcoinAddresses } from './test_data'
 
 dotenv.config()
 
@@ -29,6 +30,7 @@ async function setAsync(): Promise<Status | void> {
       respondAs: Responses.Callback,
       authDetails,
     })
+    await wait(2000)
     return await service.getStatus()
   } catch (err) {
     log(err)
@@ -53,7 +55,7 @@ describe('Smaller functions', () => {
   })
 
   afterAll(async () => {
-    service.connect({ action: SwitchActions.CONNECT, value: false })
+    service.disconnect()
     await wait(2000)
   })
   describe(' getStatus:', () => {
@@ -71,18 +73,19 @@ describe('Smaller functions', () => {
       if (result) {
         Object.keys(result).forEach(key => {
           if (!listOfStatusKeys.includes(key)) keysValuesCheck = false
+          else {
+            const resValType = typeof changeType<KeyObject<string | number | boolean>>(result)[key]
 
-          const resValType = typeof changeType<StringKeyObject<string | number | boolean>>(result)[key]
+            const reqValType = typeOfStatusValues[key]
 
-          const reqValType = typeOfStatusValues[key]
-
-          if (resValType !== reqValType) keysValuesCheck = false
+            if (resValType !== reqValType) keysValuesCheck = false
+          }
         })
       }
 
       expect(keysValuesCheck).toBe(true)
     })
-    it('- returns information in "Callback" mode', async () => {
+    it('returns information in "Callback" mode', async () => {
       expect.assertions(2)
       await setAsync()
       await service.getStatus()
@@ -92,7 +95,7 @@ describe('Smaller functions', () => {
       expect(eventReceived.type).toBe('service_update_status')
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = changeType<StringKeyObject<any>>(eventReceived.payload)
+      const result = changeType<KeyObject<any>>(eventReceived.payload)
 
       let keysValuesCheck = true
 
@@ -115,9 +118,9 @@ describe('Smaller functions', () => {
       expect(keysValuesCheck).toBe(true)
     })
   })
-  describe('- cached addresses functions', () => {
+  describe('cached addresses functions', () => {
     // eslint-disable-next-line @typescript-eslint/quotes
-    it(`- doesn't cache address in case of incorrect request`, async () => {
+    it(`doesn't cache address in case of incorrect request`, async () => {
       expect.assertions(2)
 
       try {
@@ -130,14 +133,14 @@ describe('Smaller functions', () => {
       }
     })
 
-    it('- caches address in case of correct request', async () => {
+    it('caches address in case of correct request', async () => {
       await service.getCollectables([validBitcoinAddresses[2]])
 
       const result = service.getLastAddresses()[0]
 
       expect(result).toBe(validBitcoinAddresses[2])
     })
-    it('- clears cache', async () => {
+    it('clears cache', async () => {
       expect.assertions(2)
       await service.getCollectables([validBitcoinAddresses[2]])
 

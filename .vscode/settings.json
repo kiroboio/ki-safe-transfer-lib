@@ -3,6 +3,7 @@
       "COINGECKO",
       "Retrievables",
       "Utxos",
+      "passcode",
       "regnet",
       "testnet"
     ],

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 import dotenv from 'dotenv'
 
-import { Service, DebugLevels, Responses, Event, AuthDetails, SwitchActions } from '../src'
+import { Service, DebugLevels, Responses, Event, AuthDetails } from '../src'
 import { wait } from './tools'
 
 dotenv.config()
@@ -16,7 +16,7 @@ function eventBus(event: Event): void {
 async function callbackService(): Promise<Service> {
   const service = new Service({ eventBus, respondAs: Responses.Callback, authDetails })
 
-  await service.getStatus()
+  await wait(2000)
   return service
 }
 
@@ -29,17 +29,16 @@ describe('Retrievable', () => {
   beforeAll(async () => {
     try {
       service = new Service({ debug: DebugLevels.MUTE, eventBus, authDetails })
-      await service.getStatus()
+      await wait(2000)
     } catch (e) {
       return
     }
   })
 
   afterAll(async () => {
-    service.connect({ action: SwitchActions.CONNECT, value: false })
+    service.disconnect()
     await wait(2000)
   })
-
 
   it('throws "not found" error in case of correct request', async () => {
     expect.assertions(2)

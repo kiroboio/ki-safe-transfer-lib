@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 import dotenv from 'dotenv'
 
-import Service, { Responses, Event, SwitchActions, AuthDetails, Results } from '../src'
-import { validBitcoinAddresses } from '../src/data'
+import Service, { Responses, Event, AuthDetails, Results } from '../src'
 import { changeType } from '../src/tools'
 import { wait } from './tools'
+import { validBitcoinAddresses } from './test_data'
 
 dotenv.config()
 
@@ -26,14 +26,14 @@ describe('Collectables', () => {
   let service: Service
   beforeAll(async () => {
     try {
-      service = new Service({ authDetails })
-      await service.getStatus()
+      service = new Service({ authDetails, eventBus, respondAs: Responses.Callback })
+      await wait(2000)
     } catch (e) {
       return
     }
   })
   afterAll(async () => {
-    service.connect({ action: SwitchActions.CONNECT, value: false })
+    service.disconnect()
     await wait(2000)
   })
   it('provides response as a result of proper request', async () => {
@@ -53,10 +53,6 @@ describe('Collectables', () => {
   })
   it('provides response through eventBus, if used', async () => {
     expect.assertions(4)
-
-    service = new Service({ eventBus, respondAs: Responses.Callback, authDetails })
-
-    await service.getStatus()
 
     const result = await service.getCollectables([validBitcoinAddresses[2]])
 

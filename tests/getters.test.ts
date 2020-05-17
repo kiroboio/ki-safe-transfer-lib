@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 import dotenv from 'dotenv'
 
-import { Service, Event, Responses, SwitchActions, EventTypes } from '../src'
-import { wait } from './tools'
+import { Service, Event, Responses, EventTypes } from '../src'
+import { wait, getEventByType } from './tools'
 import { keys } from 'ramda'
 
 dotenv.config()
@@ -11,20 +11,27 @@ const { log } = console
 
 const authDetails = { key: process.env.AUTH_KEY ?? '', secret: process.env.AUTH_SECRET ?? '' }
 
-let result: Event = { type: EventTypes.SEND_MESSAGE, payload: [] }
+let events: Event[] = []
 
 function eventBus(event: Event): void {
-  result = event
+  events.push(event)
 }
 
-const service = new Service({ respondAs: Responses.Callback, eventBus, authDetails })
-
 describe('Getters', () => {
-  afterEach(() => {
-    result = { type: EventTypes.SEND_MESSAGE, payload: [] }
+  let service: Service
+  beforeAll(async () => {
+    try {
+      service = new Service({ authDetails, eventBus, respondAs: Responses.Callback })
+      await wait(5000)
+    } catch (e) {
+      return
+    }
+  })
+  beforeEach(() => {
+    events = []
   })
   afterAll(async () => {
-    service.connect({ action: SwitchActions.CONNECT, value: false })
+    service.disconnect()
     await wait(2000)
   })
 
@@ -34,7 +41,9 @@ describe('Getters', () => {
     try {
       await service.getByOwnerId('xxx')
 
-      const { type, payload } = result
+      const event = getEventByType(events, EventTypes.GET_BY_OWNER_ID)
+
+      const { type, payload } = event as Event
 
       expect(type).toEqual(EventTypes.GET_BY_OWNER_ID)
       expect(keys(payload).length).toBe(4)
@@ -59,7 +68,9 @@ describe('Getters', () => {
     try {
       await service.getUsed(['xxx'])
 
-      const { type, payload } = result
+      const event = getEventByType(events, EventTypes.GET_USED)
+
+      const { type, payload } = event as Event
 
       expect(type).toEqual(EventTypes.GET_USED)
       expect(keys(payload).length).toBe(4)
@@ -84,7 +95,9 @@ describe('Getters', () => {
     try {
       await service.getFresh(['xxx'])
 
-      const { type, payload } = result
+      const event = getEventByType(events, EventTypes.GET_FRESH)
+
+      const { type, payload } = event as Event
 
       expect(type).toEqual(EventTypes.GET_FRESH)
       expect(keys(payload).length).toBe(4)
@@ -109,7 +122,9 @@ describe('Getters', () => {
     try {
       await service.getUtxos(['xxx'])
 
-      const { type, payload } = result
+      const event = getEventByType(events, EventTypes.GET_UTXOS)
+
+      const { type, payload } = event as Event
 
       expect(type).toEqual(EventTypes.GET_UTXOS)
       expect(keys(payload).length).toBe(4)
