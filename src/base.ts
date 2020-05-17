@@ -43,11 +43,12 @@ class Base {
   }
 
   protected _logApiWarning(message: string, payload?: unknown | undefined): void {
-    if (this._debug !== DebugLevels.MUTE && this._debug!==DebugLevels.QUIET) new LogApiWarning(message, payload).make()
+    if (this._debug !== DebugLevels.MUTE && this._debug !== DebugLevels.QUIET)
+      new LogApiWarning(message, payload).make()
   }
 
   protected _log(message: string, payload?: unknown | undefined): void {
-   if (this._debug !== DebugLevels.MUTE && this._debug !== DebugLevels.QUIET) new LogInfo(message, payload).make()
+    if (this._debug !== DebugLevels.MUTE && this._debug !== DebugLevels.QUIET) new LogInfo(message, payload).make()
   }
 
   protected _logTechnical(message: string, payload?: unknown | undefined): void {
@@ -65,6 +66,18 @@ class Base {
         this._logError(`Service: eventBus caught error, when emitting event (${type}).`, err)
       }
     }
+  }
+
+  protected _exceededQtyLog(time: number): void {
+    this._logTechnical(
+      `Service (connect) exceeded MAX connection tries (${time}) and will halt the reconnection efforts.`,
+    )
+  }
+
+  protected _tooEarlyToConnectLog(last: number|undefined, timeout: number): void {
+    this._logTechnical(
+      `Service (connect) recently (${last}) tried to connect. Will wait for ${timeout}s and try again.`,
+    )
   }
 
   public getSettings(): Settings {

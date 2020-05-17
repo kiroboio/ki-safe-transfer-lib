@@ -18,8 +18,8 @@ import {
 } from './types'
 import { Base } from './base'
 import { debugLevelSelector } from './tools/debug'
-import { apiUrl, version, endpoints, connectionTriesMax } from './config'
-import { capitalize, makeString } from './tools'
+import { apiUrl, version, endpoints, connectionTriesMax, connectionTimeout } from './config'
+import { capitalize, makeString, diff, getTime, changeType } from './tools'
 import { WARNINGS, ERRORS, MESSAGES } from './text'
 import { makeApiResponseError, makeReturnError, makePropsResponseError } from './tools/error'
 import { shouldReturnDirect, isDirect } from './tools/connect'
@@ -31,6 +31,8 @@ class Connect extends Base {
   private _socket: SocketIOClient.Socket
 
   protected _connectionCounter = 0
+
+  protected _lastConnect: number | undefined = undefined
 
   protected _networks: ApiService
 
@@ -57,7 +59,7 @@ class Connect extends Base {
 
     const { network, currency, authDetails, eventBus, respondAs } = props
 
-    this._logTechnical('Service (connect > constructor) assigns instance variables')
+    this._logTechnical('Service (connect > constructor) assigns instance variables...')
 
     if (currency && currency !== this._currency) this._currency = currency
 
@@ -82,44 +84,34 @@ class Connect extends Base {
 
     this._connect = connect.configure(auth({ storageKey: 'auth' }))
 
-    // TODO: refactor
-    this._logTechnical('Service is calling authentication method...')
-    this._authSocket()?.catch(err => this._logApiError(ERRORS.connect.authSocket, err))
-
-    // assign services
-    this._logTechnical('Service is setting up API services...')
-    this._networks = this._getService(Endpoints.Networks)
-    this._transfers = this._getService(Endpoints.Transfers)
-    this._inbox = this._getService(Endpoints.Inbox)
-    this._collect = this._getService(Endpoints.Collect)
-    this._utxos = this._getService(Endpoints.Utxos)
-    this._exists = this._getService(Endpoints.Exists)
-    this._rateBtcToUsd = this._getService(Endpoints.RateToUsd)
-    this._retrieve = this._getService(Endpoints.Retrieve)
-
     // connect/disconnect event processes
-    this._logTechnical('Service is setting up event listeners...')
+    this._logTechnical('Service is setting up connect/disconnect listeners...')
 
     try {
       this._connect.io.on('connect', (): void => {
         this._logTechnical('Service is connected, proceeding with authorization...')
 
-        if (this._connectionCounter <= connectionTriesMax) {
-          (this._authSocket() as Promise<AuthDetails>)
-            .then(() => {
-              this._logTechnical('Service is authed, resetting connectionCounter.')
-              this._connectionCounter = 0
-              this._onConnect()
-            })
-            .catch(err => {
-              this._logTechnical('Service failed to authenticate, updating connectionCounter.')
-              this._connectionCounter++
-              this._logApiError(ERRORS.connect.on.connect.authSocket, err)
-            })
+        this._logTechnical('Service is checking if it\'s allowed to proceed:')
+
+        this._logTechnical(`- connectionCounter: ${this._connectionCounter}`)
+        this._logTechnical(`- lastConnect: ${this._lastConnect}`)
+
+        if (
+          this._connectionCounter <= connectionTriesMax &&
+          (!this._lastConnect || diff(this._lastConnect) > connectionTimeout)
+        ) {
+
+        this._logTechnical('Service is allowed :)')
+          this._runAuth()
         } else {
-          this._logTechnical(
-            `Service (connect) exceeded MAX connection tries (${connectionTriesMax}) and will halt the reconnection efforts.`,
-          )
+        this._logTechnical('Service is not allowed :(')
+
+          if (this._connectionCounter > connectionTriesMax) this._exceededQtyLog(connectionTriesMax)
+
+          if (diff(this._lastConnect) <= connectionTimeout) {
+            this._tooEarlyToConnectLog(this._lastConnect, connectionTimeout)
+            setTimeout(() => this._runAuth(), connectionTimeout * 1000)
+          }
         }
       })
     } catch (err) {
@@ -133,6 +125,19 @@ class Connect extends Base {
     } catch (err) {
       this._logApiError(ERRORS.connect.on.disconnect.direct, err)
     }
+
+    // assign services
+    this._logTechnical('Service is setting up API services...')
+    this._networks = this._getService(Endpoints.Networks)
+    this._transfers = this._getService(Endpoints.Transfers)
+    this._inbox = this._getService(Endpoints.Inbox)
+    this._collect = this._getService(Endpoints.Collect)
+    this._utxos = this._getService(Endpoints.Utxos)
+    this._exists = this._getService(Endpoints.Exists)
+    this._rateBtcToUsd = this._getService(Endpoints.RateToUsd)
+    this._retrieve = this._getService(Endpoints.Retrieve)
+
+    this._logTechnical('Service is setting up event listeners...')
 
     // status update
     this._networks.on('patched', (data: NetworkTip) => {
@@ -178,7 +183,9 @@ class Connect extends Base {
             }
 
             if (this._connectionCounter > connectionTriesMax)
-              this._logApiWarning('Service exceeded connectionTriesMax.')
+              this._logApiWarning(
+                `Service exceeded connectionTriesMax (${this._connectionCounter}/${connectionTriesMax}).`,
+              )
           })
           .catch(() => {
             if (this._connect.io.connected) {
@@ -191,7 +198,7 @@ class Connect extends Base {
       //  this is web
       window.addEventListener('offline', () => {
         if (this._connect.io.connected) {
-          this._logTechnical('Browser connection is offline, but service is not - will disconnec.')
+          this._logTechnical('Browser connection is offline, but service is not - will disconnect.')
 
           this._connect.io.disconnect()
         }
@@ -221,16 +228,40 @@ class Connect extends Base {
     }
   }
 
+  private _runAuth(): void {
+    this._logTechnical(makeString(MESSAGES.technical.running, ['runAuth']))
+    changeType<Promise<AuthDetails>>(this._authSocket())
+      .then(() => {
+        this._logTechnical('Service is authed, resetting connectionCounter.')
+        this._connectionCounter = 0
+        this._logTechnical('Setting lastConnect timestamp.')
+        this._lastConnect = getTime()
+        this._onConnect()
+      })
+      .catch(err => {
+        this._logTechnical('Service failed to authenticate, updating connectionCounter.')
+        this._connectionCounter++
+        this._logTechnical('Setting lastConnect timestamp.')
+        this._lastConnect = getTime()
+        this._logApiError(ERRORS.connect.on.connect.authSocket, err)
+      })
+  }
+
   /**
    * Function to authenticate socket connection. First is tries to
    * re-authenticate. If it's not possible (not done before), then
    * it tries to authenticate.
    */
   private _authSocket(): Promise<AuthenticationResult | void> | undefined {
+    this._logTechnical(makeString(MESSAGES.technical.running, ['authSocket']))
+
+    // if no lastConnect or it's been over 10 seconds since last time
+    // if () {
     try {
-      this._logTechnical('Service is trying to re-authenticate (authSocket).')
+      this._logTechnical('Service (authSocket) is trying to re-authenticate...')
+
       return this._connect.reAuthenticate().catch(() => {
-        this._logTechnical('Service failed to re-authenticate, proceeding with authentication (authSocket).')
+        this._logTechnical('Service (authSocket) failed to re-authenticate, proceeding with authentication.')
         this._connect
           .authenticate({
             strategy: 'local',
@@ -239,11 +270,20 @@ class Connect extends Base {
           .catch(err => {
             // if not
             this._logApiError(ERRORS.connect.authenticate, err)
+            this._logTechnical('Set connectionCounter to MAX+1.')
+            this._connectionCounter = connectionTriesMax + 1
+            this._logTechnical('Set lastConnect timestamp.')
+            this._lastConnect = getTime()
           })
       })
     } catch (err) {
       this._logApiError(ERRORS.connect.reAuthenticate, err)
+      this._logTechnical('Set connectionCounter to MAX+1.')
+      this._connectionCounter = connectionTriesMax + 1
+      this._logTechnical('Set lastConnect timestamp.')
+      this._lastConnect = getTime()
     }
+    // }
   }
 
   /**
@@ -256,25 +296,36 @@ class Connect extends Base {
       this._logApiError('Service (onConnect) caught error when calling (getStatus).', err)
     })
 
+    this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['onConnect', 'refreshInbox']))
     this._refreshInbox()
   }
 
   // TODO: add desc
   private async _refreshInbox(): Promise<void> {
-    this._logTechnical(makeString(MESSAGES.technical.running, ['connect']))
+    this._logTechnical(makeString(MESSAGES.technical.running, ['refreshInbox']))
 
     if (this._lastAddresses && this._lastAddresses.length) {
-        this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['connect','']))
+      this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['refreshInbox', 'refreshing collects...']))
       let response
 
       try {
-         this._logTechnical(makeString(MESSAGES.technical.requestingData, ['connect']))
-        response = await this._inbox.find({ query: { to: this._lastAddresses.join(';') } })
-         this._log(makeString(MESSAGES.technical.gotResponse, ['connect']), response)
+        this._logTechnical(makeString(MESSAGES.technical.requestingData, ['refreshInbox']))
+        response = await this._inbox.find({
+          query: { to: this._lastAddresses.join(';') },
+        })
+        this._log(makeString(MESSAGES.technical.gotResponse, ['refreshInbox']), response)
       } catch (err) {
+
+        /** log error */
+        this._logApiError(makeString(ERRORS.service.gotError, ['refreshInbox', 'request']), err)
+
+        /** throw appropriate error */
         throw makeApiResponseError(err)
       }
 
+      /** return results */
+
+      this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['refreshInbox', 'return']))
       this._useEventBus(EventTypes.GET_COLLECTABLES, response)
     }
   }
@@ -283,7 +334,7 @@ class Connect extends Base {
    * Function to assign endpoints to a service
    */
   private _getService(endpoint: Endpoints): ApiService {
-    this._logTechnical(makeString(MESSAGES.technical.service,['getService']), endpoint)
+    this._logTechnical(makeString(MESSAGES.technical.service, ['getService']), endpoint)
 
     return this._connect.service(this._makeEndpointPath(endpoint))
   }
@@ -296,7 +347,7 @@ class Connect extends Base {
    * @returns string
    */
   private _makeEndpointPath = (endpoint: Endpoints): string => {
-    this._logTechnical(makeString(MESSAGES.technical.endpoint,['makeEndpointPath']), endpoint)
+    this._logTechnical(makeString(MESSAGES.technical.endpoint, ['makeEndpointPath']), endpoint)
 
     const path = `/${version}/${this._currency}/`
 

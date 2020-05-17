@@ -1,6 +1,9 @@
 import { KeyObject } from './types'
+import { modeIs } from './mode'
 
 const connectionTriesMax = 3
+
+const connectionTimeout = modeIs('test') ? 1 : 10
 
 const version = 'v1' as const
 
@@ -15,4 +18,4 @@ const endpoints: KeyObject<string> = {
   exists: 'exists',
 } as const
 
-export { version, apiUrl, endpoints,connectionTriesMax }
+export { version, apiUrl, endpoints, connectionTriesMax, connectionTimeout }

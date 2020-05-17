@@ -26,8 +26,8 @@ describe('Collectables', () => {
   let service: Service
   beforeAll(async () => {
     try {
-      service = new Service({ authDetails })
-      await service.getStatus()
+      service = new Service({ authDetails, eventBus, respondAs: Responses.Callback })
+      await wait(2000)
     } catch (e) {
       return
     }
@@ -53,10 +53,6 @@ describe('Collectables', () => {
   })
   it('provides response through eventBus, if used', async () => {
     expect.assertions(4)
-
-    service = new Service({ eventBus, respondAs: Responses.Callback, authDetails })
-
-    await service.getStatus()
 
     const result = await service.getCollectables([validBitcoinAddresses[2]])
 

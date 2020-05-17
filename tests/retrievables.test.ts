@@ -24,7 +24,7 @@ function eventBus(event: Event): void {
 async function callbackService() {
   const srv = new Service({ eventBus, respondAs: Responses.Callback, authDetails })
 
-  await srv.getStatus()
+  await wait(2000)
   return srv
 }
 

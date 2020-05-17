@@ -8,6 +8,7 @@ import { Endpoints, QueryOptions, Responses } from '../types'
  * @returns boolean
  */
 function isDirect(endpoint: Endpoints): boolean {
+
   if (endpoint === Endpoints.Networks) return true
 
   if (endpoint === Endpoints.RateToUsd) return true
@@ -16,7 +17,7 @@ function isDirect(endpoint: Endpoints): boolean {
 }
 
 /**
- * Function to determine if the reply shoul dbe sent directly back or through the eventBus
+ * Function to determine if the reply should be sent directly back or through the eventBus
  *
  * @param [(QueryOptions | undefined)] options - options object
  *

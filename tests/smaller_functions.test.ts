@@ -30,6 +30,7 @@ async function setAsync(): Promise<Status | void> {
       respondAs: Responses.Callback,
       authDetails,
     })
+    await wait(2000)
     return await service.getStatus()
   } catch (err) {
     log(err)
