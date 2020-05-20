@@ -39,7 +39,8 @@ enum EventTypes {
   GET_BTC_TO_USD_RATES = 'service_get_btc_to_usd_rates',
   GET_BTC_TO_USD_RATE = 'service_get_btc_to_usd_rate',
   GET_ONLINE_NETWORKS = 'service_get_online_networks',
-  RETRIEVE = 'service_retrieve'
+  RETRIEVE = 'service_retrieve',
+  IS_AUTHED = 'service_is_authenticated'
 }
 
 

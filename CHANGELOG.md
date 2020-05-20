@@ -1,5 +1,12 @@
 # Changelog
 
+
+##### v2.6 2020-05-20
+
+  New:
+
+  - isAuthenticated() method
+
 ##### v2.5 2020-05-13
 
   New:
