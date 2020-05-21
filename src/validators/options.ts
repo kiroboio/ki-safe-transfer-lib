@@ -1,21 +1,23 @@
 import { isEmpty, keys, pipe, forEach } from 'ramda'
 
 import { makeString, makeLocation, changeType } from '../tools/other'
-import { TEXT, optionsValidValues } from '../data'
+import { TEXT, optionsValidValues, optionsRequestValidValues } from '../data'
 import { isOfType } from '../validators'
 import { KeyObject } from '../types'
 
-export function validateOptions(options: unknown, fnName: string): void {
+export function validateOptions(options: unknown, fnName: string, request?: true): void {
 
   /** if empty */
   if (isEmpty(options)) throw new TypeError(makeString(TEXT.errors.validation.emptyGenObject, ['Options']))
 
+  const valid = request ? optionsRequestValidValues : optionsValidValues
+
   /** if length is different */
-  if (keys(options).length > keys(optionsValidValues).length)
+  if (keys(options).length > keys(valid).length)
     throw new TypeError(makeString(TEXT.errors.validation.extraGenKeys, ['Options']))
 
   /** check keys */
-  const validKeys = keys(optionsValidValues)
+  const validKeys = keys(valid)
 
   const checkFn = (key: string): void => {
 
@@ -26,17 +28,17 @@ export function validateOptions(options: unknown, fnName: string): void {
     const value = changeType<KeyObject<string>>(options)[key]
 
     /** if value is of wrong type */
-    if (!isOfType(value, optionsValidValues[key].type))
+    if (!isOfType(value, valid[key].type))
       throw new TypeError(
         `${makeString(TEXT.errors.validation.wrongGenValueType, [
           key,
           makeLocation(fnName, 'options'),
           typeof value,
-          optionsValidValues[key].type,
+          valid[key].type,
         ])}`,
       )
 
-    const acceptableValues = optionsValidValues[key].values
+    const acceptableValues = valid[key].values
 
     // wrongGenValue: 'Wrong value \'%1\' for key \'%2\' in %3. Should be one of: %4.',
     /** if value is not acceptable */

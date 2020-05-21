@@ -15,6 +15,7 @@ import {
   EventTypes,
   Collectable,
   Transfer,
+  RequestOptions,
 } from './types'
 import { Base } from './base'
 import { debugLevelSelector } from './tools/debug'
@@ -375,14 +376,14 @@ class Connect extends Base {
    * ```*
    * -
    */
-  public async getStatus(options?: Omit<QueryOptions, 'limit' | 'skip'>): Promise<Status | void> {
+  public async getStatus(options?: RequestOptions): Promise<Status | void> {
     this._logTechnical(makeString(MESSAGES.technical.running, ['getStatus']))
 
     /** validate options, if present */
     try {
       if (options) {
         this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['getStatus', 'options']))
-        validateOptions(options, 'getStatus')
+        validateOptions(options, 'getStatus', true)
       }
     } catch (err) {
 
@@ -555,15 +556,14 @@ class Connect extends Base {
     this._useEventBus(EventTypes.CONNECT, response)
   }
 
-  public async isAuthenticated(options?: Omit<QueryOptions, 'limit' | 'skip'>): Promise<boolean | void> {
+  public async isAuthenticated(options?: RequestOptions): Promise<boolean | void> {
     this._logTechnical(makeString(MESSAGES.technical.running, ['isAuthenticated']))
-
 
     /** validate options, if present */
     try {
       if (options) {
         this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['isAuthenticated', 'options']))
-        validateOptions(options, 'isAuthenticated')
+        validateOptions(options, 'isAuthenticated', true)
       }
     } catch (err) {
 
@@ -579,7 +579,7 @@ class Connect extends Base {
     try {
       this._logTechnical(makeString(MESSAGES.technical.requestingData, ['isAuthenticated']))
 
-       response = await this._connect.get('authentication')
+      response = await this._connect.get('authentication')
       this._log(makeString(MESSAGES.technical.gotResponse, ['isAuthenticated']), response)
     } catch (err) {
 
@@ -598,7 +598,7 @@ class Connect extends Base {
 
     this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['isAuthenticated']))
 
-    this._useEventBus(EventTypes.IS_AUTHED, !!response )
+    this._useEventBus(EventTypes.IS_AUTHED, !!response)
   }
 }
 

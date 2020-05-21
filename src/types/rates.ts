@@ -1,4 +1,4 @@
-import { QueryOptions } from './api'
+import { QueryOptions, RequestOptions } from './api'
 
 enum RatesProviders {
   BITFINEX = 'bitfinex.com',
@@ -8,7 +8,7 @@ enum RatesProviders {
 
 interface GetRatesProps {
   provider?: RatesProviders
-  options?: Omit<QueryOptions, 'limit' | 'skip'>
+  options?: RequestOptions
 }
 
 interface ExchangeRate {

@@ -22,15 +22,38 @@ interface Results<T> extends Paging {
 }
 
 /**
+ * List of 'watch' options
+ *
+ * @enum
+ * @name Watch
+ */
+export enum Watch {
+  DISABLE = 'disable', // to cancel all subscriptions (was ’none’ before) - this is the default behaviour when watch param does not exist
+  ADD = 'add', // to add this query to the existing subscriptions (or create a new subscription for the current query when there is none)
+  REPLACE = 'replace', // to remove old subscriptions and create a new subsciption for the current query
+  IGNORE = 'ignore', // the current query won’t affect the exisiting subscription
+}
+
+/**
+ * Describes request options
+ *
+ * @interface
+ * @name RequestOptions
+ */
+export interface RequestOptions {
+  respondDirect?: boolean
+}
+
+/**
  * Paging options for query and response type override
  *
  * @interface
  * @name QueryOptions
  */
-interface QueryOptions {
+interface QueryOptions extends RequestOptions {
   limit?: number
   skip?: number
-  respondDirect?: boolean
+  watch?: Watch
 }
 
 /**

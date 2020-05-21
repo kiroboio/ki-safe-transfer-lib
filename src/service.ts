@@ -16,6 +16,7 @@ import {
   SendRequest,
   Transfer,
   RetrieveRequest,
+  RequestOptions,
 } from './types'
 import {
   validateOptions,
@@ -203,7 +204,7 @@ class Service extends Connect {
     /** make request */
     try {
       response = await this._inbox.find({
-        query: { to: addresses.join(';') },
+        query: { to: addresses.join(';'), ...makeOptions(options) },
       })
     } catch (err) {
 
@@ -461,7 +462,7 @@ class Service extends Connect {
   }
 
   // get retrievable by ID
-  public async getRetrievable(id: string, options?: QueryOptions): Promise<Results<Retrievable> | void> {
+  public async getRetrievable(id: string, options?: RequestOptions): Promise<Results<Retrievable> | void> {
 
     /** validate props */
     try {
@@ -469,7 +470,7 @@ class Service extends Connect {
 
       /** validate options, if present */
       if (options) {
-        validateOptions(options, 'getRetrievable')
+        validateOptions(options, 'getRetrievable', true)
       }
     } catch (err) {
 
@@ -526,7 +527,6 @@ class Service extends Connect {
    */
   public async getRetrievables(ids: string[], options?: QueryOptions): Promise<Results<Retrievable[]> | void> {
     this._logTechnical(makeString(MESSAGES.technical.running, ['getRetrievables']))
-
 
     /** validate props */
     try {
@@ -673,7 +673,7 @@ class Service extends Connect {
         /** validate options, if present */
         if (options) {
           this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['getRate', 'options']))
-          validateOptions(options, 'getRate')
+          validateOptions(options, 'getRate', true)
         }
       } catch (err) {
 
@@ -719,10 +719,7 @@ class Service extends Connect {
    * @param [Object] options
    * @param [Boolean] options.respondDirect - should method respond directly?
    */
-  public async retrieve(
-    data: RetrieveRequest,
-    options?: Omit<QueryOptions, 'limit' | 'skip'>,
-  ): Promise<Results<unknown> | void> {
+  public async retrieve(data: RetrieveRequest, options?: RequestOptions): Promise<Results<unknown> | void> {
     this._logTechnical(makeString(MESSAGES.technical.running, ['retrieve']))
 
     /** validate props */

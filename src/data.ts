@@ -31,7 +31,7 @@ export const TEXT = {
   },
 }
 
-export const listOfStatusKeys = ['height', 'online', 'fee', 'netId', 'timestamp','updatedAt']
+export const listOfStatusKeys = ['height', 'online', 'fee', 'netId', 'timestamp', 'updatedAt']
 
 export const typeOfStatusValues: KeyObject<string> = {
   height: 'number',
@@ -39,7 +39,7 @@ export const typeOfStatusValues: KeyObject<string> = {
   fee: 'number',
   netId: 'string',
   timestamp: 'number',
-  updatedAt: 'string'
+  updatedAt: 'string',
 }
 
 export const listOfSettingsKeys = ['debug', 'currency', 'network', 'eventBus', 'respondAs', 'authDetails']
@@ -65,7 +65,6 @@ export const authDetailsData: KeyObject<string> = {
   secret: 'string',
 }
 
-
 interface ValidType {
   [index: string]: { type: string; values?: string[] }
 }
@@ -73,5 +72,10 @@ interface ValidType {
 export const optionsValidValues: ValidType = {
   skip: { type: 'number' },
   limit: { type: 'number' },
+  watch: { type: 'string' },
+  respondDirect: { type: 'boolean' },
+}
+
+export const optionsRequestValidValues: ValidType = {
   respondDirect: { type: 'boolean' },
 }
