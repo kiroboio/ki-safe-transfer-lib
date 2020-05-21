@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 import { capitalize, makeString, compareBasicObjects, makeOptions } from '../src/tools/other'
-import { Watch } from '../src/types'
+import { Watch } from '../src/types/api'
 import { wait } from './tools'
 
 process.on('unhandledRejection', () => {
