@@ -8,7 +8,6 @@ import {
   Networks,
   AuthDetails,
   Settings,
-  QueryOptions,
   LastAddresses,
 } from './types'
 import { LogError, LogApiWarning, LogInfo, LogApiError } from './tools/log'
