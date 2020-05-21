@@ -1,5 +1,10 @@
 # Changelog
 
+##### v2.7 2020-05-21
+
+  New:
+
+  - 'watch' option for requests
 
 ##### v2.6 2020-05-20
 
