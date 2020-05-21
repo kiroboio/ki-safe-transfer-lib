@@ -1,4 +1,4 @@
-import { QueryOptions, RequestOptions } from './api'
+import { RequestOptions } from './api'
 
 enum RatesProviders {
   BITFINEX = 'bitfinex.com',
