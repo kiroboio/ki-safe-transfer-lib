@@ -8,6 +8,8 @@ import {
   Networks,
   AuthDetails,
   Settings,
+  QueryOptions,
+  LastAddresses,
 } from './types'
 import { LogError, LogApiWarning, LogInfo, LogApiError } from './tools/log'
 import { authDetailsDefaults } from './defaults'
@@ -18,7 +20,7 @@ class Base {
 
   protected _eventBus: EventBus | undefined
 
-  protected _lastAddresses: string[] = [] // caching last addresses request
+  protected _lastAddresses: LastAddresses = { addresses: [] } // caching last addresses request
 
   protected _respondAs: Responses = Responses.Direct
 
@@ -74,7 +76,7 @@ class Base {
     )
   }
 
-  protected _tooEarlyToConnectLog(last: number|undefined, timeout: number): void {
+  protected _tooEarlyToConnectLog(last: number | undefined, timeout: number): void {
     this._logTechnical(
       `Service (connect) recently (${last}) tried to connect. Will wait for ${timeout}s and try again.`,
     )
@@ -91,10 +93,13 @@ class Base {
   }
 
   // get last addresses
-  public getLastAddresses = (): string[] => this._lastAddresses
+  public getLastAddresses = (): LastAddresses => this._lastAddresses
 
   // clear cached addresses
-  public clearLastAddresses = (): never[] => (this._lastAddresses = [])
+  public clearLastAddresses = (): boolean => {
+    this._lastAddresses = { addresses: [] }
+    return true
+  }
 }
 
 export { Base }

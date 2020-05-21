@@ -77,5 +77,6 @@ export const optionsValidValues: ValidType = {
 }
 
 export const optionsRequestValidValues: ValidType = {
+  watch: { type: 'string' },
   respondDirect: { type: 'boolean' },
 }

@@ -136,22 +136,22 @@ describe('Smaller functions', () => {
     it('caches address in case of correct request', async () => {
       await service.getCollectables([validBitcoinAddresses[2]])
 
-      const result = service.getLastAddresses()[0]
+      const result = service.getLastAddresses()
 
-      expect(result).toBe(validBitcoinAddresses[2])
+      expect(result.addresses[0]).toBe(validBitcoinAddresses[2])
     })
     it('clears cache', async () => {
       expect.assertions(2)
       await service.getCollectables([validBitcoinAddresses[2]])
 
-      const result = service.getLastAddresses()[0]
+      const result = service.getLastAddresses()
 
-      expect(result).toBe(validBitcoinAddresses[2])
+      expect(result.addresses[0]).toBe(validBitcoinAddresses[2])
       service.clearLastAddresses()
 
       const clear = service.getLastAddresses()
 
-      expect(clear.length).toBe(0)
+      expect(clear.addresses.length).toBe(0)
     })
   })
 })

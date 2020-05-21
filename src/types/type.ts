@@ -1,4 +1,5 @@
 import { Responses, Networks, Currencies, DebugLevels, EventTypes } from './enums'
+import { Watch, QueryOptions } from '.'
 
 interface KeyObject<T> {
   [index: string]: T
@@ -18,6 +19,7 @@ interface ConnectProps {
   authDetails: AuthDetails
   eventBus?: EventBus
   respondAs?: Responses
+  watch?: Watch
 }
 
 interface NetworkTip {
@@ -62,6 +64,17 @@ type Settings = {
 }
 
 /**
+ * Describes lastAddresses object, which is props for getCollectables
+ *
+ * @interface
+ * @enum LastAddresses
+ */
+interface LastAddresses {
+  addresses: string[]
+  options?: QueryOptions
+}
+
+/**
  * Unspent transaction output (UTXO) fields
  *
  * @interface
@@ -79,6 +92,7 @@ interface Utxo {
 
 // eslint-disable-next-line max-len
 export {
+  LastAddresses,
   ApiService,
   AuthDetails,
   ConnectProps,

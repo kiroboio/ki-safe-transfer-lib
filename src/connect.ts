@@ -16,11 +16,13 @@ import {
   Collectable,
   Transfer,
   RequestOptions,
+  Results,
+  Watch,
 } from './types'
 import { Base } from './base'
 import { debugLevelSelector } from './tools/debug'
 import { apiUrl, version, endpoints, connectionTriesMax, connectionTimeout } from './config'
-import { capitalize, makeString, diff, getTime, changeType } from './tools'
+import { capitalize, makeString, diff, getTime, changeType, makeOptions } from './tools'
 import { WARNINGS, ERRORS, MESSAGES } from './text'
 import { makeApiResponseError, makeReturnError, makePropsResponseError } from './tools/error'
 import { shouldReturnDirect, isDirect } from './tools/connect'
@@ -51,6 +53,8 @@ class Connect extends Base {
 
   protected _retrieve: ApiService
 
+  protected _watch: Watch | undefined = undefined
+
   constructor(props: ConnectProps) {
     super(debugLevelSelector(props?.debug))
 
@@ -58,7 +62,7 @@ class Connect extends Base {
 
     this._validateProps(props)
 
-    const { network, currency, authDetails, eventBus, respondAs } = props
+    const { network, currency, authDetails, eventBus, respondAs, watch } = props
 
     this._logTechnical('Service (connect > constructor) assigns instance variables...')
 
@@ -67,6 +71,8 @@ class Connect extends Base {
     if (network && network !== this._network) this._network = network
 
     if (respondAs && respondAs !== this._respondAs) this._respondAs = respondAs
+
+    if (watch && watch !== this._watch) this._watch = watch
 
     this._auth = authDetails
 
@@ -304,14 +310,17 @@ class Connect extends Base {
   private async _refreshInbox(): Promise<void> {
     this._logTechnical(makeString(MESSAGES.technical.running, ['refreshInbox']))
 
-    if (this._lastAddresses && this._lastAddresses.length) {
+    if (this._lastAddresses && this._lastAddresses.addresses.length) {
       this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['refreshInbox', 'refreshing collects...']))
       let response
 
       try {
         this._logTechnical(makeString(MESSAGES.technical.requestingData, ['refreshInbox']))
         response = await this._inbox.find({
-          query: { to: this._lastAddresses.join(';') },
+          query: {
+            to: this._lastAddresses.addresses.join(';'),
+            ...makeOptions(this._lastAddresses.options, this._watch),
+          },
         })
         this._log(makeString(MESSAGES.technical.gotResponse, ['refreshInbox']), response)
       } catch (err) {
@@ -394,12 +403,12 @@ class Connect extends Base {
       throw makePropsResponseError(err)
     }
 
-    let response: NetworkTip
+    let response: Results<NetworkTip>
 
     /** make request */
     try {
       this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getStatus']))
-      response = await this._networks.get(this._network)
+      response = await this._networks.find({ query: { netId: this._network, ...makeOptions(options, this._watch) } })
       this._log(makeString(MESSAGES.technical.gotResponse, ['getStatus']), response)
     } catch (err) {
 
@@ -414,11 +423,11 @@ class Connect extends Base {
 
     this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getStatus', 'return']))
 
-    if (shouldReturnDirect(options, this._respondAs)) return response
+    if (shouldReturnDirect(options, this._respondAs)) return response.data[0]
 
     this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getStatus']))
 
-    this._useEventBus(EventTypes.UPDATE_STATUS, response)
+    this._useEventBus(EventTypes.UPDATE_STATUS, response.data[0])
   }
 
   public getConnectionStatus(options?: Omit<QueryOptions, 'limit' | 'skip'>): boolean | void {

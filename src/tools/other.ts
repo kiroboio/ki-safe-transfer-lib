@@ -2,7 +2,7 @@ import { assoc, isNil, not, map } from 'ramda'
 import { v4 as generateId } from 'uuid'
 
 import { validateObject, validateArray } from '../validators'
-import { QueryOptions, KeyObject, Address, SendRequest } from '../types'
+import { QueryOptions, KeyObject, Address, SendRequest, Watch } from '../types'
 
 const splitText = (text: string): string[] => text.split('')
 
@@ -74,7 +74,7 @@ export function checkOwnerId(transaction: SendRequest): SendRequest {
 
 export { generateId }
 
-export function makeOptions(options: QueryOptions | undefined): {} {
+export function makeOptions(options: QueryOptions | undefined, globalWatch: Watch | undefined): {} {
   let queryOptions = { $limit: 100, $skip: 0 }
 
   if (!options) return queryOptions
@@ -82,6 +82,12 @@ export function makeOptions(options: QueryOptions | undefined): {} {
   if (not(isNil(options.limit))) queryOptions = assoc('$limit', options.limit, queryOptions)
 
   if (not(isNil(options.skip))) queryOptions = assoc('$skip', options.skip, queryOptions)
+
+  // if 'watch' is provided -> chose either, prefer inline
+  if (options.watch || globalWatch) {
+    if (options.watch) queryOptions = assoc('watch', options.watch, queryOptions)
+    else if (globalWatch) queryOptions = assoc('watch', globalWatch, queryOptions)
+  }
 
   return queryOptions
 }

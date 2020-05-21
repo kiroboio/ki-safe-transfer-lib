@@ -77,7 +77,7 @@ class Service extends Connect {
       response = await this._networks.find({
         query: {
           online: true,
-          ...makeOptions(options),
+          ...makeOptions(options, this._watch),
         },
       })
     } catch (err) {
@@ -204,7 +204,7 @@ class Service extends Connect {
     /** make request */
     try {
       response = await this._inbox.find({
-        query: { to: addresses.join(';'), ...makeOptions(options) },
+        query: { to: addresses.join(';'), ...makeOptions(options, this._watch) },
       })
     } catch (err) {
 
@@ -216,7 +216,7 @@ class Service extends Connect {
     }
 
     /** cache addresses */
-    this._lastAddresses = addresses
+    this._lastAddresses = { addresses, options }
 
     try {
 
@@ -254,7 +254,7 @@ class Service extends Connect {
     /** make request */
     try {
       response = await this._utxos.find({
-        query: { address: join(';', addresses), ...makeOptions(options) },
+        query: { address: join(';', addresses), ...makeOptions(options, this._watch) },
       })
     } catch (err) {
 
@@ -302,7 +302,7 @@ class Service extends Connect {
       response = await this._exists.find({
         query: {
           address: join(';', addresses),
-          ...makeOptions(options),
+          ...makeOptions(options, this._watch),
         },
       })
     } catch (err) {
@@ -372,7 +372,7 @@ class Service extends Connect {
     /** make request */
     try {
       response = await this._exists.find({
-        query: { address: join(';', addresses), ...makeOptions(options) },
+        query: { address: join(';', addresses), ...makeOptions(options, this._watch) },
       })
     } catch (err) {
 
@@ -438,7 +438,7 @@ class Service extends Connect {
       response = await this._transfers.find({
         query: {
           owner: ownerId,
-          ...makeOptions(options),
+          ...makeOptions(options, this._watch),
         },
       })
     } catch (err) {
@@ -553,7 +553,7 @@ class Service extends Connect {
     try {
       this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getRetrievables']))
       response = await this._transfers.find({
-        query: { id: ids.join(';'), ...makeOptions(options) },
+        query: { id: ids.join(';'), ...makeOptions(options, this._watch) },
       })
       this._log(makeString(MESSAGES.technical.gotResponse, ['getRetrievables']), response)
     } catch (err) {

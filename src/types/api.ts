@@ -42,6 +42,7 @@ export enum Watch {
  */
 export interface RequestOptions {
   respondDirect?: boolean
+  watch?: Watch
 }
 
 /**
@@ -53,7 +54,6 @@ export interface RequestOptions {
 interface QueryOptions extends RequestOptions {
   limit?: number
   skip?: number
-  watch?: Watch
 }
 
 /**

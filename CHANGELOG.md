@@ -1,5 +1,13 @@
 # Changelog
 
+##### v2.7.1 2020-05-21
+
+  Updated:
+
+  - lastAddresses to include options from original request
+  - makeOptions process and makes choice for watch options in request vs global
+  - updated tests
+
 ##### v2.7 2020-05-21
 
   New:

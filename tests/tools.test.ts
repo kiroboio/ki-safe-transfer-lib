@@ -1,17 +1,16 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
-import { capitalize, makeString, compareBasicObjects } from '../src/tools/other'
+import { capitalize, makeString, compareBasicObjects, makeOptions } from '../src/tools/other'
+import { Watch } from '../src/types'
 import { wait } from './tools'
-
-const { log } = console
 
 process.on('unhandledRejection', () => {
   return
 })
 
 describe('Tools', () => {
-    afterAll(async () => {
-      await wait(2000)
-    })
+  afterAll(async () => {
+    await wait(2000)
+  })
   describe('- "capitalize"', () => {
     test('- doesn\'t crash at non-string, and returns empty string', () => {
       // @ts-ignore
@@ -74,5 +73,17 @@ describe('Tools', () => {
       expect(compareBasicObjects({ key: 'qwerty', keyTwo: 2 }, { key: 'qwerty', keyTwo: 2 })).toBe(true)
     })
   })
-
+  // TODO: test other features
+  describe('- \'makeOptions\'', () => {
+    test('- returns default pagination options without arguments', () => {
+      // @ts-ignore
+      expect(JSON.stringify(makeOptions())).toBe(JSON.stringify({ $limit: 100, $skip: 0 }))
+    })
+    test('- chooses \'watch\' options correctly', () => {
+      // @ts-ignore
+      expect(JSON.stringify(makeOptions({ watch: Watch.ADD }, Watch.DISABLE))).toBe(
+        JSON.stringify({ $limit: 100, $skip: 0, watch: 'add' }),
+      )
+    })
+  })
 })
