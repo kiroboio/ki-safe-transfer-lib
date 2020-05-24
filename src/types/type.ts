@@ -90,6 +90,19 @@ interface Utxo {
   vout: number
 }
 
+interface MinMax {
+  min?: number
+  max?: number
+}
+
+interface DataSpec {
+  [key: string]: {
+    type: string
+    required?: boolean
+    length?: MinMax
+  }
+}
+
 // eslint-disable-next-line max-len
 export {
   LastAddresses,
@@ -104,4 +117,6 @@ export {
   Message,
   Settings,
   Utxo,
+  MinMax,
+  DataSpec,
 }

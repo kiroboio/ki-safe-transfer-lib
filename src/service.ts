@@ -21,18 +21,19 @@ import {
 import {
   validateOptions,
   validateObjectWithStrings,
-  validateData,
+  validateSend,
   validateObject,
   validatePropsAddresses,
   validatePropsArray,
   validatePropsString,
   validateRetrieve,
+  validateAddress,
 } from './validators'
 import { checkOwnerId, flattenAddresses, makeOptions, makeString } from './tools'
 import { makePropsResponseError, makeReturnError, makeApiResponseError } from './tools/error'
 import { shouldReturnDirect } from './tools/connect'
-import { isNil, join, assoc, filter } from 'ramda'
-import { TEXT } from './data'
+import { isNil, join, assoc, filter, isEmpty } from 'ramda'
+import { TEXT, SEND_DATA_SPEC } from './data'
 import { ERRORS, MESSAGES } from './text'
 
 class Service extends Connect {
@@ -136,15 +137,19 @@ class Service extends Connect {
   }
 
   // TODO: add desc
-
   public async send(transaction: SendRequest, options?: QueryOptions): Promise<Transfer | void> {
 
     /** validate props */
     try {
-      if (isNil(transaction)) throw new Error(TEXT.errors.validation.missingArgument)
+      if (isNil(transaction) || isEmpty(transaction)) throw new Error(TEXT.errors.validation.missingArgument)
 
       validateObject(transaction, 'transaction')
-      validateData(transaction, this._currency, this._network)
+
+      // validate address
+      if (!validateAddress({ address: transaction.to, currency: this._currency, networkType: this._network }))
+        throw new TypeError('Invalid address in "to".')
+
+      validateSend(transaction, SEND_DATA_SPEC, 'send')
 
       /** validate options, if present */
       if (options) {
@@ -501,81 +506,6 @@ class Service extends Connect {
       if (shouldReturnDirect(options, this._respondAs)) return response
 
       this._useEventBus(EventTypes.GET_RETRIEVABLE, response)
-    } catch (err) {
-      throw makeReturnError(err.message, err)
-    }
-  }
-
-  /**
-   * Function to get the retrievables transfers for the array of transaction ids.
-   *
-   * @param [Array] ids - array of ids (string format)
-   * @param [QueryOptions] [options] - optional paging options to modify
-   * the default ones
-   *
-   * @returns Promise - promise can contain results,if in _Direct_ mode -
-   * array of transaction. If in _Callback_ mode, the function returns void
-   * in Promise
-   *
-   * #### Example
-   *
-   * ```typescript
-   * service.getRetrievables(['xxxx', 'yyyy', 'zzzz'], { limit: 10, skip: 0 })
-   * ```
-   *
-   * -
-   */
-  public async getRetrievables(ids: string[], options?: QueryOptions): Promise<Results<Retrievable[]> | void> {
-    this._logTechnical(makeString(MESSAGES.technical.running, ['getRetrievables']))
-
-    /** validate props */
-    try {
-      this._logTechnical(makeString(MESSAGES.technical.checkingProps, ['getRetrievables']))
-      validatePropsArray(ids, 'string', 'ids', 'getRetrievables')
-
-      /** validate options, if present */
-      if (options) {
-        this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['getRetrievables', 'options']))
-        validateOptions(options, 'getRetrievables')
-      }
-    } catch (err) {
-
-      /** log error */
-      this._logError(makeString(ERRORS.service.gotError, ['getRetrievables', 'validation']), err)
-
-      /** throw appropriate error */
-      throw makePropsResponseError(err)
-    }
-
-    let response: Results<Retrievable[]>
-
-    /** make request */
-    try {
-      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getRetrievables']))
-      response = await this._transfers.find({
-        query: { id: ids.join(';'), ...makeOptions(options, this._watch) },
-      })
-      this._log(makeString(MESSAGES.technical.gotResponse, ['getRetrievables']), response)
-    } catch (err) {
-
-      /** log error */
-      this._logApiError(makeString(ERRORS.service.gotError, ['getRetrievables', 'request']), err)
-
-      /** throw error */
-      throw makeApiResponseError(err)
-    }
-
-    try {
-
-      /** return the results */
-
-      this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getRetrievables', 'return']))
-
-      if (shouldReturnDirect(options, this._respondAs)) return response
-
-      this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getRetrievables']))
-
-      this._useEventBus(EventTypes.GET_RETRIEVABLES, response)
     } catch (err) {
       throw makeReturnError(err.message, err)
     }

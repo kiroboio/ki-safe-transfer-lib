@@ -1,5 +1,13 @@
 # Changelog
 
+##### v2.7.2 2020-05-24
+
+  Updated:
+
+  - removed getRetrievables
+  - changed validateSend
+  - updated tests
+
 ##### v2.7.1 2020-05-21
 
   Updated:

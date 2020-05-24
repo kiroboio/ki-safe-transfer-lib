@@ -3,6 +3,7 @@ import dotenv from 'dotenv'
 
 import Service, { DebugLevels } from '../src'
 import { wait } from './tools'
+import { validBitcoinAddresses } from './test_data'
 
 dotenv.config()
 
@@ -18,7 +19,7 @@ describe('Send', () => {
   beforeAll(async () => {
     try {
       service = new Service({ debug: DebugLevels.MUTE, authDetails })
-      await service.getStatus()
+      await wait(2000)
     } catch (e) {
       return
     }
@@ -57,7 +58,25 @@ describe('Send', () => {
       } catch (err) {
          expect(err).toBeInstanceOf(Object)
          expect(err).toHaveProperty('name', 'BadProps')
-         expect(err).toHaveProperty('message', 'Data is malformed. Missing values: to, amount, collect, deposit, owner.')
+         expect(err).toHaveProperty('message', 'Data is missing')
+      }
+    })
+    it('throws TypeError for argument with unknown keys', async () => {
+      try {
+        await service.send({
+        // @ts-ignore
+          id: 'string',
+          to: validBitcoinAddresses[2],
+          amount: 123,
+          collect: 'qwerty',
+          deposit: 'qwerty',
+          owner: '0123456789012345678901234567890',
+          depositPath: 'qwerty',
+        })
+      } catch (err) {
+         expect(err).toBeInstanceOf(Object)
+         expect(err).toHaveProperty('name', 'BadProps')
+         expect(err).toHaveProperty('message', 'Wrong keys present: id.')
       }
     })
   })

@@ -1,4 +1,4 @@
-import { KeyObject } from './types'
+import { KeyObject, DataSpec } from './types'
 
 export const TEXT = {
   validation: {
@@ -79,4 +79,17 @@ export const optionsValidValues: ValidType = {
 export const optionsRequestValidValues: ValidType = {
   watch: { type: 'string' },
   respondDirect: { type: 'boolean' },
+}
+
+
+export const SEND_DATA_SPEC: DataSpec = {
+  amount: { type: 'number', required: true }, // the transfer amount in satoshi
+  collect: { type: 'string', required: true }, // collect raw transaction
+  deposit: { type: 'string' }, // deposit raw transaction
+  depositPath: { type: 'string' }, // deposit hd derived path
+  from: { type: 'string' }, // free text to be attached to this transfer
+  hint: { type: 'string' }, // passcode hint for the recipient
+  owner: { type: 'string', length: { min: 20, max: 120 }, required: true }, // owner id of this transaction, maxLength: 120, minLength: 20
+  salt: { type: 'string' }, // salt use to encrypt collect transaction
+  to: { type: 'string', required:true }, // the destination address
 }
