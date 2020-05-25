@@ -18,7 +18,7 @@ describe('Send', () => {
 
   beforeAll(async () => {
     try {
-      service = new Service({ debug: DebugLevels.MUTE, authDetails })
+      service = Service.getInstance({ debug: DebugLevels.MUTE, authDetails })
       await wait(2000)
     } catch (e) {
       return

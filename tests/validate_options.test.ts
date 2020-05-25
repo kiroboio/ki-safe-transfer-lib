@@ -12,7 +12,7 @@ function eventBus(_event: Event): void {
   return
 }
 
-const service = new Service({ respondAs: Responses.Callback, eventBus, authDetails })
+const service = Service.getInstance({ respondAs: Responses.Callback, eventBus, authDetails }, true)
 
 describe('Validate options', () => {
   afterAll(async () => {

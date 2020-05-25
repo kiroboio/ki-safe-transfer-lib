@@ -26,7 +26,7 @@ describe('Collectables', () => {
   let service: Service
   beforeAll(async () => {
     try {
-      service = new Service({ authDetails, eventBus, respondAs: Responses.Callback })
+      service = Service.getInstance({ authDetails, eventBus, respondAs: Responses.Callback }, true)
       await wait(2000)
     } catch (e) {
       return

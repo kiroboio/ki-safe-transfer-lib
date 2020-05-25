@@ -19,7 +19,7 @@ describe('Connect', () => {
   let service: Service
   beforeAll(async () => {
     try {
-      service = new Service({ authDetails, respondAs: Responses.Direct })
+      service = Service.getInstance({ authDetails, respondAs: Responses.Direct }, true)
       await wait(2000)
     } catch (e) {
       log(e)

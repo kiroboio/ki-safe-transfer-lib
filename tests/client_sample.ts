@@ -17,12 +17,13 @@ function eventBus(event: Event): void {
   console.log('event fired: ', prettyFormat(event))
 }
 
-const service = new Service({
+const service = Service.getInstance({
   debug: DebugLevels.QUIET,
   respondAs: Responses.Callback,
   eventBus,
   authDetails,
-})
+},
+true)
 
 service.getStatus()
 

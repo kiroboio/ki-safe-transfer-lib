@@ -14,7 +14,7 @@ function eventBus(event: Event): void {
 }
 
 async function callbackService(): Promise<Service> {
-  const service = new Service({ eventBus, respondAs: Responses.Callback, authDetails })
+  const service = Service.getInstance({ eventBus, respondAs: Responses.Callback, authDetails }, true)
 
   await wait(2000)
   return service
@@ -28,7 +28,7 @@ describe('Retrievable', () => {
   let service: Service
   beforeAll(async () => {
     try {
-      service = new Service({ debug: DebugLevels.MUTE, eventBus, authDetails })
+      service = Service.getInstance({ debug: DebugLevels.MUTE, eventBus, authDetails }, true)
       await wait(2000)
     } catch (e) {
       return

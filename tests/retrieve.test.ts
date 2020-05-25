@@ -23,7 +23,7 @@ describe('Retrieve', () => {
   let service: Service
   beforeAll(async () => {
     try {
-      service = new Service({ authDetails })
+      service = Service.getInstance({ authDetails }, true)
       await wait(5000)
     } catch (e) {
       return

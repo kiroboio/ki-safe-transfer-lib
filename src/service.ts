@@ -17,6 +17,7 @@ import {
   Transfer,
   RetrieveRequest,
   RequestOptions,
+  ConnectProps,
 } from './types'
 import {
   validateOptions,
@@ -37,6 +38,24 @@ import { TEXT, SEND_DATA_SPEC } from './data'
 import { ERRORS, MESSAGES } from './text'
 
 class Service extends Connect {
+
+  private static instance: Service
+
+  public static getInstance(props?: ConnectProps, replace = false): Service {
+    if (replace) {
+      delete Service.instance
+    }
+
+    if (!Service.instance) {
+        Service.instance = new Service(props as ConnectProps)
+    }
+
+    return Service.instance
+  }
+
+  private constructor(props: ConnectProps) {
+    super(props)
+  }
 
   /**
    * Function to get the list of networks with online status for the API

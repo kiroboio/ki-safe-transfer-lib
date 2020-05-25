@@ -32,7 +32,7 @@ describe('Library configuration', () => {
 
       try {
         // @ts-ignore
-        service = new Service(null)
+        service = Service.getInstance(null, true)
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', 'Data is missing: authDetails.')
@@ -43,7 +43,7 @@ describe('Library configuration', () => {
 
       try {
         // @ts-ignore
-        service = new Service('string')
+        service = Service.getInstance('string', true)
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', TEXT.errors.validation.typeOfObject)
@@ -54,7 +54,7 @@ describe('Library configuration', () => {
 
       try {
         // @ts-ignore
-        new Service('string', 'string')
+        Service.getInstance('string', 'string')
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', TEXT.errors.validation.typeOfObject)
@@ -66,7 +66,7 @@ describe('Library configuration', () => {
 
       try {
         // @ts-ignore
-        service = new Service({})
+        service = Service.getInstance({})
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', TEXT.errors.validation.emptyObject)
@@ -76,7 +76,7 @@ describe('Library configuration', () => {
       expect.assertions(2)
 
       try {
-        new Service({
+        Service.getInstance({
           // @ts-ignore
           key1: '1',
           key2: '1',
@@ -84,7 +84,8 @@ describe('Library configuration', () => {
           key4: '1',
           key5: '1',
           key6: '1',
-        })
+        },
+        true)
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', `${TEXT.errors.validation.unknownKeys}key1.`)
@@ -95,7 +96,7 @@ describe('Library configuration', () => {
 
       try {
         // @ts-ignore
-        new Service({ key1: '1' })
+        Service.getInstance({ key1: '1' }, true)
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', `${TEXT.errors.validation.unknownKeys}key1.`)
@@ -106,7 +107,7 @@ describe('Library configuration', () => {
 
       try {
         // @ts-ignore
-        new Service({ debug: '1' })
+        Service.getInstance({ debug: '1' })
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', makeString(TEXT.errors.validation.wrongValueType, ['debug', 'number']))
@@ -117,7 +118,7 @@ describe('Library configuration', () => {
 
       try {
         // @ts-ignore
-        new Service({ debug: 5 })
+        Service.getInstance({ debug: 5 })
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
 
@@ -133,7 +134,7 @@ describe('Library configuration', () => {
   describe('correct settings:', () => {
     it('runs without settings (auth is always required)', async () => {
       try {
-        service = new Service({ authDetails })
+        service = Service.getInstance({ authDetails })
         expect(is(Object, service)).toBe(true)
       } catch (err) {
         log(err)
@@ -148,7 +149,7 @@ describe('Library configuration', () => {
       }
 
       try {
-        service = new Service({ ...settings, authDetails })
+        service = Service.getInstance({ ...settings, authDetails })
 
         const compare = compareBasicObjects(service.getSettings(), { ...settings, version: 'v1' })
 

@@ -24,12 +24,13 @@ let service: Service
 
 async function setAsync(): Promise<Status | void> {
   try {
-    service = new Service({
+    service = Service.getInstance({
       debug: DebugLevels.MUTE,
       eventBus,
       respondAs: Responses.Callback,
       authDetails,
-    })
+    },
+    true)
     await wait(2000)
     return await service.getStatus()
   } catch (err) {
@@ -44,7 +45,7 @@ process.on('unhandledRejection', () => {
 describe('Smaller functions', () => {
   beforeAll(async () => {
     try {
-      service = new Service({ debug: DebugLevels.MUTE, authDetails })
+      service = Service.getInstance({ debug: DebugLevels.MUTE, authDetails })
       await service.getStatus()
     } catch (e) {
       return
