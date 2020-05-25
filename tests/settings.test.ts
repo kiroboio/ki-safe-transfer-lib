@@ -149,7 +149,7 @@ describe('Library configuration', () => {
       }
 
       try {
-        service = Service.getInstance({ ...settings, authDetails })
+        service = Service.getInstance({ ...settings, authDetails }, true)
 
         const compare = compareBasicObjects(service.getSettings(), { ...settings, version: 'v1' })
 
