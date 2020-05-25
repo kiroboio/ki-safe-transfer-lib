@@ -48,6 +48,8 @@ class Service extends Connect {
 
     if (!Service.instance) {
         Service.instance = new Service(props as ConnectProps)
+    } else if (props) {
+      throw TypeError('Library already initiated: props should be null or undefined')
     }
 
     return Service.instance
