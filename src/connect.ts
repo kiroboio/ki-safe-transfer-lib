@@ -81,7 +81,7 @@ class Connect extends Base {
     // setup
 
     this._logTechnical('Service is configuring connection...')
-    this._socket = io(apiUrl)
+    this._socket = io.connect(apiUrl)
 
     const connect = feathers().configure(
       socket(this._socket, {
