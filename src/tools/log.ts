@@ -36,13 +36,13 @@ class Log {
 
 class LogError extends Log {
   constructor(message: string, error?: Error | undefined) {
-    super(LogTypes.ERROR, message || 'Unknown Error', makeApiResponseError(error))
+    super(LogTypes.ERROR, message || 'Unknown Error', makeApiResponseError(error || null /* need this null for obfuscator*/))
   }
 }
 
 class LogApiError extends Log {
   constructor(message: string, error?: ApiError | undefined) {
-    super(LogTypes.ERROR, message || 'Unknown API Error', makeApiResponseError(error))
+    super(LogTypes.ERROR, message || 'Unknown API Error', makeApiResponseError(error || null /* need this null for obfuscator*/))
   }
 }
 

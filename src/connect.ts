@@ -275,7 +275,7 @@ class Connect extends Base {
           })
           .catch(err => {
             // if not
-            this._logApiError(ERRORS.connect.authenticate, err || null /* need this null for obfuscator*/)
+            this._logApiError(ERRORS.connect.authenticate, err)
             this._logTechnical('Set connectionCounter to MAX+1.')
             this._connectionCounter = connectionTriesMax + 1
             this._logTechnical('Set lastConnect timestamp.')
