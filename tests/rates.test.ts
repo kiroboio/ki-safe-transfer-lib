@@ -1,6 +1,6 @@
 import dotenv from 'dotenv'
 
-import Service, { Event, AuthDetails, RatesProviders, Responses } from '../src'
+import Service, { Event, AuthDetails, RatesSources, Responses } from '../src'
 import { wait, getEventByType } from './tools'
 import { changeType } from '../src/tools'
 
@@ -53,7 +53,7 @@ describe('Rates', () => {
   it('gets rate from a single specified source', async () => {
     expect.assertions(1)
 
-    await service.getRate({ provider: RatesProviders.COINGECKO })
+    await service.getRate({ source: RatesSources.COINGECKO })
 
     const event = getEventByType(events, 'service_get_btc_to_usd_rate')
 

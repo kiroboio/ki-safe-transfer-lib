@@ -1,21 +1,21 @@
 import { RequestOptions } from './api'
 
-enum RatesProviders {
+enum RatesSources {
   BITFINEX = 'bitfinex.com',
   BLOCKCHAIN = 'blockchain.info',
   COINGECKO = 'coingecko.com',
 }
 
 interface GetRatesProps {
-  provider?: RatesProviders
+  source?: RatesSources
   options?: RequestOptions
 }
 
 interface ExchangeRate {
-  source: RatesProviders
+  source: RatesSources
   timestamp: number
   online: boolean
   value: number
 }
 
-export { ExchangeRate, GetRatesProps, RatesProviders }
+export { ExchangeRate, GetRatesProps, RatesSources }

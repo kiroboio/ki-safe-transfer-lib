@@ -1,19 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 import dotenv from 'dotenv'
 
-import Service, { Event, AuthDetails, RatesProviders, Responses } from '../src'
-import { wait, getEventByType } from './tools'
-import { changeType } from '../src/tools'
+import Service, { AuthDetails, } from '../src'
+import { wait, } from './tools'
 
 dotenv.config()
 
 const authDetails: AuthDetails = { key: process.env.AUTH_KEY ?? '', secret: process.env.AUTH_SECRET ?? '' }
-
-let events: Event[] = []
-
-function eventBus(event: Event): void {
-  events.push(event)
-}
 
 process.on('unhandledRejection', () => {
   return
@@ -29,9 +22,7 @@ describe('Retrieve', () => {
       return
     }
   })
-  beforeEach(() => {
-    events = []
-  })
+
   afterAll(async () => {
     service.disconnect()
     await wait(2000)

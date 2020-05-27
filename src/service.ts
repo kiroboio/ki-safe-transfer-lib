@@ -10,7 +10,6 @@ import {
   Collectable,
   Utxo,
   ExchangeRate,
-  RatesProviders,
   GetRatesProps,
   Address,
   SendRequest,
@@ -18,6 +17,7 @@ import {
   RetrieveRequest,
   RequestOptions,
   ConnectProps,
+  RatesSources,
 } from './types'
 import {
   validateOptions,
@@ -38,7 +38,6 @@ import { TEXT, SEND_DATA_SPEC } from './data'
 import { ERRORS, MESSAGES } from './text'
 
 class Service extends Connect {
-
   private static instance: Service
 
   public static getInstance(props?: ConnectProps, replace = false): Service {
@@ -47,7 +46,7 @@ class Service extends Connect {
     }
 
     if (!Service.instance) {
-        Service.instance = new Service(props as ConnectProps)
+      Service.instance = new Service(props as ConnectProps)
     } else if (props) {
       throw TypeError('Library already initiated: props should be null or undefined')
     }
@@ -487,51 +486,6 @@ class Service extends Connect {
     }
   }
 
-  // get retrievable by ID
-  public async getRetrievable(id: string, options?: RequestOptions): Promise<Results<Retrievable> | void> {
-
-    /** validate props */
-    try {
-      validatePropsString(id, 'ownerId', 'getRetrievable')
-
-      /** validate options, if present */
-      if (options) {
-        validateOptions(options, 'getRetrievable', true)
-      }
-    } catch (err) {
-
-      /** log error */
-      this._logError('Service (getRetrievable) caught [validation] error.', err.message)
-
-      /** throw appropriate error */
-      throw makePropsResponseError(err)
-    }
-
-    let response: Results<Retrievable>
-
-    /** make request */
-    try {
-      response = await this._transfers.get(id)
-    } catch (err) {
-
-      /** log error */
-      this._logApiError('Service (getRetrievable) caught [request] error.', err.message)
-
-      /** throw error */
-      throw makeApiResponseError(err)
-    }
-
-    try {
-
-      /** return the results */
-      if (shouldReturnDirect(options, this._respondAs)) return response
-
-      this._useEventBus(EventTypes.GET_RETRIEVABLE, response)
-    } catch (err) {
-      throw makeReturnError(err.message, err)
-    }
-  }
-
   /**
    * Function to get all available rate for BTC/USD pair
    *
@@ -572,7 +526,7 @@ class Service extends Connect {
 
     try {
       this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getRates']))
-      response = await this._rateBtcToUsd.find({})
+      response = await this._rateBtcToUsd.find({ query: { ...makeOptions(options, this._watch) } })
       this._log(makeString(MESSAGES.technical.gotResponse, ['getRates']), response)
     } catch (err) {
       this._logApiError(makeString(ERRORS.service.gotError, ['getRates', 'request']), err)
@@ -593,7 +547,7 @@ class Service extends Connect {
    * Function to get all available rate for BTC/USD pair
    *
    * @param [Object] GetRatesProps
-   * @param [RatesProviders] [GetRatesProps.provide] - optional provider to get data
+   * @param [RatesSources] [GetRatesProps.provide] - optional provider to get data
    * from; default => BITFINEX
    * @param [QueryOptions] [GetRatesProps.options] - optional paging options to modify
    * the default ones
@@ -605,7 +559,7 @@ class Service extends Connect {
    * #### Example
    *
    * ```typescript
-   * service.getRate({provider: RatesProviders.COINGECKO })
+   * service.getRate({source: RatesSources.COINGECKO })
    * ```
    * -
    */
@@ -615,11 +569,11 @@ class Service extends Connect {
     if (props) {
       this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['getRate', 'props']), props)
 
-      const { provider, options } = props
+      const { source, options } = props
 
       /** validate props */
       try {
-        if (provider) validatePropsString(provider, 'Provider', 'getRate')
+        if (source) validatePropsString(source, 'Source', 'getRate')
 
         /** validate options, if present */
         if (options) {
@@ -636,15 +590,21 @@ class Service extends Connect {
       }
     }
 
-    if (!props?.provider)
-      this._logTechnical(makeString(MESSAGES.technical.requestWithDefault, ['getRate']), RatesProviders.BITFINEX)
+    if (!props?.source)
+      this._logTechnical(makeString(MESSAGES.technical.requestWithDefault, ['getRate']), RatesSources.BITFINEX)
 
-    let response: ExchangeRate
+    let response: Results<ExchangeRate>
 
     /** make request */
     try {
       this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getRate']))
-      response = await this._rateBtcToUsd.get(props?.provider ?? RatesProviders.BITFINEX)
+
+      response = await this._rateBtcToUsd.find({
+        query: {
+          source: props?.source ?? RatesSources.BITFINEX,
+          ...makeOptions(props?.options, this._watch),
+        },
+      })
       this._log(makeString(MESSAGES.technical.gotResponse, ['getRate']), response)
     } catch (err) {
       this._logApiError(makeString(ERRORS.service.gotError, ['getRate', 'request']), err)
@@ -655,10 +615,10 @@ class Service extends Connect {
 
     this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getRate', 'return']))
 
-    if (shouldReturnDirect(props?.options, this._respondAs)) return response
+    if (shouldReturnDirect(props?.options, this._respondAs)) return response.data[0]
 
     this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getRate']))
-    this._useEventBus(EventTypes.GET_BTC_TO_USD_RATE, response)
+    this._useEventBus(EventTypes.GET_BTC_TO_USD_RATE, response.data[0])
   }
 
   /**
@@ -670,7 +630,10 @@ class Service extends Connect {
    * @param [Object] options
    * @param [Boolean] options.respondDirect - should method respond directly?
    */
-  public async retrieve(data: RetrieveRequest, options?: RequestOptions): Promise<Results<unknown> | void> {
+  public async retrieve(
+    data: RetrieveRequest,
+    options?: Omit<RequestOptions, 'watch'>,
+  ): Promise<Results<unknown> | void> {
     this._logTechnical(makeString(MESSAGES.technical.running, ['retrieve']))
 
     /** validate props */
