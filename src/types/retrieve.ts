@@ -13,6 +13,11 @@ interface Retrievable {
     address: string
     path?: string
   }
+  retrieve: {
+    broadcasted: number
+    confirmed: number
+    txid: string
+  }
   expires: { at?: string; block?: number }
   from?: string
   hint?: string
