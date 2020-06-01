@@ -1,6 +1,6 @@
 import dotenv from 'dotenv'
 
-import Service, { Event, AuthDetails, Responses } from '../src'
+import Service, { Event, AuthDetails, Responses } from '@src/.'
 import { wait } from './tools'
 
 dotenv.config()

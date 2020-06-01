@@ -1,4 +1,4 @@
-import { KeyObject, DataSpec } from './types'
+import { DataSpec } from './types'
 
 export const TEXT = {
   validation: {
@@ -33,7 +33,7 @@ export const TEXT = {
 
 export const listOfStatusKeys = ['height', 'online', 'fee', 'netId', 'timestamp', 'updatedAt']
 
-export const typeOfStatusValues: KeyObject<string> = {
+export const typeOfStatusValues: Record<string, string> = {
   height: 'number',
   online: 'boolean',
   fee: 'number',
@@ -44,7 +44,7 @@ export const typeOfStatusValues: KeyObject<string> = {
 
 export const listOfSettingsKeys = ['debug', 'currency', 'network', 'eventBus', 'respondAs', 'authDetails']
 
-export const typeOfSettingsKeys: KeyObject<string> = {
+export const typeOfSettingsKeys: Record<string, string> = {
   debug: 'number',
   currency: 'string',
   network: 'string',
@@ -53,14 +53,14 @@ export const typeOfSettingsKeys: KeyObject<string> = {
   authDetails: 'object',
 }
 
-export const valuesForSettings: KeyObject<(string | number)[]> = {
+export const valuesForSettings: Record<string, (string | number)[]> = {
   currency: ['btc'],
   network: ['testnet', 'regtest', 'main'],
   debug: [0, 1, 2, 4],
   respondAs: ['callback', 'direct'],
 }
 
-export const authDetailsData: KeyObject<string> = {
+export const authDetailsData: Record<string, string> = {
   key: 'string',
   secret: 'string',
 }
@@ -81,7 +81,6 @@ export const optionsRequestValidValues: ValidType = {
   respondDirect: { type: 'boolean' },
 }
 
-
 export const SEND_DATA_SPEC: DataSpec = {
   amount: { type: 'number', required: true }, // the transfer amount in satoshi
   collect: { type: 'string', required: true }, // collect raw transaction
@@ -90,6 +89,6 @@ export const SEND_DATA_SPEC: DataSpec = {
   from: { type: 'string' }, // free text to be attached to this transfer
   hint: { type: 'string' }, // passcode hint for the recipient
   owner: { type: 'string', length: { min: 20, max: 120 }, required: true }, // owner id of this transaction, maxLength: 120, minLength: 20
-  salt: { type: 'string' }, // salt use to encrypt collect transaction
-  to: { type: 'string', required:true }, // the destination address
+  salt: { type: 'string', required: true }, // salt used to encrypt collect transaction
+  to: { type: 'string', required: true }, // the destination address
 }

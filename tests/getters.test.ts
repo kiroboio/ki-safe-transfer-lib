@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
 import dotenv from 'dotenv'
 
-import { Service, Event, Responses, EventTypes } from '../src'
+import { Service, Event, Responses, EventTypes } from '@src/.'
 import { wait, getEventByType } from './tools'
 import { keys } from 'ramda'
 
@@ -114,6 +113,47 @@ describe('Getters', () => {
       expect(keys(response).length).toBe(4)
     } catch (err) {
       log(err)
+    }
+  })
+  it('getUtxos: throws on missing argument', async () => {
+    expect.assertions(3)
+
+    try {
+      // @ts-expect-error
+      await service.getUtxos()
+    } catch (err) {
+      expect(err).toBeInstanceOf(Object)
+      expect(err).toHaveProperty('name', 'BadProps')
+      expect(err).toHaveProperty(
+        'message',
+        'Required argument (addresses) in getUtxos argument of [%3] function is missing.',
+      )
+    }
+  })
+  it('getUtxos: throws on incorrect argument', async () => {
+    expect.assertions(3)
+
+    try {
+      // @ts-expect-error
+      await service.getUtxos('xxx')
+    } catch (err) {
+      expect(err).toBeInstanceOf(Object)
+      expect(err).toHaveProperty('name', 'BadProps')
+      expect(err).toHaveProperty(
+        'message',
+        'Type of argument (addresses) in function [getUtxos] is wrong - string. Should be string[].',
+      )
+    }
+  })
+  it('getUtxos: throws on empty argument', async () => {
+    expect.assertions(3)
+
+    try {
+      await service.getUtxos([])
+    } catch (err) {
+      expect(err).toBeInstanceOf(Object)
+      expect(err).toHaveProperty('name', 'BadProps')
+      expect(err).toHaveProperty('message', 'Required argument (addresses) of [getUtxos] function is empty.')
     }
   })
   it('getUtxos: sends result through eventBus', async () => {

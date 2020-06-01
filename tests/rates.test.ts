@@ -1,8 +1,8 @@
 import dotenv from 'dotenv'
 
-import Service, { Event, AuthDetails, RatesSources, Responses } from '../src'
 import { wait, getEventByType } from './tools'
-import { changeType } from '../src/tools'
+import { changeType } from '@src/tools'
+import Service, { AuthDetails, Responses, RatesSources, Event } from '@src/.'
 
 dotenv.config()
 
@@ -34,6 +34,18 @@ describe('Rates', () => {
   afterAll(async () => {
     service.disconnect()
     await wait(2000)
+  })
+  it('throws on incorrect options', async () => {
+    expect.assertions(3)
+
+    try {
+      // @ts-expect-error
+      await service.getRates({ testing: 'test' })
+    } catch (err) {
+      expect(err).toBeInstanceOf(Object)
+      expect(err).toHaveProperty('name', 'BadProps')
+      expect(err).toHaveProperty('message', 'Extra key (testing) found in options argument of [getRates] function.')
+    }
   })
   it('gets rates from three sources', async () => {
     expect.assertions(2)

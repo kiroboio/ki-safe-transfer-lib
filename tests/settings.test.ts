@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
+
 import dotenv from 'dotenv'
 import { is } from 'ramda'
 
-import Service, { DebugLevels, Currencies, Networks, Responses, AuthDetails } from '../src'
-import { TEXT, valuesForSettings } from '../src/data'
-import { makeString, compareBasicObjects } from '../src/tools'
+import Service, { DebugLevels, Currencies, Networks, Responses, AuthDetails } from '@src/.'
+import { TEXT, valuesForSettings } from '@src/data'
+import { makeString, compareBasicObjects } from '@src/tools'
 import { wait } from './tools'
 
 dotenv.config()
@@ -31,7 +31,7 @@ describe('Library configuration', () => {
       expect.assertions(2)
 
       try {
-        // @ts-ignore
+        // @ts-expect-error
         service = Service.getInstance(null, true)
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
@@ -42,7 +42,7 @@ describe('Library configuration', () => {
       expect.assertions(2)
 
       try {
-        // @ts-ignore
+        // @ts-expect-error
         service = Service.getInstance('string', true)
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
@@ -53,7 +53,7 @@ describe('Library configuration', () => {
       expect.assertions(2)
 
       try {
-        // @ts-ignore
+        // @ts-expect-error
         Service.getInstance('string', 'string')
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
@@ -65,7 +65,7 @@ describe('Library configuration', () => {
       expect.assertions(2)
 
       try {
-        // @ts-ignore
+        // @ts-expect-error
         service = Service.getInstance({})
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
@@ -77,7 +77,7 @@ describe('Library configuration', () => {
 
       try {
         Service.getInstance({
-          // @ts-ignore
+          // @ts-expect-error
           key1: '1',
           key2: '1',
           key3: '1',
@@ -95,7 +95,7 @@ describe('Library configuration', () => {
       expect.assertions(2)
 
       try {
-        // @ts-ignore
+        // @ts-expect-error
         Service.getInstance({ key1: '1' }, true)
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
@@ -106,7 +106,7 @@ describe('Library configuration', () => {
       expect.assertions(2)
 
       try {
-        // @ts-ignore
+        // @ts-expect-error
         Service.getInstance({ debug: '1' })
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
@@ -117,7 +117,7 @@ describe('Library configuration', () => {
       expect.assertions(2)
 
       try {
-        // @ts-ignore
+        // @ts-expect-error
         Service.getInstance({ debug: 5 })
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)

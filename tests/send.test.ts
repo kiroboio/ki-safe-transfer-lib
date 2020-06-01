@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
+
 import dotenv from 'dotenv'
 
-import Service, { DebugLevels } from '../src'
+import Service, { DebugLevels } from '@src/.'
 import { wait } from './tools'
 import { validBitcoinAddresses } from './test_data'
 
@@ -33,7 +33,7 @@ describe('Send', () => {
       expect.assertions(3)
 
       try {
-        // @ts-ignore
+        // @ts-expect-error
         await service.send()
       } catch (err) {
         expect(err).toBeInstanceOf(Object)
@@ -43,7 +43,7 @@ describe('Send', () => {
     })
     it('throws TypeError argument with wrong type', async () => {
       try {
-        // @ts-ignore
+        // @ts-expect-error
         await service.send(1234)
       } catch (err) {
          expect(err).toBeInstanceOf(Object)
@@ -53,7 +53,7 @@ describe('Send', () => {
     })
     it('throws TypeError argument with empty object', async () => {
       try {
-        // @ts-ignore
+        // @ts-expect-error
         await service.send({})
       } catch (err) {
          expect(err).toBeInstanceOf(Object)
@@ -64,7 +64,7 @@ describe('Send', () => {
     it('throws TypeError for argument with unknown keys', async () => {
       try {
         await service.send({
-        // @ts-ignore
+        // @ts-expect-error
           id: 'string',
           to: validBitcoinAddresses[2],
           amount: 123,
@@ -72,6 +72,7 @@ describe('Send', () => {
           deposit: 'qwerty',
           owner: '0123456789012345678901234567890',
           depositPath: 'qwerty',
+          salt: 'qwerty'
         })
       } catch (err) {
          expect(err).toBeInstanceOf(Object)

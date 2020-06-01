@@ -1,9 +1,9 @@
 import { not, is, forEach, keys, isNil, append, filter } from 'ramda'
 
-import { RetrieveRequest, DataSpec, MinMax } from '../types'
-import { makeString, changeType } from '../tools'
-import { ERRORS } from '../text'
-import { makeStringFromArray } from '../tools/string'
+import { DataSpec, MinMax, RetrieveRequest } from '..'
+import { changeType, makeString } from '@src/tools'
+import { makeStringFromArray } from '@src/tools/string'
+import { ERRORS } from '@src/text'
 
 function isMin(value: number, min: number): boolean {
   return value >= min

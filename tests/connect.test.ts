@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
+
 
 import dotenv from 'dotenv'
 
-import Service, { Responses } from '../src'
+import Service, { Responses } from '@src/.'
 import { wait } from './tools'
 
 dotenv.config()

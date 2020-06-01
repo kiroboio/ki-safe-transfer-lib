@@ -1,5 +1,4 @@
-import { KeyObject } from './types'
-import { modeIs } from './mode'
+import { modeIs } from './tools/mode'
 
 const connectionTriesMax = 3
 
@@ -9,7 +8,7 @@ const version = 'v1' as const
 
 const apiUrl = 'https://api.kirobo.me' as const
 
-const endpoints: KeyObject<string> = {
+const endpoints: Record<string, string> = {
   collect: 'transfer/action/collect',
   retrieve: 'transfer/action/retrieve',
   inbox: 'transfer/inbox',

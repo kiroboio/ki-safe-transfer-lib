@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
+
 import dotenv from 'dotenv'
 
-import Service, { Responses, Event, AuthDetails, Results } from '../src'
-import { changeType } from '../src/tools'
+import Service, { Responses, Event, AuthDetails, Results } from '@src/.'
+import { changeType } from '@src/tools'
 import { wait } from './tools'
 import { validBitcoinAddresses } from './test_data'
 

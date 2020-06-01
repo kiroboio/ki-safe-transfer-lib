@@ -9,7 +9,10 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "maxNodeModuleJsDepth": 15,
-    "baseUrl": "./",
+     "baseUrl": "./",
+    "paths": {
+      "@src/*": [ "src/*" ]
+    },
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "moduleResolution": "node",
@@ -20,7 +23,9 @@
       "dom"
     ],
     "noImplicitAny": true,
-    "declaration": true
+    "declaration": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
   },
   "typedocOptions": {
     "mode": "modules",

@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
+
 import dotenv from 'dotenv'
 
-import { Service, Event, Responses } from '../src'
+import { Service, Event, Responses } from '@src/.'
 import { wait } from './tools'
 
 dotenv.config()
@@ -24,7 +24,7 @@ describe('Validate options', () => {
       expect.assertions(3)
 
       try {
-        // @ts-ignore
+        // @ts-expect-error
         await service.getUtxos(['xxx'], [])
       } catch (err) {
         expect(err).toBeInstanceOf(Object)
@@ -36,19 +36,19 @@ describe('Validate options', () => {
       expect.assertions(3)
 
       try {
-        // @ts-ignore
+        // @ts-expect-error
         await service.getUtxos(['xxx'], { test: 'test' })
       } catch (err) {
         expect(err).toBeInstanceOf(Object)
         expect(err).toHaveProperty('name', 'BadProps')
-        expect(err).toHaveProperty('message', 'Unknown key in \'getUtxos\' function\'s options test')
+        expect(err).toHaveProperty('message', 'Extra key (test) found in options argument of [getUtxos] function.')
       }
     })
     it('throws if "respondDirect" is wrong value type', async () => {
       expect.assertions(3)
 
       try {
-        // @ts-ignore
+        // @ts-expect-error
         await service.getUtxos(['xxx'], { respondDirect: 'test' })
       } catch (err) {
         expect(err).toBeInstanceOf(Object)
@@ -63,7 +63,7 @@ describe('Validate options', () => {
       expect.assertions(3)
 
       try {
-        // @ts-ignore
+        // @ts-expect-error
         await service.getUtxos(['xxx'], { skip: 'test' })
       } catch (err) {
         expect(err).toBeInstanceOf(Object)
@@ -78,7 +78,7 @@ describe('Validate options', () => {
       expect.assertions(3)
 
       try {
-        // @ts-ignore
+        // @ts-expect-error
         await service.getUtxos(['xxx'], { limit: 'test' })
       } catch (err) {
         expect(err).toBeInstanceOf(Object)

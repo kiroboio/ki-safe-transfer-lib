@@ -1,9 +1,4 @@
-import { Responses, Networks, Currencies, DebugLevels, EventTypes } from './enums'
-import { Watch, QueryOptions } from '.'
-
-interface KeyObject<T> {
-  [index: string]: T
-}
+import { DebugLevels, Currencies, Networks, Responses, Watch, EventTypes, QueryOptions } from '.'
 
 interface AuthDetails {
   key: string
@@ -37,7 +32,7 @@ interface ApiService {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   get: (arg0: unknown) => any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  create: (arg0: {}) => any
+  create: (arg0: Record<string, unknown>) => any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   on: (arg0: string, arg1: (arg2: any) => any) => any
 }
@@ -111,7 +106,6 @@ export {
   ConnectProps,
   Event,
   EventBus,
-  KeyObject,
   NetworkTip,
   Status,
   Message,

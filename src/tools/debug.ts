@@ -1,12 +1,12 @@
-import { DebugLevels } from '../types'
-import { is } from './mode'
+import { DebugLevels } from '..'
+import { modeIs } from './mode'
 
 function debugLevelSelector(debug: DebugLevels | undefined): DebugLevels {
   if (debug && [0,1,2,4].includes(debug)) return debug
 
-  if (is('test')) return DebugLevels.MUTE
+  if (modeIs('test')) return DebugLevels.MUTE
 
-  if (is('dev')) return DebugLevels.VERBOSE
+  if (modeIs('development')) return DebugLevels.VERBOSE
 
   return DebugLevels.QUIET
 }

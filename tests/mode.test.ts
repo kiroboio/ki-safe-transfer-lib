@@ -1,4 +1,4 @@
-import { modeIs } from '../src/mode'
+import { modeIs } from '@src/tools/mode'
 
 const { log } = console
 

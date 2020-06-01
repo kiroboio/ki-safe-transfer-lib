@@ -14,15 +14,17 @@ const ERRORS = {
     },
   },
   service: {
-    gotError: 'Service (%1) caught [%2] error.'
+    gotError: 'Service (%1) caught [%2] error.',
   },
   validation: {
+    emptyArgument: 'Required argument (%1) of [%2] function is empty.',
+    missingArguments: 'Required argument (%1) of [%2] function is missing.',
     extraKey: 'Extra key (%1) found in %2 argument of [%3] function.',
-    missingArgument: 'Required argument %1 in %2 argument of [%3] function is missing.',
+    missingArgument: 'Required argument (%1) in %2 argument of [%3] function is missing.',
     missingKey: 'Required key %1 in %2 argument of [%3] function is missing.',
-    wrongTypeArgument: 'Type of argument %1 in function [%2] is wrong - %3. Should be %4.',
-    wrongTypeKey: 'Type of key %1 in function [%2] is wrong - %3. Should be %4.'
-  }
+    wrongTypeArgument: 'Type of argument (%1) in function [%2] is wrong - %3. Should be %4.',
+    wrongTypeKey: 'Type of key %1 in function [%2] is wrong - %3. Should be %4.',
+  },
 }
 
 const WARNINGS = {

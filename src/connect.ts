@@ -20,12 +20,25 @@ import {
   Watch,
 } from './types'
 import { Base } from './base'
-import { debugLevelSelector } from './tools/debug'
+// import { debugLevelSelector } from './tools/debug'
 import { apiUrl, version, endpoints, connectionTriesMax, connectionTimeout } from './config'
-import { capitalize, makeString, diff, getTime, changeType, makeOptions } from './tools'
+import {
+  debugLevelSelector,
+  capitalize,
+  makeString,
+  diff,
+  getTime,
+  changeType,
+  makeOptions,
+  makeApiResponseError,
+  makeReturnError,
+  makePropsResponseError,
+  shouldReturnDirect,
+  isDirect,
+} from './tools'
 import { WARNINGS, ERRORS, MESSAGES } from './text'
-import { makeApiResponseError, makeReturnError, makePropsResponseError } from './tools/error'
-import { shouldReturnDirect, isDirect } from './tools/connect'
+// import { makeApiResponseError, makeReturnError, makePropsResponseError } from './tools/error'
+// import { shouldReturnDirect, isDirect } from './tools/connect'
 import { validateOptions, validateSettings } from './validators'
 
 class Connect extends Base {

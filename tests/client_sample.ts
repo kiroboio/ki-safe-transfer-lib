@@ -5,26 +5,33 @@
  * */
 import prettyFormat from 'pretty-format'
 
-import Service, { DebugLevels, Responses, Event } from '../src'
+import Service, { DebugLevels, Responses, Event } from '@src/.'
 import dotenv from 'dotenv'
+import { wait } from './tools'
 
 dotenv.config()
+
+const { log } = console
 
 const authDetails = { key: process.env.AUTH_KEY || '', secret: process.env.AUTH_SECRET || '' }
 
 function eventBus(event: Event): void {
-  // eslint-disable-next-line no-console
-  console.log('event fired: ', prettyFormat(event))
+  log('event fired: ', prettyFormat(event))
 }
 
-const service = Service.getInstance({
-  debug: DebugLevels.QUIET,
-  respondAs: Responses.Callback,
-  eventBus,
-  authDetails,
-},
-true)
+const service = Service.getInstance(
+  {
+    debug: DebugLevels.QUIET,
+    respondAs: Responses.Callback,
+    eventBus,
+    authDetails,
+  },
+  true,
+)
 
-service.getStatus()
+async function run(): Promise<void> {
+  await wait(3000)
+  service.getStatus().catch((err) => log('getStatus error', err))
+}
 
-// service.clearLastAddresses()
+run()

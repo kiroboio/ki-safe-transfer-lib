@@ -1,4 +1,5 @@
-import { Endpoints, QueryOptions, Responses } from '../types'
+import { Endpoints, QueryOptions, Responses } from '..'
+
 
 /**
  * Helper to makeEndpointPath to help create paths for services, that are not relying on 'network' section

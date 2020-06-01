@@ -1,8 +1,8 @@
 import { assoc, isNil, not, map } from 'ramda'
 import { v4 as generateId } from 'uuid'
 
-import { validateObject, validateArray } from '../validators'
-import { QueryOptions, KeyObject, Address, SendRequest, Watch } from '../types'
+import { validateArray, validateObject } from '@src/validators'
+import { SendRequest, QueryOptions, Watch, Address } from '..'
 
 const splitText = (text: string): string[] => text.split('')
 
@@ -31,7 +31,7 @@ export const makeString = (template: string, params: string[]): string => {
   return result
 }
 
-export const compareBasicObjects = (objOne: KeyObject<unknown>, objTwo: KeyObject<unknown>): boolean => {
+export const compareBasicObjects = (objOne: Record<string, unknown>, objTwo: Record<string, unknown>): boolean => {
   let result = true
 
   try {
@@ -41,7 +41,7 @@ export const compareBasicObjects = (objOne: KeyObject<unknown>, objTwo: KeyObjec
 
     if (Object.keys(objOne).length !== Object.keys(objTwo).length) return false
 
-    Object.keys(objOne).forEach(key => {
+    Object.keys(objOne).forEach((key) => {
       if (objOne[key] !== objTwo[key]) result = false
     })
   } catch (e) {
@@ -74,7 +74,10 @@ export function checkOwnerId(transaction: SendRequest): SendRequest {
 
 export { generateId }
 
-export function makeOptions(options: QueryOptions | undefined, globalWatch: Watch | undefined): {} {
+export function makeOptions(
+  options: QueryOptions | undefined,
+  globalWatch: Watch | undefined,
+): Record<string, unknown> {
   let queryOptions = { $limit: 100, $skip: 0 }
 
   if (!options) return queryOptions

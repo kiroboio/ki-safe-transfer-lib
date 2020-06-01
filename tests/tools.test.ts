@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
-import { capitalize, makeString, compareBasicObjects, makeOptions } from '../src/tools/other'
-import { Watch } from '../src/types/api'
+
+import { capitalize, makeString, compareBasicObjects, makeOptions } from '@src/tools/other'
+import { Watch } from '@src/types/api'
 import { wait } from './tools'
 
 process.on('unhandledRejection', () => {
@@ -13,7 +13,7 @@ describe('Tools', () => {
   })
   describe('- "capitalize"', () => {
     test('- doesn\'t crash at non-string, and returns empty string', () => {
-      // @ts-ignore
+      // @ts-expect-error
       expect(capitalize(123)).toBe('')
     })
     test('- returns string with capitalized 1st letter', () => {
@@ -25,19 +25,19 @@ describe('Tools', () => {
   })
   describe('- "makeString"', () => {
     test('- doesn\'t crash at no arguments', () => {
-      // @ts-ignore
+      // @ts-expect-error
       expect(makeString(123)).toBe('')
     })
     test('- doesn\'t crash at missing some arguments', () => {
-      // @ts-ignore
+      // @ts-expect-error
       expect(makeString(123)).toBe('')
     })
     test('- doesn\'t crash at wrong argument types', () => {
-      // @ts-ignore
+      // @ts-expect-error
       expect(makeString('qwerty')).toBe('')
     })
     test('- doesn\'t crash at wrong argument types #2', () => {
-      // @ts-ignore
+      // @ts-expect-error
       expect(makeString('qwerty', [2, {}])).toBe('')
     })
     test('- correctly creates string with one parameter', () => {
@@ -53,11 +53,11 @@ describe('Tools', () => {
   })
   describe('- \'compareBasicObjects\'', () => {
     test('- doesn\'t crash at no arguments', () => {
-      // @ts-ignore
+      // @ts-expect-error
       expect(compareBasicObjects()).toBe(false)
     })
     test('- doesn\'t crash without some arguments', () => {
-      // @ts-ignore
+      // @ts-expect-error
       expect(compareBasicObjects(123)).toBe(false)
     })
     test('- different objects, don\'t match', () => {
@@ -76,11 +76,10 @@ describe('Tools', () => {
   // TODO: test other features
   describe('- \'makeOptions\'', () => {
     test('- returns default pagination options without arguments', () => {
-      // @ts-ignore
+      // @ts-expect-error
       expect(JSON.stringify(makeOptions())).toBe(JSON.stringify({ $limit: 100, $skip: 0 }))
     })
     test('- chooses \'watch\' options correctly', () => {
-      // @ts-ignore
       expect(JSON.stringify(makeOptions({ watch: Watch.ADD }, Watch.DISABLE))).toBe(
         JSON.stringify({ $limit: 100, $skip: 0, watch: 'add' }),
       )

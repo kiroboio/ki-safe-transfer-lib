@@ -1,9 +1,9 @@
 import { isEmpty, keys, pipe, forEach } from 'ramda'
 
-import { makeString, makeLocation, changeType } from '../tools/other'
-import { TEXT, optionsValidValues, optionsRequestValidValues } from '../data'
-import { isOfType } from '../validators'
-import { KeyObject } from '../types'
+import { makeString, makeLocation, changeType } from '@src/tools'
+import { TEXT, optionsRequestValidValues, optionsValidValues } from '@src/data'
+import { isOfType } from '.'
+import { ERRORS } from '@src/text'
 
 export function validateOptions(options: unknown, fnName: string, request?: true): void {
 
@@ -22,10 +22,9 @@ export function validateOptions(options: unknown, fnName: string, request?: true
   const checkFn = (key: string): void => {
 
     /** if key doesn't exist */
-    if (!validKeys.includes(key))
-      throw new TypeError(makeString(TEXT.errors.validation.unknownGenKeys, [makeLocation(fnName, 'options')]) + key)
+    if (!validKeys.includes(key)) throw new TypeError(makeString(ERRORS.validation.extraKey, [key, 'options', fnName]))
 
-    const value = changeType<KeyObject<string>>(options)[key]
+    const value = changeType<Record<string, string>>(options)[key]
 
     /** if value is of wrong type */
     if (!isOfType(value, valid[key].type))

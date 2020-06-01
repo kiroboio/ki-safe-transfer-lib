@@ -1,8 +1,7 @@
 import { isNil, keys, forEach } from 'ramda'
 
-import { TEXT } from '../data'
-import { makeString, capitalize, changeType } from '../tools'
-import { KeyObject } from 'src/types'
+import { TEXT } from '@src/data'
+import { makeString, capitalize, changeType } from '@src/tools'
 
 
 function validateObject(data: unknown, argName?: string): void {
@@ -18,7 +17,7 @@ function validateObject(data: unknown, argName?: string): void {
   if (typeof data === 'function') throw new TypeError(TEXT.errors.validation.noFunction)
 }
 
-function validateObjectWithStrings(params: {}, paramName: string, method: string): void {
+function validateObjectWithStrings(params: Record<string,unknown>, paramName: string, method: string): void {
   if (!paramName || !method)
     throw new TypeError(
       makeString(TEXT.validation.cantBe, [
@@ -55,7 +54,7 @@ function validateObjectWithStrings(params: {}, paramName: string, method: string
 
   if (!keys(params).length) throw new TypeError(makeString(TEXT.validation.empty, [paramName, method]))
 
-  const data = changeType<KeyObject<string>>(params)
+  const data = changeType<Record<string, string>>(params)
 
   const fn = (key: string): void => {
     if (typeof data[key] !== 'string')

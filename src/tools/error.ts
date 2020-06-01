@@ -1,7 +1,7 @@
 import { assoc, forEach, isNil, isEmpty } from 'ramda'
 
+import { ResponseError } from '..'
 import { changeType } from '.'
-import { ResponseError, KeyObject } from '../types'
 
 /**
  * Function to make errors from caught API error objects. Will check argument
@@ -29,18 +29,18 @@ function makeApiResponseError(error: unknown): ResponseError {
     if (isEmpty(data)) return false
 
     /** not if the same */
-    if (data === changeType<KeyObject<unknown>>(response)[key]) return false
+    if (data === changeType<Record<string, unknown>>(response)[key]) return false
 
     return true
   }
 
   /** assigner function */
-  const assignerFn = (data: KeyObject<unknown>) => (key: string): void => {
+  const assignerFn = (data: Record<string, unknown>) => (key: string): void => {
     if (shouldAssign(data[key], key)) response = assoc(key, data[key], response)
   }
 
   /** run for each of default fields */
-  forEach(assignerFn(changeType<KeyObject<unknown>>(error)), ['name', 'message', 'code', 'data', 'errors'])
+  forEach(assignerFn(changeType<Record<string, unknown>>(error)), ['name', 'message', 'code', 'data', 'errors'])
 
   /** try to parse message, in case it has some object inside */
   try {
@@ -59,13 +59,13 @@ function makePropsResponseError(error: unknown): ResponseError {
 
   if (!error) return response
 
-  const data = changeType<KeyObject<unknown>>(error)
+  const data = changeType<Record<string, unknown>>(error)
 
   const fn = (key: string): void => {
     if (key === 'name') {
       if (data.type) response = assoc('name', data.type, response)
     } else {
-      if (data[key] && data[key] !== changeType<KeyObject<unknown>>(response)[key])
+      if (data[key] && data[key] !== changeType<Record<string, unknown>>(response)[key])
         response = assoc(key, data[key], response)
     }
   }
@@ -84,6 +84,5 @@ function makeReturnError(message: string, error?: unknown): ResponseError {
 
   return assoc('message', message, response)
 }
-
 
 export { makeApiResponseError, makePropsResponseError, makeReturnError }

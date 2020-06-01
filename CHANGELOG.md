@@ -1,5 +1,11 @@
 # Changelog
 
+##### v2.9.0 2020-06-01
+
+  New:
+
+  - salt is manadatory when sending transaction
+
 ##### v2.8.0 2020-05-31
 
   New:

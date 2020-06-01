@@ -30,9 +30,18 @@ import {
   validateRetrieve,
   validateAddress,
 } from './validators'
-import { checkOwnerId, flattenAddresses, makeOptions, makeString } from './tools'
-import { makePropsResponseError, makeReturnError, makeApiResponseError } from './tools/error'
-import { shouldReturnDirect } from './tools/connect'
+import {
+  checkOwnerId,
+  flattenAddresses,
+  makeOptions,
+  makeString,
+  makePropsResponseError,
+  makeReturnError,
+  makeApiResponseError,
+  shouldReturnDirect,
+} from './tools'
+// import { makePropsResponseError, makeReturnError, makeApiResponseError } from './tools/error'
+// import { shouldReturnDirect } from './tools/connect'
 import { isNil, join, assoc, filter, isEmpty } from 'ramda'
 import { TEXT, SEND_DATA_SPEC } from './data'
 import { ERRORS, MESSAGES } from './text'

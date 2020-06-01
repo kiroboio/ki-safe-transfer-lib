@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
+
 import dotenv from 'dotenv'
 
-import Service, { AuthDetails, } from '../src'
+import Service, { AuthDetails } from '@src/.'
 import { wait, } from './tools'
 
 dotenv.config()
@@ -31,7 +31,7 @@ describe('Retrieve', () => {
     expect.assertions(3)
 
     try {
-      // @ts-ignore
+      // @ts-expect-error
       await service.retrieve()
     } catch (err) {
       expect(err).toBeInstanceOf(Object)
@@ -43,7 +43,7 @@ describe('Retrieve', () => {
     expect.assertions(3)
 
     try {
-      // @ts-ignore
+      // @ts-expect-error
       await service.retrieve({test:'qwerty'})
     } catch (err) {
       expect(err).toBeInstanceOf(Object)
@@ -55,7 +55,7 @@ describe('Retrieve', () => {
     expect.assertions(3)
 
     try {
-      // @ts-ignore
+      // @ts-expect-error
       await service.retrieve({ id: 'qwert', raw: 'qwerty' }, [])
     } catch (err) {
       expect(err).toBeInstanceOf(Object)

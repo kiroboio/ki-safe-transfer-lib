@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
-import { validateObject, validateObjectWithStrings } from '../src/validators'
+
+import { validateObject, validateObjectWithStrings, validatePropsArray } from '@src/validators'
 
 describe('Validators', () => {
   describe('validateObject', () => {
@@ -7,7 +7,7 @@ describe('Validators', () => {
       expect.assertions(2)
 
       try {
-        // @ts-ignore
+        // @ts-expect-error
         validateObject()
       } catch (err) {
         expect(err).toBeInstanceOf(TypeError)
@@ -18,7 +18,6 @@ describe('Validators', () => {
       expect.assertions(2)
 
       try {
-        // @ts-ignore
         validateObject([])
       } catch (err) {
         expect(err).toBeInstanceOf(TypeError)
@@ -29,7 +28,6 @@ describe('Validators', () => {
       expect.assertions(2)
 
       try {
-        // @ts-ignore
         validateObject([])
       } catch (err) {
         expect(err).toBeInstanceOf(TypeError)
@@ -40,7 +38,6 @@ describe('Validators', () => {
       expect.assertions(2)
 
       try {
-        // @ts-ignore
         validateObject(() => { return })
       } catch (err) {
         expect(err).toBeInstanceOf(TypeError)
@@ -53,7 +50,7 @@ describe('Validators', () => {
         expect.assertions(2)
 
         try {
-          // @ts-ignore
+          // @ts-expect-error
           validateObjectWithStrings()
         } catch (err) {
           expect(err).toBeInstanceOf(TypeError)
@@ -67,7 +64,6 @@ describe('Validators', () => {
         expect.assertions(2)
 
         try {
-          // @ts-ignore
           validateObjectWithStrings([], 'Props', 'test')
         } catch (err) {
           expect(err).toBeInstanceOf(TypeError)
@@ -82,7 +78,6 @@ describe('Validators', () => {
         expect.assertions(2)
 
         try {
-          // @ts-ignore
           validateObjectWithStrings(() => { return }, 'Props', 'test')
         } catch (err) {
           expect(err).toBeInstanceOf(TypeError)
@@ -96,7 +91,6 @@ describe('Validators', () => {
         expect.assertions(2)
 
         try {
-          // @ts-ignore
           validateObjectWithStrings({}, 'Props', 'test')
         } catch (err) {
           expect(err).toBeInstanceOf(TypeError)
@@ -108,7 +102,6 @@ describe('Validators', () => {
         expect.assertions(2)
 
         try {
-          // @ts-ignore
           validateObjectWithStrings({ key: 0 }, 'Props', 'test')
         } catch (err) {
           expect(err).toBeInstanceOf(TypeError)
@@ -122,13 +115,37 @@ describe('Validators', () => {
         expect.assertions(2)
 
         try {
-          // @ts-ignore
           validateObjectWithStrings({ key: '' }, 'Props', 'test')
         } catch (err) {
           expect(err).toBeInstanceOf(TypeError)
           expect(err).toHaveProperty(
             'message',
             'Element key in params of "test" method can\'t be empty. It should be value in string form.',
+          )
+        }
+      })
+    })
+    describe('validatePropsArray', () => {
+      it('throws if empty ', () => {
+        expect.assertions(2)
+
+        try {
+          validatePropsArray([], 'string', 'strings', 'test')
+        } catch (err) {
+          expect(err).toBeInstanceOf(TypeError)
+          expect(err).toHaveProperty('message', 'Required argument (strings) of [test] function is empty.')
+        }
+      })
+      it('throws if element in array of different type', () => {
+        expect.assertions(2)
+
+        try {
+          validatePropsArray(['string', 123], 'number', 'strings', 'test')
+        } catch (err) {
+          expect(err).toBeInstanceOf(TypeError)
+          expect(err).toHaveProperty(
+            'message',
+            'Type of argument (#0: string) in function [test] is wrong - string. Should be number.',
           )
         }
       })

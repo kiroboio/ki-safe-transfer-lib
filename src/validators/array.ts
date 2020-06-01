@@ -1,16 +1,17 @@
-import { isNil, not, is, forEach } from 'ramda'
+import { isNil, not, is } from 'ramda'
 
-import { makeString } from '../tools'
-import { TEXT } from '../data'
-import { Settings } from 'src/types'
+import { ERRORS } from '@src/text'
+import { makeString } from '@src/tools'
+import { TEXT } from '@src/data'
 import { validateAddress } from '.'
+import { Settings } from '@src/types'
 
 function validateArray(arr: unknown[], type: string[]): boolean {
   if (!Array.isArray(arr)) return false
 
   let result = true
 
-  arr.forEach(el => {
+  arr.forEach((el) => {
     if (!type.includes(typeof el)) result = false
   })
 
@@ -20,39 +21,33 @@ function validateArray(arr: unknown[], type: string[]): boolean {
 // TODO: desc
 // TODO: test
 function validatePropsArray(params: unknown[], type: string, paramName: string, method: string): void {
-  if (isNil(params))
-    throw new TypeError(
-      makeString(TEXT.validation.params, [paramName, method, 'missing or undefined/null', 'string[]']),
-    )
+  if (isNil(params)) throw new TypeError(makeString(ERRORS.validation.missingArgument, [paramName, method]))
 
   if (not(is(Array, params)))
-    throw new TypeError(makeString(TEXT.validation.params, [paramName, method, typeof params, 'string[]']))
+    throw new TypeError(makeString(ERRORS.validation.wrongTypeArgument, [paramName, method, typeof params, 'string[]']))
 
-  if (!params.length) throw new TypeError(makeString(TEXT.validation.empty, [paramName, method]))
+  if (!params.length) throw new TypeError(makeString(ERRORS.validation.emptyArgument, [paramName, method]))
 
-  const fn = (el: unknown): void => {
+  params.forEach((el: unknown, index: number): void => {
     if (typeof el !== type)
-      throw new TypeError(makeString(TEXT.validation.params, [`Element (${el})`, method, typeof el, 'string']))
-  }
-
-  forEach(fn, params)
+      throw new TypeError(
+        makeString(ERRORS.validation.wrongTypeArgument, [`#${index}: ${el}`, method, typeof el, type]),
+      )
+  })
 }
 
 function validatePropsAddresses(params: string[], paramName: string, method: string, settings: Settings): void {
-  if (isNil(params))
-    throw new TypeError(
-      makeString(TEXT.validation.params, [paramName, method, 'missing or undefined/null', 'string[]']),
-    )
+  if (isNil(params)) throw new TypeError(makeString(ERRORS.validation.missingArgument, [paramName, method]))
 
   if (not(is(Array, params)))
-    throw new TypeError(makeString(TEXT.validation.params, [paramName, method, typeof params, 'string[]']))
+    throw new TypeError(makeString(ERRORS.validation.wrongTypeArgument, [paramName, method, typeof params, 'string[]']))
 
-  if (!params.length) throw new TypeError(makeString(TEXT.validation.empty, [paramName, method]))
+  if (!params.length) throw new TypeError(makeString(ERRORS.validation.emptyArgument, [paramName, method]))
 
-  const fn = (address: string): void => {
+  const fn = (address: string, index: number): void => {
     if (typeof address !== 'string')
       throw new TypeError(
-        makeString(TEXT.validation.params, [`Element (${address})`, method, typeof address, 'string']),
+        makeString(ERRORS.validation.wrongTypeArgument, [`#${index}: ${address}`, method, typeof address, 'string']),
       )
 
     if (
@@ -65,7 +60,7 @@ function validatePropsAddresses(params: string[], paramName: string, method: str
       throw new TypeError(makeString(TEXT.validation.notAddress, [address, method, JSON.stringify(settings)]))
   }
 
-  forEach(fn, params)
+  params.forEach(fn)
 }
 
 export { validatePropsAddresses, validatePropsArray, validateArray }
