@@ -1,5 +1,11 @@
 # Changelog
 
+##### v2.10.0 2020-06-01
+
+  Updated:
+
+  - connect check feature removed
+
 ##### v2.9.1 2020-06-01
 
   Updated:
