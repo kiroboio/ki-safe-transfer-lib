@@ -1,5 +1,11 @@
 # Changelog
 
+##### v2.8.0 2020-05-31
+
+  New:
+
+  - retrieve object in Retrievable
+
 ##### v2.7.2 2020-05-24
 
   Updated:
