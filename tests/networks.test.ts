@@ -1,8 +1,8 @@
 import dotenv from 'dotenv'
 
-import Service, { Event, AuthDetails, Responses } from '@src/.'
+import Service, { Event, AuthDetails, Responses } from '../src/.'
 import { wait, getEventByType } from './tools'
-import { changeType } from '@src/tools'
+import { changeType } from '../src/tools'
 
 dotenv.config()
 

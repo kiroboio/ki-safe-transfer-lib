@@ -1,7 +1,7 @@
 import { not, is, isNil } from 'ramda'
 
-import { makeString } from '@src/tools'
-import { TEXT } from '@src/data'
+import { makeString } from '../tools'
+import { TEXT } from '../data'
 
 // TODO: desc
 // TODO: test

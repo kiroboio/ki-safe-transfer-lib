@@ -1,9 +1,9 @@
 import { isEmpty, keys, pipe, forEach } from 'ramda'
 
-import { makeString, makeLocation, changeType } from '@src/tools'
-import { TEXT, optionsRequestValidValues, optionsValidValues } from '@src/data'
+import { makeString, makeLocation, changeType } from '../tools'
+import { TEXT, optionsRequestValidValues, optionsValidValues } from '../data'
 import { isOfType } from '.'
-import { ERRORS } from '@src/text'
+import { ERRORS } from '../text'
 
 export function validateOptions(options: unknown, fnName: string, request?: true): void {
 

@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 
-import { capitalize, makeString, compareBasicObjects, makeOptions } from '@src/tools/other'
-import { Watch } from '@src/types/api'
+import { capitalize, makeString, compareBasicObjects, makeOptions } from '../src/tools'
+import { Watch } from '../src'
 import { wait } from './tools'
 
 process.on('unhandledRejection', () => {

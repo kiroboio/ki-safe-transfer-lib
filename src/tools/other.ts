@@ -1,7 +1,7 @@
 import { assoc, isNil, not, map } from 'ramda'
 import { v4 as generateId } from 'uuid'
 
-import { validateArray, validateObject } from '@src/validators'
+import { validateArray, validateObject } from '../validators'
 import { SendRequest, QueryOptions, Watch, Address } from '..'
 
 const splitText = (text: string): string[] => text.split('')

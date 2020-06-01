@@ -1,13 +1,15 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 
 import dotenv from 'dotenv'
 
-import { Service, Event, Responses } from '@src/.'
+import { Service, Event, Responses } from '../src/.'
 import { wait } from './tools'
 
 dotenv.config()
 
 const authDetails = { key: process.env.AUTH_KEY ?? '', secret: process.env.AUTH_SECRET ?? '' }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function eventBus(_event: Event): void {
   return
 }

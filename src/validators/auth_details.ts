@@ -1,4 +1,4 @@
-import { TEXT, authDetailsData } from '@src/data'
+import { TEXT, authDetailsData } from '../data'
 import { validateObject } from '.'
 
 export function validateAuthDetails(details: unknown): void {

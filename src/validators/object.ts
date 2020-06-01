@@ -1,7 +1,7 @@
 import { isNil, keys, forEach } from 'ramda'
 
-import { TEXT } from '@src/data'
-import { makeString, capitalize, changeType } from '@src/tools'
+import { TEXT } from '../data'
+import { makeString, capitalize, changeType } from '../tools'
 
 
 function validateObject(data: unknown, argName?: string): void {

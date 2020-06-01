@@ -9,10 +9,7 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "maxNodeModuleJsDepth": 15,
-     "baseUrl": "./",
-    "paths": {
-      "@src/*": [ "src/*" ]
-    },
+    "baseUrl": ".",
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "moduleResolution": "node",

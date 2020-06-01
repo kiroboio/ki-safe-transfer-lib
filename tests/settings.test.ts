@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 
 import dotenv from 'dotenv'
 import { is } from 'ramda'
 
-import Service, { DebugLevels, Currencies, Networks, Responses, AuthDetails } from '@src/.'
-import { TEXT, valuesForSettings } from '@src/data'
-import { makeString, compareBasicObjects } from '@src/tools'
+import Service, { DebugLevels, Currencies, Networks, Responses, AuthDetails } from '../src/.'
+import { TEXT, valuesForSettings } from '../src/data'
+import { makeString, compareBasicObjects } from '../src/tools'
 import { wait } from './tools'
 
 dotenv.config()

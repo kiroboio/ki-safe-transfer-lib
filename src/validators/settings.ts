@@ -1,6 +1,6 @@
-import { TEXT, listOfSettingsKeys, typeOfSettingsKeys, valuesForSettings } from '@src/data'
+import { TEXT, listOfSettingsKeys, typeOfSettingsKeys, valuesForSettings } from '../data'
 import { validateObject, validateAuthDetails } from '.'
-import { makeString } from '@src/tools'
+import { makeString } from '../tools'
 
 
 export const validateSettings = (settings: unknown): void => {

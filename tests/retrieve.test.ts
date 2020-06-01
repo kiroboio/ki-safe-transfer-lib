@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 
 import dotenv from 'dotenv'
 
-import Service, { AuthDetails } from '@src/.'
+import Service, { AuthDetails } from '../src/.'
 import { wait, } from './tools'
 
 dotenv.config()

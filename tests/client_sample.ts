@@ -5,7 +5,7 @@
  * */
 import prettyFormat from 'pretty-format'
 
-import Service, { DebugLevels, Responses, Event } from '@src/.'
+import Service, { DebugLevels, Responses, Event } from '../src'
 import dotenv from 'dotenv'
 import { wait } from './tools'
 

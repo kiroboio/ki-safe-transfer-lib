@@ -1,6 +1,6 @@
 import { find, isNil, isEmpty } from 'ramda'
 
-import { Event } from '@src/.'
+import { Event } from '../src'
 
 /**
  * Function to force test to wait extra time to ensure, that the socket connect it properly OFF

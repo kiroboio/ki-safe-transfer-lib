@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import dotenv from 'dotenv'
 
-import { Service, Event, Responses, EventTypes } from '@src/.'
+import { Service, Event, Responses, EventTypes } from '../src'
 import { wait, getEventByType } from './tools'
 import { keys } from 'ramda'
 

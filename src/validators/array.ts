@@ -1,10 +1,10 @@
 import { isNil, not, is } from 'ramda'
 
-import { ERRORS } from '@src/text'
-import { makeString } from '@src/tools'
-import { TEXT } from '@src/data'
+import { ERRORS } from '../text'
+import { makeString } from '../tools'
+import { TEXT } from '../data'
 import { validateAddress } from '.'
-import { Settings } from '@src/types'
+import { Settings } from '../types'
 
 function validateArray(arr: unknown[], type: string[]): boolean {
   if (!Array.isArray(arr)) return false

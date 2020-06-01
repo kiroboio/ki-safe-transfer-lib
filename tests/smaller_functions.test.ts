@@ -1,10 +1,10 @@
 import dotenv from 'dotenv'
 
-import Service, { DebugLevels, Responses, Event, Status, AuthDetails } from '@src/.'
-import { listOfStatusKeys, typeOfStatusValues } from '@src/data'
+import Service, { DebugLevels, Responses, Event, Status, AuthDetails } from '../src/.'
+import { listOfStatusKeys, typeOfStatusValues } from '../src/data'
 
-import { changeType } from '@src/tools/other'
-import { validateObject } from '@src/validators'
+import { changeType } from '../src/tools/other'
+import { validateObject } from '../src/validators'
 import { wait } from './tools'
 import { validBitcoinAddresses } from './test_data'
 
@@ -14,7 +14,7 @@ const { log } = console
 
 const authDetails: AuthDetails = { key: process.env.AUTH_KEY ?? '', secret: process.env.AUTH_SECRET ?? '' }
 
-let storedEvent: Event | {}
+let storedEvent: Event | Record<string, unknown>
 
 function eventBus(event: Event): void {
   storedEvent = event
@@ -24,13 +24,15 @@ let service: Service
 
 async function setAsync(): Promise<Status | void> {
   try {
-    service = Service.getInstance({
-      debug: DebugLevels.MUTE,
-      eventBus,
-      respondAs: Responses.Callback,
-      authDetails,
-    },
-    true)
+    service = Service.getInstance(
+      {
+        debug: DebugLevels.MUTE,
+        eventBus,
+        respondAs: Responses.Callback,
+        authDetails,
+      },
+      true,
+    )
     await wait(2000)
     return await service.getStatus()
   } catch (err) {
@@ -72,7 +74,7 @@ describe('Smaller functions', () => {
       }
 
       if (result) {
-        Object.keys(result).forEach(key => {
+        Object.keys(result).forEach((key) => {
           if (!listOfStatusKeys.includes(key)) keysValuesCheck = false
           else {
             const resValType = typeof changeType<Record<string, string | number | boolean>>(result)[key]
@@ -106,7 +108,7 @@ describe('Smaller functions', () => {
         keysValuesCheck = false
       }
 
-      Object.keys(result).forEach(key => {
+      Object.keys(result).forEach((key) => {
         if (!listOfStatusKeys.includes(key)) keysValuesCheck = false
 
         const resValType = typeof result[key]

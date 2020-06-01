@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
-import { validateObject, validateObjectWithStrings, validatePropsArray } from '@src/validators'
+import { validateObject, validateObjectWithStrings, validatePropsArray } from '../src/validators'
 
 describe('Validators', () => {
   describe('validateObject', () => {

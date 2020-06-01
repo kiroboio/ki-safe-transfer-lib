@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import dotenv from 'dotenv'
 
 import { wait, getEventByType } from './tools'
-import { changeType } from '@src/tools'
-import Service, { AuthDetails, Responses, RatesSources, Event } from '@src/.'
+import { changeType } from '../src/tools'
+import Service, { AuthDetails, Responses, RatesSources, Event } from '../src/.'
 
 dotenv.config()
 

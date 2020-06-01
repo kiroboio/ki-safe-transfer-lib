@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 
 import dotenv from 'dotenv'
 
-import Service, { DebugLevels } from '@src/.'
+import Service, { DebugLevels } from '../src/.'
 import { wait } from './tools'
 import { validBitcoinAddresses } from './test_data'
 
