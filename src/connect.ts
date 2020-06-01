@@ -187,6 +187,53 @@ class Connect extends Base {
     this._inbox.on('removed', (payload: Collectable) => {
       this._useEventBus(EventTypes.REMOVED_COLLECTABLE, payload)
     })
+
+    // set internet connection check
+    if (typeof window === 'undefined') {
+      // this is backend
+      setInterval(() => {
+        this._logTechnical('Checking connection status...')
+        require('dns')
+          .promises.lookup('google.com')
+          .then(() => {
+            if (!this._connect.io.connected && this._connectionCounter <= connectionTriesMax) {
+              this._logTechnical('Connection is online, but service is not -  will re-connect.')
+              this._connect.io.connect()
+            }
+
+            if (this._connectionCounter > connectionTriesMax)
+              this._logApiWarning(
+                `Service exceeded connectionTriesMax (${this._connectionCounter}/${connectionTriesMax}).`,
+              )
+          })
+          .catch(() => {
+            if (this._connect.io.connected) {
+              this._logTechnical('Connection is offline, but service is not - will disconnect.')
+              this._connect.io.disconnect()
+            }
+          })
+      }, 3000)
+    } else {
+      //  this is web
+      // window.addEventListener('offline', () => {
+      //   if (this._connect.io.connected) {
+      //     this._logTechnical('Browser connection is offline, but service is not - will disconnect.')
+
+      //     this._connect.io.disconnect()
+      //   }
+      // })
+      window.addEventListener('online', () => {
+        if (!this._connect.io.connected && this._connectionCounter <= connectionTriesMax) {
+          this._logTechnical('Browser connection is online,but service is not - will re-connect.')
+          this._connect.io.connect()
+        }
+
+        if (!this._connect.io.connected && this._connectionCounter > connectionTriesMax)
+          this._logApiWarning(
+            'Browser connection is online, but service is not - service exceeded connectionTriesMax, will not re-connect.',
+          )
+      })
+    }
   }
 
   private _validateProps(settings: unknown): void {
