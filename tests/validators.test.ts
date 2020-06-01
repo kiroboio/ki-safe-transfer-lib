@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 
 import { validateObject, validateObjectWithStrings, validatePropsArray } from '@src/validators'
 
@@ -64,6 +65,7 @@ describe('Validators', () => {
         expect.assertions(2)
 
         try {
+          // @ts-expect-error
           validateObjectWithStrings([], 'Props', 'test')
         } catch (err) {
           expect(err).toBeInstanceOf(TypeError)
@@ -78,6 +80,7 @@ describe('Validators', () => {
         expect.assertions(2)
 
         try {
+          // @ts-expect-error
           validateObjectWithStrings(() => { return }, 'Props', 'test')
         } catch (err) {
           expect(err).toBeInstanceOf(TypeError)
