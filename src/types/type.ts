@@ -1,4 +1,7 @@
 import { DebugLevels, Currencies, Networks, Responses, Watch, EventTypes, QueryOptions } from '.'
+import { RetrieveRequest } from './retrieve'
+import { SendRequest } from './send'
+import { CollectRequest } from './collect'
 
 interface AuthDetails {
   key: string
@@ -32,7 +35,7 @@ interface ApiService {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   get: (arg0: unknown) => any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  create: (arg0: Record<string, unknown>) => any
+  create: (arg0: Record<string, unknown> | RetrieveRequest | SendRequest | CollectRequest) => any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   on: (arg0: string, arg1: (arg2: any) => any) => any
 }
