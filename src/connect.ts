@@ -98,7 +98,7 @@ class Connect extends Base {
 
     const connect = feathers().configure(
       socket(this._socket, {
-        timeout: 10000,
+        timeout: 20000,
       }),
     )
 
@@ -214,14 +214,6 @@ class Connect extends Base {
           })
       }, 3000)
     } else {
-      //  this is web
-      // window.addEventListener('offline', () => {
-      //   if (this._connect.io.connected) {
-      //     this._logTechnical('Browser connection is offline, but service is not - will disconnect.')
-
-      //     this._connect.io.disconnect()
-      //   }
-      // })
       window.addEventListener('online', () => {
         if (!this._connect.io.connected && this._connectionCounter <= connectionTriesMax) {
           this._logTechnical('Browser connection is online,but service is not - will re-connect.')

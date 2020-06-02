@@ -1,5 +1,12 @@
 # Changelog
 
+##### v2.11.0 2020-06-02
+
+  Updated:
+
+  - reinstated onConnect process
+  - increase socket timeout to 20s
+
 ##### v2.10.0 2020-06-01
 
   Updated:
