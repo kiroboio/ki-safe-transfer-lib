@@ -4,24 +4,7 @@ import socket from '@feathersjs/socketio-client'
 import { AuthenticationResult } from '@feathersjs/authentication'
 import auth from '@feathersjs/authentication-client'
 
-import {
-  AuthDetails,
-  ConnectProps,
-  QueryOptions,
-  Status,
-  NetworkTip,
-  ApiService,
-  Endpoints,
-  EventTypes,
-  Collectable,
-  Transfer,
-  RequestOptions,
-  Results,
-  Watch,
-} from './types'
 import { Base } from './base'
-// import { debugLevelSelector } from './tools/debug'
-import { apiUrl, version, endpoints, connectionTriesMax, connectionTimeout } from './config'
 import {
   debugLevelSelector,
   capitalize,
@@ -36,10 +19,24 @@ import {
   shouldReturnDirect,
   isDirect,
 } from './tools'
-import { WARNINGS, ERRORS, MESSAGES } from './text'
-// import { makeApiResponseError, makeReturnError, makePropsResponseError } from './tools/error'
-// import { shouldReturnDirect, isDirect } from './tools/connect'
 import { validateOptions, validateSettings } from './validators'
+import {
+  AuthDetails,
+  ConnectProps,
+  QueryOptions,
+  Status,
+  NetworkTip,
+  ApiService,
+  Endpoints,
+  EventTypes,
+  Collectable,
+  Transfer,
+  RequestOptions,
+  Results,
+} from './types'
+
+import { apiUrl, version, endpoints, connectionTriesMax, connectionTimeout } from './config'
+import { WARNINGS, ERRORS, MESSAGES } from './text'
 
 class Connect extends Base {
   private _connect: Application<unknown>

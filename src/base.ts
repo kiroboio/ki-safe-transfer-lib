@@ -1,3 +1,5 @@
+import { isEmpty } from 'ramda'
+
 import {
   DebugLevels,
   ApiError,
@@ -7,16 +9,12 @@ import {
   Currencies,
   Networks,
   AuthDetails,
-  Settings,
   LastAddresses,
-  ConnectProps,
   Watch,
 } from './types'
 import { LogError, LogApiWarning, LogInfo, LogApiError } from './tools/log'
 import { authDetailsDefaults } from './defaults'
 import { version } from './config'
-import { is, isEmpty } from 'ramda'
-import { ConnectOpts } from 'net'
 
 class Base {
   private _debug: DebugLevels = DebugLevels.MUTE
