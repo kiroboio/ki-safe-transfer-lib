@@ -11,11 +11,11 @@
   - [Dependencies](#dependencies)
   - [Points to mention](#points-to-mention)
   - [Terminology](#terminology)
-  - [API documentation](api.md#api-documentation)
+  - [Library API & Tools Documentation](documentation.md#documentation)
 
 ## What this library is intended to do?
 
-This library is an interface for a convenient two-way work with [Retrievable Transfer Service by Kirobo](https://kirobo.io/index.php/retrievable-transfer/) and a set of blockchain services - [Find UTXOs](find_utxos.md#find-utxos) and [Find Free and Used Addresses](find_addresses.md#find-free-and-used-addresses). A set of [endpoints](endpoints.md#api-endpoints) provides access to full spectrum of Kirobo API services. It will be updated following the further API development.
+This library is an interface for a convenient two-way work with [Retrievable Transfer Service by Kirobo](https://kirobo.io/index.php/retrievable-transfer/) and a set of blockchain services - [Find UTXOs](find_utxos.md#find-utxos) and [Find Free and Used Addresses](find_addresses.md#find-free-and-used-addresses). A set of [endpoints](endpoints.md#api-endpoints) provides access to full spectrum of Kirobo API services. It is kept up to date with current API development.
 
 The library is built with both front-end and back-end in mind. Use of TypeScript allows to provide a convenient and stable work.
 
@@ -29,15 +29,15 @@ Step by step explanation of the process, life-cycle of the transaction on server
 
 ## Dependencies
 
-Current version (v2) is using the following dependencies:
+Current version (v2) uses the following dependencies:
 
 - `@feathersjs/feathers` v4.5.3
-- `@feathersjs/socketio-client` v4.5.3
-- `@feathersjs/authentication-client` v4.5.3
+- `@feathersjs/socketio-client` v4.5.4
+- `@feathersjs/authentication-client` v4.5.4
 - `socket.io-client` v2.3.0
-- `multicoin-address-validator` v0.4.1
+- `multicoin-address-validator` v0.4.4
 - `ramda` v0.27.0
-- `uuid` v7.0.3
+- `uuid` v8.1.0
 
 These libraries are needed to set up the socket communication with the server, for address validation and are used in functions. Some of the functionality of these libraries are exposed through the library API.
 

@@ -3,8 +3,14 @@
 
 ## Contents
 
-- What this service does?
+- [What this service does?](#what-this-service-does)
 - [How to use the library?](#how-to-use-library)
+
+## What this service does?
+
+You can use library to send an array of addresses to check and receive either __only__ free or __only__ used addresses from the array. Search is done by the Kirobo server, with library providing convinient API and information workflow.
+
+[⬑ _to top_](#find-free-and-used-addresses)
 
 ## How to use library?
 

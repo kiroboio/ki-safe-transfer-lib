@@ -11,12 +11,12 @@ import { wait } from './tools'
 
 dotenv.config()
 
-const { log } = console
+const { log, dir } = console
 
 const authDetails = { key: process.env.AUTH_KEY || '', secret: process.env.AUTH_SECRET || '' }
 
 function eventBus(event: Event): void {
-  log('event fired: ', prettyFormat(event))
+  dir(event, { depth: 15, colors: true, compact: true })
 }
 
 const service = Service.getInstance(

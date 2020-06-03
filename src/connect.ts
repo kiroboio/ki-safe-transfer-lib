@@ -66,8 +66,6 @@ class Connect extends Base {
 
   protected _retrieve: ApiService
 
-  protected _watch: Watch | undefined = undefined
-
   constructor(props: ConnectProps) {
     super(debugLevelSelector(props?.debug))
 
@@ -249,7 +247,7 @@ class Connect extends Base {
         this._lastConnect = getTime()
         this._onConnect()
       })
-      .catch(err => {
+      .catch((err) => {
         this._logTechnical('Service failed to authenticate, updating connectionCounter.')
         this._connectionCounter++
         this._logTechnical('Setting lastConnect timestamp.')
@@ -278,7 +276,7 @@ class Connect extends Base {
             strategy: 'local',
             ...this._auth,
           })
-          .catch(err => {
+          .catch((err) => {
             // if not
             this._logApiError(ERRORS.connect.authenticate, err)
             this._logTechnical('Set connectionCounter to MAX+1.')
@@ -303,7 +301,7 @@ class Connect extends Base {
   private _onConnect(): void {
     this._log('Service (connect) is ON, requesting latest status...')
 
-    this.getStatus().catch(err => {
+    this.getStatus().catch((err) => {
       this._logApiError('Service (onConnect) caught error when calling (getStatus).', err)
     })
 
@@ -435,7 +433,7 @@ class Connect extends Base {
     this._useEventBus(EventTypes.UPDATE_STATUS, response.data[0])
   }
 
-  public getConnectionStatus(options?: Omit<QueryOptions, 'limit' | 'skip'>): boolean | void {
+  public getConnectionStatus(options?: Omit<QueryOptions, 'limit' | 'skip' | 'watch'>): boolean | void {
     this._logTechnical(makeString(MESSAGES.technical.running, ['getConnectionStatus']))
 
     /** validate options, if present */
@@ -480,7 +478,7 @@ class Connect extends Base {
     this._useEventBus(EventTypes.GET_CONNECTION_STATUS, response)
   }
 
-  public disconnect(options?: Omit<QueryOptions, 'limit' | 'skip'>): boolean | void {
+  public disconnect(options?: Omit<QueryOptions, 'limit' | 'skip' | 'watch'>): boolean | void {
     this._logTechnical(makeString(MESSAGES.technical.running, ['disconnect']))
 
     /** validate options, if present */

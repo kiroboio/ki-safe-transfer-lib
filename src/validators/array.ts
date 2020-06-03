@@ -4,7 +4,7 @@ import { ERRORS } from '../text'
 import { makeString } from '../tools'
 import { TEXT } from '../data'
 import { validateAddress } from '.'
-import { Settings } from '../types'
+import { Settings, Currencies, Networks } from '../types'
 
 function validateArray(arr: unknown[], type: string[]): boolean {
   if (!Array.isArray(arr)) return false
@@ -36,7 +36,12 @@ function validatePropsArray(params: unknown[], type: string, paramName: string, 
   })
 }
 
-function validatePropsAddresses(params: string[], paramName: string, method: string, settings: Settings): void {
+function validatePropsAddresses(
+  params: string[],
+  paramName: string,
+  method: string,
+  settings: Settings | Record<string, unknown>,
+): void {
   if (isNil(params)) throw new TypeError(makeString(ERRORS.validation.missingArgument, [paramName, method]))
 
   if (not(is(Array, params)))
@@ -53,8 +58,8 @@ function validatePropsAddresses(params: string[], paramName: string, method: str
     if (
       !validateAddress({
         address,
-        currency: settings.currency,
-        networkType: settings.network,
+        currency: settings.currency as Currencies,
+        networkType: settings.network as Networks,
       })
     )
       throw new TypeError(makeString(TEXT.validation.notAddress, [address, method, JSON.stringify(settings)]))

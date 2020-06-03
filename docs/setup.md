@@ -25,15 +25,41 @@ const authDetails = {key: process.env.AUTH_KEY, secret: process.env.AUTH_SECRET}
 
 try {
 
-  const service = new Service({ authDetails })
+  const service = Service.getInstance({ authDetails }, true))
 
 } catch (e) {
   console.log('error: ', e.message)
 }
  ```
- > Please, see [Default settings](#default-settings) for details.
 
- > We strongly advise to handle library errors to catch helpful  messages that will help in development and production. More about this [here](errors.md#errors-and-handling-them).
+> Error handling has to be provided to catch error messages that will help in development and production. More about this [here](errors.md#errors-and-handling-them).
+
+Service is using simple instance management to ensure that it is running only one connection at a time. ```getInstance()``` method takes two arguments:
+
+- object as _ConnectProps_
+- replace instance request, optional
+
+_ConnectProps_ are:
+
+```TypeScript
+
+interface ConnectProps {
+  debug?: DebugLevels // logging level (via console);
+  currency?: Currencies // currency;
+  network?: Networks // network for the currency;
+  authDetails: AuthDetails // authentication details - key, secret;
+  eventBus?: EventBus // event bus to send events and data through¹;
+  respondAs?: Responses // default response method - direct or through callback (if event bus was provided);
+  watch?: Watch // default watch (subscribe) method²;
+}
+
+```
+
+> ¹ Event bus implementation is built with [Flux](https://facebook.github.io/flux/docs/dispatcher) logic in mind.
+
+ > ² Please, see [Watch]() for details on ```watch``` feature.
+
+ > Please, see [Default settings](#default-settings) for details on defaults.
 
  or
 
@@ -48,7 +74,7 @@ function eventBus(event: Event) {
 
 try {
 
-  const service = new Service({
+  const service = Service.getInstance({
     respondAs: Responses.Callback,
     eventBus,
     authDetails,
@@ -78,7 +104,7 @@ const serviceOptions = {
 
 try {
 
-  const service = new Service(serviceOptions)
+  const service = Service.getInstance(serviceOptions)
 
 } catch (e) {
   console.log('error: ', e.message)
@@ -124,8 +150,14 @@ The library can work in two modes - _direct reply_ and _use callback_:
      console.log('event fired: ', event)
      // event fired:  {
      //  type: 'service_update_status',
-     //  payload: { height: 1664922, online: true, fee: 10000 }
-     // }
+     //  payload: {
+     //     height: 1747254,
+     //     online: true,
+     //     netId: 'testnet',
+     //     timestamp: 1591102463,
+     //     fee: 999,
+     //     updatedAt: '2020-06-02T12:54:15.856Z' }
+     //   }
    }
 
    const service = new Service({ respond: Responses.Callback, eventBus, authDetails })
@@ -134,7 +166,7 @@ The library can work in two modes - _direct reply_ and _use callback_:
      try {
 
        const result = await service.getStatus()
-       console.log(result) // undefined
+       console.log(result) //
 
      } catch (e) {
        console.log('error: ', e.message)
@@ -143,6 +175,40 @@ The library can work in two modes - _direct reply_ and _use callback_:
 
    run()
    ```
+
+There is an way to override the system-wide setting of ```respond``` per method:
+
+```TypeScript
+   ...
+
+   function eventBus(event: Event) {
+     console.log('event fired: ', event) //
+   }
+
+   const service = new Service({ respond: Responses.Callback, eventBus, authDetails })
+
+   async function run() {
+     try {
+
+       const result = await service.getStatus({ respondDirect: true })
+       console.log(result)
+       // {
+       //   height: 1747245,
+       //   online: true,
+       //   netId: 'testnet',
+       //   timestamp: 1591101501,
+       //   fee: 999,
+       //   updatedAt: '2020-06-02T12:38:33.868Z'
+       //  }
+
+     } catch (e) {
+       console.log('error: ', e.message)
+     }
+   }
+
+   run()
+   ```
+> More about QueryOptions is covered [here](query_options.md#query-options).
 
 [⬑ _to top_](#setup)
 

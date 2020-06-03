@@ -9,10 +9,14 @@ import {
   AuthDetails,
   Settings,
   LastAddresses,
+  ConnectProps,
+  Watch,
 } from './types'
 import { LogError, LogApiWarning, LogInfo, LogApiError } from './tools/log'
 import { authDetailsDefaults } from './defaults'
 import { version } from './config'
+import { is, isEmpty } from 'ramda'
+import { ConnectOpts } from 'net'
 
 class Base {
   private _debug: DebugLevels = DebugLevels.MUTE
@@ -28,6 +32,8 @@ class Base {
   protected _network: Networks = Networks.Testnet
 
   protected _auth: AuthDetails = authDetailsDefaults
+
+  protected _watch: Watch | undefined = undefined
 
   constructor(debug: DebugLevels) {
     this._debug = debug
@@ -81,13 +87,30 @@ class Base {
     )
   }
 
-  public getSettings(): Settings {
+  protected _authDetailsIsPresent() {
+    if (!this._auth) return 'not present'
+
+    if (isEmpty(this._auth)) return 'empty'
+
+    if (!this._auth.key && !this._auth.secret) return 'key and secret is empty'
+
+    if (!this._auth.key) return 'key is empty'
+
+    if (!this._auth.secret) return 'secret is empty'
+
+    return true
+  }
+
+  public getSettings(): Record<string, unknown> {
     return {
-      debug: this._debug,
+      authDetails: this._authDetailsIsPresent(),
       currency: this._currency,
+      debug: this._debug,
+      eventBus: !!this._eventBus,
+      lastAddresses: this._lastAddresses,
       network: this._network,
-      version: version,
       respondAs: this._respondAs,
+      version: version,
     }
   }
 

@@ -1,31 +1,374 @@
-# API Documentation
-[◅ _return home_](README.md#kirobo-retrievable-transfer-library-documentation)
+# Library API
+[◅ _return home_](documentation.md#documentation)
 
-- [Setup](setup.md#setup)
-  - [Why eventBus is always required?](setup.md#why-eventbus-is-always-required)
-  - [Default settings](setup.md#default-settings)
-  - [Options for settings](setup.md#options-for-settings)
-    - [debug](setup.md#debug)
-    - [respondAs](setup.md#respondas)
-    - [eventBus](setup.md#eventbus)
-- [Create Retrievable ID](create_retrievable_id.md#create_retrievable_id)
-- [Errors and handling them](errors.md#errors-and-handling-them)
-- [eventBus](event_bus.md#eventbus)
-- [Encryption](encryption.md#encryption)
-- [Find UTXOs](find_utxos.md)
-- [Find Free & Used Addresses](find_addresses.md)
-- [API Endpoints](endpoints.md#api-endpoints)
-  - [_getSettings()_](endpoints.md#getsettings)
-  - [_getLastAddresses()_](endpoints.md#getlastaddresses)
-  - [_clearLastAddresses()_](endpoints.md#clearlastaddresses)
-  - [_connect()_](endpoints.md#connect)
-  - [async _getCollectables()_](endpoints.md#async-getcollectables)
-    - [Caching of get Collectables request](endpoints.md#caching-of-get-collectables-request)
-  - [async _getRetrievable()_](endpoints.md#async-getretrievable)
-  - [async _send()_](endpoints.md#async-send)
-  - [async _collect()_](endpoints.md#async-collect)
-  - [async _getStatus(_)](endpoints.md#async-getstatus)
+## Contents
 
-[⬑ _to top_](#api-documentation)
+  - [_getSettings()_](#getsettings)
+  - [_getLastAddresses()_](#getlastaddresses)
+  - [_clearLastAddresses()_](#clearlastaddresses)
+  - [_connect()_](#connect)
+  - [_disconnect()_](#disconnect)
+  - [_getConnectionStatus()_]()
+  - [async _getCollectables()_](#async-getcollectables)
+    - [Caching of get Collectables request](#caching-of-get-collectables-request)
+  - [async _send()_](#async-send)
+  - [async _collect()_](#async-collect)
+  - [async _getStatus()_](#async-getstatus)
+  - [async _getUtxos()_](find_utxos.md#how-to-use-the-library)
+  - [async _getFresh()_](find_addresses.md#how-to-use-the-library)
+  - [async _getUsed()_](find_addresses.md#how-to-use-the-library)
+  - [async _getByOwnerId()_]()
+  - [async _getOnlineNetworks()_]()
+  - [async _getRate()_]()
+  - [async _getRates()_]()
+  - [async _isAuthenticated()_]()
+  - [async _retrieve ()_]()
 
-[◅ _return home_](README.md#kirobo-retrievable-transfer-library-documentation)
+---
+
+## ___getSettings()___
+
+  Function to check the current settings of the library session:
+
+  ```TypeScript
+  ...¹
+
+  const service = Service.getInstance({ authDetails })
+
+  const result = service.getSettings()
+
+  console.log(result)
+  //   {
+  //   authDetails: true,
+  //   currency: 'btc',
+  //   debug: 1,
+  //   eventBus: true,
+  //   lastAddresses: { addresses: [] },
+  //   network: 'testnet',
+  //   respondAs: 'callback',
+  //   version: 'v1'
+  // }
+  ```
+
+  > ¹ Here and further we are not going to show the imports and settings of the library in the code. You can get into details [here](setup.md#setup).
+
+  > Check more details about [debug levels](setup.md#debug) and [default settings](setup.md#default-settings).
+
+  [⬑ _to top_](#library-api)
+
+## ___getLastAddresses()___
+
+  Show [cached](#caching-of-get-collectables-request) addresses, saved after last [getCollectables()](#async-getcollectables):
+
+  ```TypeScript
+  ...
+
+  const result = service.getLastAddresses()
+
+  console.log(result) // ['xxxxxx', 'xxxxxx']
+
+  ```
+
+  > Also available through [getSettings()](#getsettings)
+
+  [⬑ _to top_](#library-api)
+
+## ___clearLastAddresses()___
+
+  Clear [cached](#caching-of-get-collectables-request) addresses, saved after last [getCollectables()](#async-getcollectables):
+
+  ```TypeScript
+  ...
+
+  service.clearLastAddresses()
+
+  ```
+
+  [⬑ _to top_](#library-api)
+
+## ___connect()___
+
+  Manual request for library to connect to server:
+
+  ```TypeScript
+  ...
+
+  service.connect()
+
+  ```
+
+  [⬑ _to top_](#library-api)
+
+  ## ___disconnect()___
+
+  Manual request for library to disconnect from server:
+
+  ```TypeScript
+  ...
+
+  service.disconnect()
+
+  ```
+
+  [⬑ _to top_](#library-api)
+
+  ## ___getConnectionStatus()___
+
+  Check connection status of library to the server:
+
+  ```TypeScript
+  ...
+
+  const response = service.getConnectionStatus({ respondDirect: true }))
+
+  console.log(response) // true
+
+  ```
+
+  [⬑ _to top_](#library-api)
+
+
+## async ___getCollectables()___
+
+  Get collectable transactions for a certain address or addresses:
+
+  ```TypeScript
+  ...
+
+  service.getCollectables(['xxxxx']) // provide recipient's address(es) in array
+  ```
+
+  The method has the following argument/return types:
+
+  ```TypeScript
+
+  async function getCollectables(addresses: string[], options?: QueryOptions): Promise<Results<Collectable> | void>
+
+  ```
+  Full set of [QueryOptions](query_options.md) is avaialble for this method. Response will be a part of [Results](response.md#results-object-with-data) object.
+
+ Data received directly or through event bus will of the following structure:
+ ```TypeScript
+
+  interface Collectable {
+    amount: number // transfer amount in satoshi
+    collect: // collect information
+    {
+      broadcasted: number // block number on broadcast
+      confirmed: number // block number on confirmation
+      txid: string // the tx ID of the transaction
+    }
+    createdAt: string // transaction create timestamp
+    expires: { // expiration time/blockahin height
+      at?: string | Date
+      block?: number
+    }
+    from?: string // sender's attached message
+    hint?: string // sender's attached passcode hint
+    id: string // unique ID
+    salt: string // salt to use in encrpytion on collect
+    state: 'ready' | 'collecting' | 'collected' // collect state
+    to: string // the destination address
+    updatedAt: string // transaction update timestamp
+  }
+
+  ```
+
+  > ☝ID of Colleactable is auto generated by the system and not linked to initial transfer in any way, to <u>avoid</u> potential identification of the sender
+
+
+  ### Caching of __getCollectables__ request
+
+  Every time you send request for collectables, the address(es) from your last request are being cached in the library. In case Internet connection dropped, the library will attempt  to reconnect once the connection is restored. After successful reconnection, library will use the cached addresses to update (re-send last request for collectables). To check the contents of the cache you can use [getLastAddresses()](#getlastaddresses) function. To clear the cache - [clearLastAddresses()](#clearlastaddresses).
+
+  [⬑ _to top_](#library-api)
+
+## async ___send()___
+
+  Send _retrievable_ transaction. The format is the following:
+  ```TypeScript
+  export type Sendable = {
+    amount: number  // amount of transaction
+    collect: string // encrypted raw collect transaction, to be collected
+    deposit: string // raw deposit transaction, already broadcasted
+    from?: string // any text to identify sender, optional
+    hint?: string // hint for automated transactions, optional
+    id?: string // custom ID, uses hash, optional; more on this below
+    to: string // recipient's address
+  }
+  ```
+  > Why and what to encrypt, as well as how, is discussed [here](encryption.md#encryption).
+
+  Sending:
+
+  ```TypeScript
+  const service = new Service({
+    respond: Responses.Callback,
+    eventBus,
+  })
+
+  const transaction: Sendable = {
+    amount: 100000,
+    collect: 'xxxxx',
+    deposit: 'xxxxx',
+    from: 'From Kirobo',
+    id: 'hash;xxxxxx',
+    to: 'xxxxx',
+  }
+
+  service.send(transaction)
+  ```
+  In case of successful acceptance of transaction by the API, it will respond with the following:
+
+  ```TypeScript
+  {
+    amount: 100000,
+    createdAt: '2020-02-05T08:51:58.598Z',
+    deposit: {
+      txid: 'xxxxx', // can be used to match the response with original transaction in your system
+      vout: 0
+    },
+    expires: { at: '2020-02-06T08:51:58.598Z' }, // after this time, the transaction, if not being collected, will be purged
+    from: 'From Kirobo',
+    id: 'xxxxx',
+    state: 'new', // state updates will be sent through the eventBus only, according to transaction life cycle
+    to: 'xxxxx',
+    updatedAt: '2020-02-05T08:51:58.598Z'
+  }
+  ```
+  > Life cycle, including states and expiration is explained [here](how_does_it_work.md#how-does-it-work).
+
+  [⬑ _to top_](#library-api)
+
+## async ___collect()___
+
+Collect Collectable transaction:
+
+  ```TypeScript
+  function eventBus(event: Event) {
+    console.log('event fired: ', event)
+
+  // >>> event #1
+
+  // *** if unsuccessful:
+
+  // event fired:  {
+    // type: 'service_message',
+    // payload: {
+    //  isError: true,
+    //  text: "Transaction Rejected by the Blockchain"
+    //  }
+
+    // ***  or, if successful:
+
+    // event fired:  {
+    // type: 'service_collect_transaction',
+    // payload: {
+    //  data: {
+    //    fromNodeTxid: "xxxxxx"
+    //    },
+    //    isError: false,
+    //    text: "Request submitted."
+    //}
+
+    // >>> event #2 (only if successful)
+
+    // event fired:  {
+    // type: 'service_updated_collectable',
+    // payload: {
+    //  amount: 12345
+    //  collect: {
+    //  broadcasted: 12345;
+    //  confirmed: -1; // only will be updated, when 1st confirmation happens
+    //  txid: 'xxxxxx'
+    //}
+    //  createdAt: "2020-02-20T13:12:26.064Z"
+    //  expires: { at: string }
+    //  from: 'Kirobo
+    //  id: 'xxxxxx'
+    //  salt: 'xxxxxx'
+    //  state: 'collecting'
+    //  to: 'xxxxxx'
+    //  updatedAt: "2020-02-20T13:12:26.064Z"
+    //}
+
+  try {
+
+    const service = new Service({
+      respond: Responses.Callback,
+      eventBus
+      })
+
+    service.collect({
+      id: selected.id,
+      key: createCollectKey(passcode, transaction.salt),
+    })
+
+  } catch (e) {
+    console.log('error: ', e.message)
+  }
+  ```
+
+  If transaction ID is wrong (for example, it [expired](how_does_it_work.md#expiration) before the collect request has reached the server), the error message will be:
+
+  ```
+  No record found for id 'xxxxxx'
+  ```
+
+  [⬑ _to top_](#library-api)
+
+## async ___getStatus()___
+
+Get status - block height for current network, server status and average fee for the latest block. The height and the fee are taken from the blockchain directly.
+
+  ```TypeScript
+
+  async function run() {
+
+    try {
+      const service = new Service({ authDetails })
+      const result = await service.getStatus()
+      console.log(result)
+      // { height: 123456, online: true, fee: 12345 }
+    } catch (e) {
+      console.log('error: ', e.message)
+    }
+
+  }
+
+  run()
+  ```
+
+  ## async ___generateId()___
+
+  This method generates random id, using the [uuid](https://www.npmjs.com/package/uuid#create-version-4-random-uuids)  library. Use:
+
+  ```typescript
+  import { generateId } from '@kiroboio/safe-transfer-lib'
+
+  const id = generateId()
+
+  // f04eebd3-6580-4c0b-bedd-f9e358d80b2b
+  ```
+
+  [⬑ _to top_](#library-api)
+
+  ## async ___validateAddress()___
+
+This method allows to validate crypto currency address, using [multicoin-address-validator]() library. Use:
+
+  ```typescript
+  import { validateAddress } from '@kiroboio/safe-transfer-lib'
+
+  const isOK = validateAddress({
+            address: 'xxxx',
+            currency: 'btc',
+            networkType: 'mainnet',
+          })
+
+  // true
+  ```
+
+  [⬑ _to top_](#library-api)
+
+  [◅ _return home_](api.md#api-documentation)

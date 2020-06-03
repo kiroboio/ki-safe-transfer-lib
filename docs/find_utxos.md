@@ -3,8 +3,14 @@
 
 ## Contents
 
-- What this service does?
+- [What this service does?](#what-this-service-does)
 - [How to use the library?](#how-to-use-the-library)
+
+## What this service does?
+
+You can use library to get UTXOs for the aray of addresses provided. Search is done by the Kirobo server, with library providing convinient API and information workflow.
+
+[⬑ _to top_](#find-utxos)
 
 ## How to use the library?
 
