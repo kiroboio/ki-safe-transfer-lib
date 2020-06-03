@@ -5,7 +5,7 @@ import { is } from 'ramda'
 
 import Service, { DebugLevels, Currencies, Networks, Responses, AuthDetails } from '../src/.'
 import { TEXT, valuesForSettings } from '../src/data'
-import { makeString, compareBasicObjects } from '../src/tools'
+import { makeString, compareBasicObjects, checkSettings } from '../src/tools'
 import { wait } from './tools'
 
 dotenv.config()
@@ -142,17 +142,21 @@ describe('Library configuration', () => {
       }
     })
     it('doesn\'t throw if provided correct settings', async () => {
+      expect.assertions(1)
+
       const settings = {
         debug: DebugLevels.VERBOSE,
         currency: Currencies.Bitcoin,
         network: Networks.Testnet,
         respondAs: Responses.Direct,
+        authDetails: {key:'',secret:''},
+        eventBus: () => { log() },
       }
 
       try {
         service = Service.getInstance({ ...settings, authDetails }, true)
 
-        const compare = compareBasicObjects(service.getSettings(), { ...settings, version: 'v1' })
+        const compare = checkSettings(service.getSettings())
 
         expect(compare).toBe(true)
       } catch (err) {

@@ -1,4 +1,4 @@
-import { assoc, isNil, not, map } from 'ramda'
+import { assoc, isNil, not, map, keys, includes, forEach } from 'ramda'
 import { v4 as generateId } from 'uuid'
 
 import { validateArray, validateObject } from '../validators'
@@ -29,6 +29,62 @@ export const makeString = (template: string, params: string[]): string => {
   })
 
   return result
+}
+
+export function checkSettings(settings: Record<string, unknown>): boolean {
+  const CONTROL_SET = {
+    authDetails: true,
+    currency: 'btc',
+    debug: 2,
+    eventBus: true,
+    lastAddresses: {
+      addresses: ['string'],
+      options: undefined,
+    },
+    network: 'testnet',
+    respondAs: 'direct',
+    version: 'v1',
+  }
+
+  // check if object
+  validateObject(settings)
+
+  // check keys
+  const settingsKeys = keys(settings)
+
+  const controlKeys = keys(CONTROL_SET)
+
+  if (settingsKeys.length !== controlKeys.length) return false
+
+  const forEachFn = (key: string | number): void => {
+    if (not(includes(key, controlKeys))) throw new Error(`wrong key: ${key}`)
+  }
+
+  forEach(forEachFn, settingsKeys)
+
+  // check value types and values
+
+  if (settings['authDetails'] !== CONTROL_SET.authDetails)
+    throw new Error(`authDetails is wrong: ${settings['authDetails']}`)
+
+  if (settings['currency'] !== CONTROL_SET.currency) throw new Error(`currency is wrong: ${settings['currency']}`)
+
+  if (settings['debug'] !== CONTROL_SET.debug) throw new Error(`debug is wrong: ${settings['debug']}`)
+
+  if (settings['eventBus'] !== CONTROL_SET.eventBus) throw new Error(`eventBus is wrong: ${settings['eventBus']}`)
+
+  if (settings['network'] !== CONTROL_SET.network) throw new Error(`network is wrong: ${settings['network']}`)
+
+  if (settings['respondAs'] !== CONTROL_SET.respondAs) throw new Error(`respondAs is wrong: ${settings['respondAs']}`)
+
+  if (settings['version'] !== CONTROL_SET.version) throw new Error(`version is wrong: ${settings['version']}`)
+
+  validateObject(settings['lastAddresses'])
+
+  if ((settings['lastAddresses'] as { addresses: string[] })['addresses'].length !== 0)
+    throw new Error(`lastAddresses is wrong: ${settings['lastAddresses']}`)
+
+  return true
 }
 
 export const compareBasicObjects = (objOne: Record<string, unknown>, objTwo: Record<string, unknown>): boolean => {
