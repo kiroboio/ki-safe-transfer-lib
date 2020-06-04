@@ -15,6 +15,8 @@ const ERRORS = {
   },
   service: {
     gotError: 'Service (%1) caught [%2] error.',
+    failedAuth: 'Service failed to authenticate, updating connectionCounter.',
+    failedTo: 'Service (%1) failed to %2, proceeding with %3.',
   },
   validation: {
     emptyArgument: 'Required argument (%1) of [%2] function is empty.',

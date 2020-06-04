@@ -3,6 +3,8 @@
 ## Contents
 
 - [Get settings, connect & disconnect](#get-settings-connect-&-disconnect)
+  - [Settings](#settings)
+  - [Connect/disconnect](#connect/disconnect)
 - [Update status](#update-status)
   - [Direct response](#direct-response)
 - [Get exchange rates](#get-exchange-rates)
@@ -10,6 +12,9 @@
 - [React app with Redux](react.md#react-app-with-redux)
 
 ## Get settings, connect & disconnect
+
+
+### Settings
 
 Library have several method, not connected to the API responses: get stored settings, manual connect and disconnect of the socket connection:
 
@@ -26,18 +31,10 @@ dotenv.config()
 // get authentication details
 const authDetails = { key: process.env.AUTH_KEY || '', secret: process.env.AUTH_SECRET || '' }
 
-// setup eventBus to process the event, coming from the API
-function eventBus(event: Event): void {
-  // here were are just displaying the event
-  console.dir(event, { depth: 15, colors: true, compact: true })
-}
-
 // configure Kirobo API service library
 const service = Service.getInstance(
   {
     debug: DebugLevels.QUIET, // minimize the console logging
-    respondAs: Responses.Callback, // send feedback and events through callback function, i.e. eventBus
-    eventBus, // providing the function for eventBus
     authDetails, // authentication details
   },
   true, //  replace previous instances
@@ -57,6 +54,7 @@ async function run(): Promise<void> {
 // run the main function
 run()
 ```
+
 _getSettings()_ responds only directly and provided the settings for currenct instance:
 
 ```TypeScript
@@ -73,10 +71,52 @@ _getSettings()_ responds only directly and provided the settings for currenct in
 ```
 > ☝Caching of addresses is required to automatically perform  re-check for collectable transactions following the connection reestablished after disconnect.
 
+[⬑ _to top_](#contents)
+
+### Connect/disconnect
+
 _connect()_/_disconnect()_ methods are provided for additional flexibility in wokring with library. It works in auto-mode, but in case you want to perform manual connection operations you can easily do it:
 
 ```TypeScript
+// library to load environment variables from .env file
+import dotenv from 'dotenv'
 
+// import required class, types and tool
+import Service, { Responses, Event, DebugLevels, wait } from '../src'
+
+// configure the library
+dotenv.config()
+
+// get authentication details
+const authDetails = { key: process.env.AUTH_KEY || '', secret: process.env.AUTH_SECRET || '' }
+
+// configure Kirobo API service library
+const service = Service.getInstance(
+  {
+    debug: DebugLevels.QUIET, // minimize the console logging
+    authDetails, // authentication details
+  },
+  true, //  replace previous instances
+)
+
+// main function
+async function run(): Promise<void> {
+  // set a delay to allow the service proceed with initial connection, and authorization
+  await wait(2000)
+
+  // call to disconnect
+  service.disconnect()
+}
+
+// run the main function
+run()
+```
+> ☝In case of manual disconnect, service will not re-connect automatically
+
+To connect/re-connect, simply:
+
+```TypeScript
+service.connect()
 ```
 
 [⬑ _to top_](#contents)
