@@ -63,6 +63,10 @@ class Connect extends Base {
 
   protected _retrieve: ApiService
 
+  protected _manuallyDisconnected = false
+
+  public isAuthed = false
+
   constructor(props: ConnectProps) {
     super(debugLevelSelector(props?.debug))
 
@@ -104,27 +108,37 @@ class Connect extends Base {
 
     try {
       this._connect.io.on('connect', (): void => {
-        this._logTechnical('Service is connected, proceeding with authorization...')
+        this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['is connected', 'authorization']))
 
-        this._logTechnical('Service is checking if it\'s allowed to proceed:')
+        this._logTechnical(makeString(MESSAGES.technical.serviceIs, ['checking if it\'s allowed to proceed:']))
 
-        this._logTechnical(`- connectionCounter: ${this._connectionCounter}`)
-        this._logTechnical(`- lastConnect: ${this._lastConnect}`)
+        this._logTechnical(`➜ connectionCounter: ${this._connectionCounter}`)
+        this._logTechnical(`➜ lastConnect: ${this._lastConnect}`)
 
         if (
           this._connectionCounter <= connectionTriesMax &&
           (!this._lastConnect || diff(this._lastConnect) > connectionTimeout)
         ) {
-          this._logTechnical('Service is allowed :)')
+          this._logTechnical(MESSAGES.technical.isAllowed)
           this._runAuth()
         } else {
-          this._logTechnical('Service is not allowed :(')
+          this._logTechnical(MESSAGES.technical.notAllowed)
 
-          if (this._connectionCounter > connectionTriesMax) this._exceededQtyLog(connectionTriesMax)
-
-          if (diff(this._lastConnect) <= connectionTimeout) {
-            this._tooEarlyToConnectLog(this._lastConnect, connectionTimeout)
-            setTimeout(() => this._runAuth(), connectionTimeout * 1000)
+          // show tech message, that exeed connection qty
+          if (this._connectionCounter > connectionTriesMax) {
+            this._exceededQtyLog(connectionTriesMax)
+            this._socket.disconnect().close()
+            this._manuallyDisconnected = true
+          } else {
+            if (diff(this._lastConnect) <= connectionTimeout) {
+              this._tooEarlyToConnectLog(this._lastConnect, connectionTimeout)
+              this._socket.disconnect().close()
+              this._manuallyDisconnected = true
+              setTimeout(() => {
+                this._manuallyDisconnected = false
+                this._runAuth()
+              }, connectionTimeout * 1000)
+            }
           }
         }
       })
@@ -141,7 +155,7 @@ class Connect extends Base {
     }
 
     // assign services
-    this._logTechnical('Service is setting up API services...')
+    this._logTechnical(makeString(MESSAGES.technical.serviceIs, ['setting up API services']))
     this._networks = this._getService(Endpoints.Networks)
     this._transfers = this._getService(Endpoints.Transfers)
     this._inbox = this._getService(Endpoints.Inbox)
@@ -151,7 +165,7 @@ class Connect extends Base {
     this._rateBtcToUsd = this._getService(Endpoints.RateToUsd)
     this._retrieve = this._getService(Endpoints.Retrieve)
 
-    this._logTechnical('Service is setting up event listeners...')
+    this._logTechnical(makeString(MESSAGES.technical.serviceIs, ['setting up event listeners...']))
 
     // status update
     this._networks.on('patched', (data: NetworkTip) => {
@@ -192,18 +206,23 @@ class Connect extends Base {
           .promises.lookup('google.com')
           .then(() => {
             if (!this._connect.io.connected && this._connectionCounter <= connectionTriesMax) {
-              this._logTechnical('Connection is online, but service is not -  will re-connect.')
-              this._connect.io.connect()
+              this._logTechnical('Connection is online, but service is not')
+
+              if (this._manuallyDisconnected) this._logTechnical(MESSAGES.technical.connection.wontReconnect)
+              else {
+                this._logTechnical('Reconnecting')
+                this._connect.io.connect()
+              }
             }
 
             if (this._connectionCounter > connectionTriesMax)
               this._logApiWarning(
-                `Service exceeded connectionTriesMax (${this._connectionCounter}/${connectionTriesMax}).`,
+                makeString(MESSAGES.technical.connection.exceeded, [this._connectionCounter, connectionTriesMax]),
               )
           })
           .catch(() => {
             if (this._connect.io.connected) {
-              this._logTechnical('Connection is offline, but service is not - will disconnect.')
+              this._logTechnical(MESSAGES.technical.connection.willConnect)
               this._connect.io.disconnect()
             }
           })
@@ -211,24 +230,22 @@ class Connect extends Base {
     } else {
       window.addEventListener('online', () => {
         if (!this._connect.io.connected && this._connectionCounter <= connectionTriesMax) {
-          this._logTechnical('Browser connection is online,but service is not - will re-connect.')
+          this._logTechnical(MESSAGES.technical.connection.willReConnect)
           this._connect.io.connect()
         }
 
         if (!this._connect.io.connected && this._connectionCounter > connectionTriesMax)
-          this._logApiWarning(
-            'Browser connection is online, but service is not - service exceeded connectionTriesMax, will not re-connect.',
-          )
+          this._logApiWarning(MESSAGES.technical.connection.willNotReconnect)
       })
     }
   }
 
   private _validateProps(settings: unknown): void {
     try {
-      this._logTechnical('Service is validating settings provided...')
+      this._logTechnical(makeString(MESSAGES.technical.serviceIs, ['validating settings provided']))
       validateSettings(settings)
     } catch (err) {
-      this._logError(`Service (validateProps) got an error. ${err.message}`, err)
+      this._logError(makeString(ERRORS.service.gotError, ['validateProps', 'err.message']), err)
 
       throw new TypeError(err.message)
     }
@@ -237,15 +254,18 @@ class Connect extends Base {
   private _runAuth(): void {
     this._logTechnical(makeString(MESSAGES.technical.running, ['runAuth']))
     changeType<Promise<AuthDetails>>(this._authSocket())
-      .then(() => {
+      .then(async () => {
         this._logTechnical('Service is authed, resetting connectionCounter.')
         this._connectionCounter = 0
         this._logTechnical('Setting lastConnect timestamp.')
         this._lastConnect = getTime()
+        await this._connect.get('authentication')
+        this.isAuthed = true
         this._onConnect()
       })
       .catch((err) => {
-        this._logTechnical('Service failed to authenticate, updating connectionCounter.')
+        this._logTechnical(ERRORS.service.failedAuth)
+        this.isAuthed = false
         this._connectionCounter++
         this._logTechnical('Setting lastConnect timestamp.')
         this._lastConnect = getTime()
@@ -267,7 +287,7 @@ class Connect extends Base {
       this._logTechnical('Service (authSocket) is trying to re-authenticate...')
 
       return this._connect.reAuthenticate().catch(() => {
-        this._logTechnical('Service (authSocket) failed to re-authenticate, proceeding with authentication.')
+        this._logTechnical(makeString(ERRORS.service.failedTo, ['authSocket', 're-authenticate', 'authentication']))
         this._connect
           .authenticate({
             strategy: 'local',
@@ -498,7 +518,9 @@ class Connect extends Base {
     /** make request */
     try {
       this._logTechnical(makeString(MESSAGES.technical.requestingData, ['disconnect']))
-      response = this._socket.disconnect().disconnected
+      this._socket.disconnect().close()
+      response = true
+      this._manuallyDisconnected = true
       this._log(makeString(MESSAGES.technical.gotResponse, ['disconnect']), response)
     } catch (err) {
 
@@ -543,7 +565,9 @@ class Connect extends Base {
     /** make request */
     try {
       this._logTechnical(makeString(MESSAGES.technical.requestingData, ['connect']))
-      response = this._socket.connect().connected
+      this._socket.connect().open()
+      response = true
+      this._manuallyDisconnected = false
       this._log(makeString(MESSAGES.technical.gotResponse, ['connect']), response)
     } catch (err) {
 

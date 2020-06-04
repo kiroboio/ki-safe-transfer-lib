@@ -17,7 +17,7 @@ export const capitalize = (text: string): string => {
   return reassign(splitText(text), 0, splitText(text)[0].toUpperCase()).join('')
 }
 
-export const makeString = (template: string, params: string[]): string => {
+export const makeString = (template: string, params: (string | number)[]): string => {
   if (typeof template !== 'string') return ''
 
   if (!validateArray(params, ['string', 'number'])) return ''

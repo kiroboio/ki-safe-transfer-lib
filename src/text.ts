@@ -45,6 +45,16 @@ const MESSAGES = {
     requestWithDefault: 'Service (%1) will request data with defaults:',
     endpoint: 'Service (%1) is making endpoint:',
     service: 'Service (%1) gets API service:',
+    serviceIs: 'Service is %1...',
+    isAllowed: 'Service is allowed ッ',
+    notAllowed: 'Service is not allowed ꈌ',
+    connection: {
+      wontReconnect: 'Service was manually disconnected, won\'t reconnect',
+      exceeded: 'Service exceeded connectionTriesMax (%1/%2).',
+      willConnect: 'Connection is offline, but service is not - will disconnect.',
+      willReConnect: 'Browser connection is online,but service is not - will re-connect.',
+      willNotReconnect:'Browser connection is online, but service is not - service exceeded connectionTriesMax, will not re-connect.'
+    },
   },
 }
 
