@@ -225,7 +225,7 @@ export const kiroboMiddleware = ({ dispatch }: Store) => (next: (action: Action)
 
 After connection, the library automatically request updated status, which comes to Redux. We process it by checking ```action.type``` and get the following:
 
-![image](screenshots/update_status.png)
+![image](https://github.com/kiroboio/ki-safe-transfer-lib/raw/develop/docs/screenshots/status.jpg)
 
 Connecting the library to React like this allows to call action, suing standard Redux dispatch:
 
@@ -252,9 +252,9 @@ After middleware receives ```action.type``` = __'request_rates'__, it will reque
 
 You will receive the data via provided eventBus (Redux):
 
-![image](screenshots/incoming_rates.png)
+![image](https://github.com/kiroboio/ki-safe-transfer-lib/raw/develop/docs/screenshots/rates.jpg)
 
-Please, note, that every event library is pushing has name, starting with _'service'_, like _'service_get_btc_to_usd_rates'_ on the screenshot above.
+> ☝Please, note, that every event library is pushing has name, starting with _'service'_, like _'service_get_btc_to_usd_rates'_ on the screenshot above.
 
 You can request data with direct response:
 
@@ -267,6 +267,6 @@ break;
 
 The result will be:
 
-![image](screenshots/settings.png)
+![image](https://github.com/kiroboio/ki-safe-transfer-lib/raw/develop/docs/screenshots/settings.jpg)
 
-By the way, _getSettings()_ is one of the few methods in the library that have only direct response.
+> ☝By the way, _getSettings()_ is one of the few methods in the library that have only direct response.
