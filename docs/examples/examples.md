@@ -236,7 +236,7 @@ service.getRates({ limit: 2, skip: 1 })
 ```
 or add it to a 'watch' list to get updates:
 ```TypeScript
-  service.getRates({ limit: 2, skip: 1, watch: Watch.ADD })
+service.getRates({ limit: 2, skip: 1, watch: Watch.ADD })
 ```
 
 _eventBus_ will get the following:
@@ -307,12 +307,14 @@ run()
 You will be getting the following event:
 
 ```TypeScript
-{ type: 'service_get_btc_to_usd_rate',
+{
+  type: 'service_get_btc_to_usd_rate',
   payload:
-   { source: 'coingecko.com', timestamp: 1591266540, online: true, value: 9533.772 } }
+   { source: 'coingecko.com', timestamp: 1591266540, online: true, value: 9533.772 }
+}
 ```
 
-> If your preferred source is BitFinex, then you don't have to specify it, as It's a default one:
+> ☝If your preferred source is BitFinex, then you don't have to specify it, as it is a default one:
 
 ```TypeScript
 service.getRate({ options: { watch: Watch.ADD } })
