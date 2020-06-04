@@ -520,7 +520,7 @@ class Connect extends Base {
     this._useEventBus(EventTypes.DISCONNECT, response)
   }
 
-  public connect(options?: Omit<QueryOptions, 'limit' | 'skip'>): boolean | void {
+  public connect(options?: Omit<QueryOptions, 'limit' | 'skip' | 'watch'>): boolean | void {
     this._logTechnical(makeString(MESSAGES.technical.running, ['connect']))
 
     /** validate options, if present */
