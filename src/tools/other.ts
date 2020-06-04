@@ -25,7 +25,7 @@ export const makeString = (template: string, params: (string | number)[]): strin
   let result = template
 
   params.forEach((param, key) => {
-    result = result.replace(`%${key + 1}`, param)
+    result = result.replace(`%${key + 1}`, String(param))
   })
 
   return result
