@@ -2,6 +2,8 @@
 
 # Kirobo Transfer Library
 
+Try example [code](docs/examples.md).
+
 Library documentation is located [here](docs/README.md#kirobo-transfer-library-documentation).
 
 ## Scripts

@@ -10,5 +10,16 @@ function getTime(): number {
   return new Date().valueOf()
 }
 
-export { diff, getTime }
+/**
+ * Function to force test to wait extra time to ensure, that the socket connect it properly OFF
+ *
+ * */
+async function wait(ms: number): Promise<string> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve('')
+    }, ms)
+  })
+}
 
+export { diff, getTime, wait }

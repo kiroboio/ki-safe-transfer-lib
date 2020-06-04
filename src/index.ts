@@ -1,11 +1,11 @@
 import { Service } from './service'
 import { validateAddress } from './validators'
-import { generateId } from './tools'
+import { generateId, wait } from './tools'
 
 // eslint-disable-next-line import/no-default-export
 export default Service
 
-export { validateAddress, generateId }
+export { validateAddress, generateId, wait }
 
 export * from './service'
 

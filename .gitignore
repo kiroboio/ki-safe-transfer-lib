@@ -9,3 +9,4 @@ client2.ts
 dist
 .env
 backup
+env_config.ts

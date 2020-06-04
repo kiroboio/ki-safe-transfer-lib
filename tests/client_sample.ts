@@ -3,35 +3,43 @@
  * run it with 'npm run dev'
  *
  * */
-import prettyFormat from 'pretty-format'
 
-import Service, { DebugLevels, Responses, Event } from '../src'
-import dotenv from 'dotenv'
-import { wait } from './tools'
+import dotenv from 'dotenv' // library to load environment variables from .env file
 
-dotenv.config()
+import Service, { Responses, Event, DebugLevels, wait, Watch } from '../src' // import required class, types and tool
 
-const { log, dir } = console
+dotenv.config() // configure the library
 
+// get authentication details
 const authDetails = { key: process.env.AUTH_KEY || '', secret: process.env.AUTH_SECRET || '' }
 
+// setup eventBus to process the event, coming from the API
 function eventBus(event: Event): void {
-  dir(event, { depth: 15, colors: true, compact: true })
+  // here were are just displaying the event
+  console.dir(event, { depth: 15, colors: true, compact: true })
 }
 
+// configure Kirobo API service library
 const service = Service.getInstance(
   {
-    debug: DebugLevels.QUIET,
-    respondAs: Responses.Callback,
-    eventBus,
-    authDetails,
+    debug: DebugLevels.QUIET, // minimize the console logging
+    respondAs: Responses.Callback, // send feedback and events through callback function, i.e. eventBus
+    eventBus, // providing the function for eventBus
+    authDetails, // authentication details
   },
-  true,
+  true, //  replace previous instances
 )
 
+// main function
 async function run(): Promise<void> {
-  await wait(3000)
-  service.getStatus().catch((err) => log('getStatus error', err))
+  // set a delay to allow the service proceed with initial connection, and authorization
+  await wait(1000)
+
+  // request status update and add it to 'watch' list, to receive further updates via eventBus
+  const response = await service.getStatus({ respondDirect: true })
+
+  console.log(response)
 }
 
+// run the main function
 run()
