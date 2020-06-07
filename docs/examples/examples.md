@@ -10,6 +10,7 @@
 - [Get exchange rates](#get-exchange-rates)
   - [Single source](#single-source)
 - [Get retrievable transfers by owner ID](#get-retrievable-transfers-by-owner-id)
+- [Get collectable transactions](#get-collectable-transactions)
 - [React app with Redux](react.md#react-app-with-redux)
 
 ## Get settings, connect & disconnect
@@ -56,7 +57,7 @@ async function run(): Promise<void> {
 run()
 ```
 
-_getSettings()_ responds only directly and provided the settings for currenct instance:
+_getSettings()_ responds only directly and provided the settings for current instance:
 
 ```TypeScript
 {
@@ -65,7 +66,7 @@ _getSettings()_ responds only directly and provided the settings for currenct in
   debug: 1, // debug levels 0-2, limiting the amount console logs
   eventBus: true, // eventBus callback function is provided
   lastAddresses: { addresses: [] }, // cached addresses, used in last call for collectable transaction
-  network: 'testnet', // blockhain netwrok for the currency
+  network: 'testnet', // blockchain network for the currency
   respondAs: 'callback', // global respond setting
   version: 'v1' // API version
 }
@@ -76,7 +77,7 @@ _getSettings()_ responds only directly and provided the settings for currenct in
 
 ### Connect/disconnect
 
-_connect()_/_disconnect()_ methods are provided for additional flexibility in wokring with library. It works in auto-mode, but in case you want to perform manual connection operations you can easily do it:
+_connect()_/_disconnect()_ methods are provided for additional flexibility in working with library. It works in auto-mode, but in case you want to perform manual connection operations you can easily do it:
 
 ```TypeScript
 // library to load environment variables from .env file
@@ -278,7 +279,7 @@ run()
 
 ### Get exchange rates
 
-You can request exchange rates for BTC (currently to USD onyl) from 3 sources or any one of them:
+You can request exchange rates for BTC (currently to USD only) from 3 sources or any one of them:
 
 ```TypeScript
 // library to load environment variables from .env file
@@ -342,7 +343,7 @@ _eventBus_ will receive the following:
 }
 ```
 
-You can utilize paging options to narrow down the results:
+You can utilize [paging](../paging.md) options to narrow down the results:
 
 ```TypeScript
 service.getRates({ limit: 2, skip: 1 })
@@ -484,7 +485,7 @@ async function run(): Promise<void> {
 run()
 ```
 
-Event bus will get [Results](response.md#results-object-with-data) object with array of transactions or empty array if non has been found:
+Event bus will get [Results](response.md#results-object-with-data) object with [paging](../paging.md) details and with array of transactions or empty array if non has been found:
 
 ```TypeScript
 { type: 'service_get_by_owner_id',
@@ -516,71 +517,121 @@ Event bus will get [Results](response.md#results-object-with-data) object with a
    }
 }
 ```
-> Transaction type is [Retrievable](../how_does_it_work.md#life-on-server)
+> Transaction type is [Retrievable](../how_does_it_work.md#retrievable-type).
+
+You can use [paging](../paging.md) and [watch](../watch.md#watch) options with this request:
+
+```TypeScript
+service.getByOwnerId(
+  '045492ca4eb8d15bce952d615d099b3bfb543426432a8f968ecf2209bd222321763e9e801b32ce51238df38dbe83d94f2999f3',
+  { limit: 1, watch: Watch.ADD },
+)
+```
+[⬑ _to top_](#contents)
+
+### Get collectable transactions
+
+To get all collectables transactions for an address or addresses, simply send a request:
+
+```TypeScript
+// library to load environment variables from .env file
+import dotenv from 'dotenv'
+
+// import required class, types and tool
+import Service, { Responses, Event, DebugLevels, wait, Watch } from '../src'
+
+// configure the library
+dotenv.config()
+
+// get authentication details
+const authDetails = { key: process.env.AUTH_KEY || '', secret: process.env.AUTH_SECRET || '' }
+
+// setup eventBus to process the event, coming from the API
+function eventBus(event: Event): void {
+  // here were are just displaying the event
+  console.dir(event, { depth: 15, colors: true, compact: true })
+}
+
+// configure Kirobo API service library
+const service = Service.getInstance(
+  {
+    debug: DebugLevels.QUIET, // minimize the console logging
+    respondAs: Responses.Callback, // send feedback and events through callback function, i.e. eventBus
+    eventBus, // providing the function for eventBus
+    authDetails, // authentication details
+  },
+  true, //  replace previous instances
+)
+
+// main function
+async function run(): Promise<void> {
+  // set a delay to allow the service proceed with initial connection, and authorization
+  await wait(2000)
+
+  // get all transactions sent to address(es)
+  service.getCollectables(['xxxxx'])
+}
+
+// run the main function
+run()
+```
+The event bus function will receive [Results](response.md#results-object-with-data) object with [paging](../paging.md) details and with array of collectable transactions:
+
+```TypeScript
+{ type: 'service_get_collectables',
+  payload:
+   { total: 1,
+     limit: 100,
+     skip: 0,
+     data:
+      [ { amount: 100000,
+          collect: {},
+          createdAt: '2020-06-07T08:02:34.771Z',
+          expires: { at: '2020-06-07T20:02:34.695Z' },
+          from: 'Kirobo',
+          id: 'aaaaa',
+          salt: 'bbbbb',
+          state: 'ready',
+          to: 'xxxxx',
+          updatedAt: '2020-06-07T08:02:34.771Z'
+        }
+      ]
+   }
+}
+```
+> Transaction type is [Collectable](../how_does_it_work.md#collectable-type).
+
+With [paging](../paging.md), [watch](../watch.md#watch) and [direct respond options](../query_options.md#query-options):
+
+```TypeScript
+const result = await service.getCollectables(['2MwZGdA3vNTdwXtKRMX8FKh7Z8devPppayj'], { limit: 1, watch: Watch.ADD, respondDirect: true })
+
+console.log(result)
+```
+
+Result:
+
+```TypeScript
+{
+  total: 1,
+  limit: 1,
+  skip: 0,
+  data: [
+    {
+      amount: 100000,
+      collect: {},
+      createdAt: '2020-06-07T08:02:34.771Z',
+      expires: [Object],
+      from: 'D0',
+      id: 'aaaaa',
+      salt: 'bbbbb',
+      state: 'ready',
+      to: 'xxxxx',
+      updatedAt: '2020-06-07T08:02:34.771Z'
+    }
+  ]
+}
+```
 
 [⬑ _to top_](#contents)
 
-<!--
-payload:
-data: Array(1)
-0:
-amount: 100000
-collect: {}
-createdAt: "2020-06-07T08:02:34.695Z"
-deposit:
-address: "2NEUmfWcqokFPQuhtCjLLD8kiRzhyG4HJSs"
-path: "49'/1'/0'/0/48991"
-txid: "80c53f279393abe023f85f97bd8b2232aac6df8da87da9e8393699bac9477296"
-value: 100744
-vout: 0
-__proto__: Object
-expires:
-at: "2020-06-07T20:02:34.695Z"
-__proto__: Object
-from: "D0"
-id: "80c53f279393abe023f85f97bd8b2232aac6df8da87da9e8393699bac94772960000"
-owner: "045492ca4eb8d15bce952d615d099b3bfb543426432a8f968ecf2209bd222321763e9e801b32ce51238df38dbe83d94f2999f3"
-retrieve:
-broadcasted: -1
-confirmed: -1
-txid: ""
-__proto__: Object
-state: "ready"
-to: "2MwZGdA3vNTdwXtKRMX8FKh7Z8devPppayj"
-updatedAt: "2020-06-07T08:02:34.759Z"
-__proto__: Object
-length: 1
-__proto__: Array(0)
-limit: 100
-skip: 0
-total: 1
-__proto__: Object
-type: "service_get_by_owner_id" -->
-
-<!--
-safe transfer result: {
-  "amount": 100000,
-  "collect": {},
-  "createdAt": "2020-06-07T08:02:34.695Z",
-  "deposit": {
-    "txid": "80c53f279393abe023f85f97bd8b2232aac6df8da87da9e8393699bac9477296",
-    "vout": 0,
-    "value": 100744,
-    "address": "2NEUmfWcqokFPQuhtCjLLD8kiRzhyG4HJSs",
-    "path": "49'/1'/0'/0/48991"
-  },
-  "expires": {
-    "at": "2020-06-07T20:02:34.695Z"
-  },
-  "from": "D0",
-  "id": "80c53f279393abe023f85f97bd8b2232aac6df8da87da9e8393699bac94772960000",
-  "retrieve": {
-    "broadcasted": -1,
-    "confirmed": -1,
-    "txid": ""
-  },
-  "state": "new",
-  "to": "2MwZGdA3vNTdwXtKRMX8FKh7Z8devPppayj",
-  "updatedAt": "2020-06-07T08:02:34.695Z",
-  "owner": "045492ca4eb8d15bce952d615d099b3bfb543426432a8f968ecf2209bd222321763e9e801b32ce51238df38dbe83d94f2999f3"
-} -->
