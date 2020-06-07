@@ -39,6 +39,7 @@ import {
   makeReturnError,
   makeApiResponseError,
   shouldReturnDirect,
+  changeType,
 } from './tools'
 // import { makePropsResponseError, makeReturnError, makeApiResponseError } from './tools/error'
 // import { shouldReturnDirect } from './tools/connect'
@@ -130,7 +131,7 @@ class Service extends Connect {
 
     /** validate props */
     try {
-      validateObjectWithStrings(request, 'request', 'collect')
+      validateObjectWithStrings(changeType< Record<string, unknown>>(request), 'request', 'collect')
 
       /** validate options, if present */
       if (options) {
