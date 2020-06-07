@@ -6,6 +6,8 @@
 - [Steps](#steps)
 - [Creation](#creation)
 - [Life on server](#life-on-server)
+  - [Retrievable type](#retrievable-type)
+  - [Collectable type](#collectable-type)
   - [Expiration](#expiration)
   - [Subscription](#subscription)
 - [Collection](#collection)
@@ -50,9 +52,11 @@ To check manually or to start getting updates in the new session (connection) us
 
 After creation of the Retrievable transaction a Collectable one appears and those, [subscribed](#subscription) to recipient's address, will receive an event, with Collectable object. We'll talk about subscription mechanism in a bit. The difference between the Retrievable and Collectable objects is slight - after all, both of them are the same transaction. Here are the types of them:
 
+### Retrievable type
+
 ```TypeScript
 interface Retrievable {
-  amount: number // transfer amount
+  amount: number // transfer amount in satoshi
   collect: {
     // collect object, available only when collection has started
     broadcasted: number // block height at the moment the collect transaction has been broadcasted
@@ -83,26 +87,34 @@ interface Retrievable {
   updatedAt: string | Date
   owner: string // owner ID
 }
+```
+[⬑ _to top_](#how-does-it-work)
 
-export type Collectable = {
-  amount: number
-  collect: {
-    broadcasted: number;
-    confirmed: number;
-    txid: string
+### Collectable type
+
+```TypeScript
+interface Collectable {
+  amount: number // the transfer amount in satoshi
+  collect: // collect information
+  {
+     broadcasted: number // block height at the moment the collect transaction has been broadcasted
+    confirmed: number // block height at the moment the transaction has been confirmed
+    txid: string // transaction ID
   }
   createdAt: string
-  expires: { at: string }
-  from?: string
-  hint?: string
-  id: string // transaction id on server, different from the Retrievable one¹
-  salt: string // salt for passcode encryption
-  state: string
-  to: string
+  expires: { at?: string | Date; block?: number } // expiration details time/block height
+  from?: string // 'from' note
+  hint?: string // password hint
+  id: string // generated inidividual ID of transaction record
+  salt: string // salt is used to encrypt the 'collect' transaction
+  state: 'ready' | 'collecting' | 'collected' // state of the transaction
+  to: string // address of the recipient
   updatedAt: string
 }
 ```
-> ¹ We'll cover this below.
+
+[⬑ _to top_](#how-does-it-work)
+
 
 #### Expiration
 

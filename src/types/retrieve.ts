@@ -1,5 +1,5 @@
 interface Retrievable {
-  amount: number // transfer amount
+  amount: number // transfer amount in satoshi
   collect: {
     // collect object, available only when collection has started
     broadcasted: number // block height at the moment the collect transaction has been broadcasted

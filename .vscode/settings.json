@@ -1,11 +1,14 @@
 {
     "cSpell.words": [
       "COINGECKO",
+      "Finex",
       "Retrievables",
       "Utxos",
       "passcode",
       "regnet",
-      "testnet"
+      "testnet",
+      "txid",
+      "vout"
     ],
     "workbench.colorCustomizations": {
       "activityBar.background": "#96ed93",
