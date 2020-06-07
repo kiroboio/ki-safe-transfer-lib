@@ -588,51 +588,6 @@ class Connect extends Base {
 
     this._useEventBus(EventTypes.CONNECT, response)
   }
-
-  public async isAuthenticated(options?: RequestOptions): Promise<boolean | void> {
-    this._logTechnical(makeString(MESSAGES.technical.running, ['isAuthenticated']))
-
-    /** validate options, if present */
-    try {
-      if (options) {
-        this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['isAuthenticated', 'options']))
-        validateOptions(options, 'isAuthenticated', true)
-      }
-    } catch (err) {
-
-      /** log error */
-      this._logError(makeString(ERRORS.service.gotError, ['isAuthenticated', 'validation']), err)
-
-      /** throw appropriate error */
-      throw makePropsResponseError(err)
-    }
-
-    let response: boolean
-
-    try {
-      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['isAuthenticated']))
-
-      response = await this._connect.get('authentication')
-      this._log(makeString(MESSAGES.technical.gotResponse, ['isAuthenticated']), response)
-    } catch (err) {
-
-      /** log error */
-      this._logApiError(makeString(ERRORS.service.gotError, ['isAuthenticated', 'request']), err)
-
-      /** throw appropriate error */
-      throw makeReturnError(err.message, err)
-    }
-
-    /** return results */
-
-    this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['isAuthenticated', 'return']))
-
-    if (shouldReturnDirect(options, this._respondAs)) return !!response
-
-    this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['isAuthenticated']))
-
-    this._useEventBus(EventTypes.IS_AUTHED, !!response)
-  }
 }
 
 export { Connect }

@@ -123,7 +123,10 @@ class Service extends Connect {
 
   // TODO:  add description
   // TODO: check the return object
-  public async collect(request: CollectRequest, options?: QueryOptions): Promise<Results<Message> | void> {
+  public async collect(
+    request: CollectRequest,
+    options?: Omit<QueryOptions, 'limit' | 'skip'>,
+  ): Promise<Results<Message> | void> {
 
     /** validate props */
     try {
@@ -264,7 +267,7 @@ class Service extends Connect {
   }
 
   // TODO: add desc
-  public async getUtxos(addresses: string[], options?: QueryOptions): Promise<Results<Utxo> | void> {
+  public async getUtxos(addresses: string[], options?: Omit<QueryOptions, 'watch'>): Promise<Results<Utxo> | void> {
 
     /** validate props */
     try {
@@ -310,7 +313,7 @@ class Service extends Connect {
     }
   }
 
-  public async getUsed(addresses: string[], options?: QueryOptions): Promise<Results<string[]> | void> {
+  public async getUsed(addresses: string[], options?: Omit<QueryOptions, 'watch'>): Promise<Results<string[]> | void> {
 
     /** validate props */
     try {
@@ -382,7 +385,7 @@ class Service extends Connect {
    *
    * -
    */
-  public async getFresh(addresses: string[], options?: QueryOptions): Promise<Results<string[]> | void> {
+  public async getFresh(addresses: string[], options?: Omit<QueryOptions, 'watch'>): Promise<Results<string[]> | void> {
 
     /** validate props */
     try {
@@ -465,7 +468,7 @@ class Service extends Connect {
       throw makePropsResponseError(err)
     }
 
-    let response:Results<Retrievable>
+    let response: Results<Retrievable>
 
     /** make request */
     try {

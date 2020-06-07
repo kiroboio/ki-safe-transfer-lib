@@ -48,7 +48,6 @@ export const kiroboMiddleware = ({ dispatch }: Store) => (next: (action: Action)
         true,
       );
       console.log('Service is set.');
-      // ![image](Colors.assets/image.jpg)
     }
   } catch (err) {
     console.log('[kirobo_middleware] setting service caught error:', err);

@@ -9,8 +9,13 @@
   - [Direct response](#direct-response)
 - [Get exchange rates](#get-exchange-rates)
   - [Single source](#single-source)
+- [Working with UTXOs](utxos.md#contents)
+  - [Get UTXOs](utxos.md#get-utxos)
+  - [Get fresh UTXOs](utxos.md#get-fresh-utxos)
+  - [Get used UTXOs](utxos.md#get-used-utxos)
 - [Get retrievable transfers by owner ID](#get-retrievable-transfers-by-owner-id)
 - [Get collectable transactions](#get-collectable-transactions)
+- [Collecting transaction](collect.md)
 - [React app with Redux](react.md#react-app-with-redux)
 
 ## Get settings, connect & disconnect
@@ -604,7 +609,7 @@ The event bus function will receive [Results](response.md#results-object-with-da
 With [paging](../paging.md), [watch](../watch.md#watch) and [direct respond options](../query_options.md#query-options):
 
 ```TypeScript
-const result = await service.getCollectables(['2MwZGdA3vNTdwXtKRMX8FKh7Z8devPppayj'], { limit: 1, watch: Watch.ADD, respondDirect: true })
+const result = await service.getCollectables(['xxxxx'], { limit: 1, watch: Watch.ADD, respondDirect: true })
 
 console.log(result)
 ```
@@ -632,6 +637,10 @@ Result:
   ]
 }
 ```
+
+[⬑ _to top_](#contents)
+
+##
 
 [⬑ _to top_](#contents)
 

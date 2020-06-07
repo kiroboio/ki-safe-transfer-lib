@@ -4,9 +4,9 @@
  * @interface
  * @name CollectRequest
  */
-type CollectRequest = {
-  id: string
-  key: string
+interface CollectRequest {
+  id: string // transaction ID to collect
+  key: string // encrypted key from passcode
 }
 
 /**

@@ -21,7 +21,7 @@
   - [async _getOnlineNetworks()_]()
   - [async _getRate()_]()
   - [async _getRates()_]()
-  - [async _isAuthenticated()_]()
+  - [async _isAuthed()_]()
   - [async _retrieve ()_]()
 
 ---
