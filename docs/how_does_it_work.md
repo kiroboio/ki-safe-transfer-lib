@@ -51,23 +51,37 @@ To check manually or to start getting updates in the new session (connection) us
 After creation of the Retrievable transaction a Collectable one appears and those, [subscribed](#subscription) to recipient's address, will receive an event, with Collectable object. We'll talk about subscription mechanism in a bit. The difference between the Retrievable and Collectable objects is slight - after all, both of them are the same transaction. Here are the types of them:
 
 ```TypeScript
-export type Retrievable = {
-  amount: number
-  collect: { // below information is available only after the Retrievable Transfer has been collected
+interface Retrievable {
+  amount: number // transfer amount
+  collect: {
+    // collect object, available only when collection has started
     broadcasted: number // block height at the moment the collect transaction has been broadcasted
     confirmed: number // block height at the moment the transaction has been confirmed
-    txid: string // txid of the transaction
+    txid: string // transaction ID
   }
-  createdAt: string // creation timestamp
-  deposit: { // data of the deposit transaction
-    txid: string
-    vout: number
+  createdAt: string | Date
+  deposit: {
+    // deposit transaction details
+    txid: string // deposit transaction ID
+    vout: number // vector of output
+    value: number // amount transferred
+    address: string // address of deposit
+    path?: string // derivation path
   }
-  expires: { at: string } // expiration time¹
-  id: string // transaction id on server¹
-  state: string // state of transaction
-  to: string // recipient's address
-  updatedAt: string // timestamp of last transaction update
+  retrieve: {
+    // retrieve transaction details
+    broadcasted: number // block height at the moment the collect transaction has been broadcasted
+    confirmed: number // block height at the moment the transaction has been confirmed
+    txid: string // transaction ID
+  }
+  expires: { at?: string; block?: number } // expiration details time/block height
+  from?: string // 'from' note
+  hint?: string // password hint
+  id: string // generated inidividual ID of transaction record
+  state: string // state of the transaction
+  to: string // address of the recipient
+  updatedAt: string | Date
+  owner: string // owner ID
 }
 
 export type Collectable = {

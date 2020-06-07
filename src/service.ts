@@ -446,7 +446,7 @@ class Service extends Connect {
    *
    *
    */
-  public async getByOwnerId(ownerId: string, options?: QueryOptions): Promise<Results<unknown> | void> {
+  public async getByOwnerId(ownerId: string, options?: QueryOptions): Promise<Results<Retrievable> | void> {
 
     /** validate props */
     try {
@@ -465,7 +465,7 @@ class Service extends Connect {
       throw makePropsResponseError(err)
     }
 
-    let response
+    let response:Results<Retrievable>
 
     /** make request */
     try {

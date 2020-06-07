@@ -9,6 +9,7 @@
   - [Direct response](#direct-response)
 - [Get exchange rates](#get-exchange-rates)
   - [Single source](#single-source)
+- [Get retrievable transfers by owner ID](#get-retrievable-transfers-by-owner-id)
 - [React app with Redux](react.md#react-app-with-redux)
 
 ## Get settings, connect & disconnect
@@ -434,3 +435,152 @@ service.getRate({ options: { watch: Watch.ADD } })
 
 [⬑ _to top_](#contents)
 
+## Get retrievable transfers by owner ID
+
+Get all transactions sent with a certain owner ID:
+
+```TypeScript
+// library to load environment variables from .env file
+import dotenv from 'dotenv'
+
+// import required class, types and tool
+import Service, { Responses, Event, DebugLevels, wait } from '../src'
+
+// configure the library
+dotenv.config()
+
+// get authentication details
+const authDetails = { key: process.env.AUTH_KEY || '', secret: process.env.AUTH_SECRET || '' }
+
+// setup eventBus to process the event, coming from the API
+function eventBus(event: Event): void {
+  // here were are just displaying the event
+  console.dir(event, { depth: 15, colors: true, compact: true })
+}
+
+// configure Kirobo API service library
+const service = Service.getInstance(
+  {
+    debug: DebugLevels.QUIET, // minimize the console logging
+    respondAs: Responses.Callback, // send feedback and events through callback function, i.e. eventBus
+    eventBus, // providing the function for eventBus
+    authDetails, // authentication details
+  },
+  true, //  replace previous instances
+)
+
+// main function
+async function run(): Promise<void> {
+  // set a delay to allow the service proceed with initial connection, and authorization
+  await wait(2000)
+
+  // get all transactions with the owner ID
+  service.getByOwnerId(
+    'xxxxx',
+  )
+}
+
+// run the main function
+run()
+```
+
+Event bus will get [Results](response.md#results-object-with-data) object with array of transactions or empty array if non has been found:
+
+```TypeScript
+{ type: 'service_get_by_owner_id',
+  payload:
+   { total: 1,
+     limit: 100,
+     skip: 0,
+     data:
+      [ { amount: 100000,
+          collect: {},
+          createdAt: '2020-06-07T08:02:34.695Z',
+          deposit:
+           { txid: 'aaaaaa',
+             vout: 0,
+             value: 100744,
+             address: 'bbbbb',
+             path: "derivation_path" },
+          expires: { at: '2020-06-07T20:02:34.695Z' },
+          from: 'Kirobo',
+          id: 'yyyyy',
+          retrieve: { broadcasted: -1, confirmed: -1, txid: '' },
+          state: 'ready',
+          to: 'zzzzz',
+          updatedAt: '2020-06-07T08:02:34.759Z',
+          owner:
+           'xxxxx'
+        }
+      ]
+   }
+}
+```
+> Transaction type is [Retrievable](../how_does_it_work.md#life-on-server)
+
+[⬑ _to top_](#contents)
+
+<!--
+payload:
+data: Array(1)
+0:
+amount: 100000
+collect: {}
+createdAt: "2020-06-07T08:02:34.695Z"
+deposit:
+address: "2NEUmfWcqokFPQuhtCjLLD8kiRzhyG4HJSs"
+path: "49'/1'/0'/0/48991"
+txid: "80c53f279393abe023f85f97bd8b2232aac6df8da87da9e8393699bac9477296"
+value: 100744
+vout: 0
+__proto__: Object
+expires:
+at: "2020-06-07T20:02:34.695Z"
+__proto__: Object
+from: "D0"
+id: "80c53f279393abe023f85f97bd8b2232aac6df8da87da9e8393699bac94772960000"
+owner: "045492ca4eb8d15bce952d615d099b3bfb543426432a8f968ecf2209bd222321763e9e801b32ce51238df38dbe83d94f2999f3"
+retrieve:
+broadcasted: -1
+confirmed: -1
+txid: ""
+__proto__: Object
+state: "ready"
+to: "2MwZGdA3vNTdwXtKRMX8FKh7Z8devPppayj"
+updatedAt: "2020-06-07T08:02:34.759Z"
+__proto__: Object
+length: 1
+__proto__: Array(0)
+limit: 100
+skip: 0
+total: 1
+__proto__: Object
+type: "service_get_by_owner_id" -->
+
+<!--
+safe transfer result: {
+  "amount": 100000,
+  "collect": {},
+  "createdAt": "2020-06-07T08:02:34.695Z",
+  "deposit": {
+    "txid": "80c53f279393abe023f85f97bd8b2232aac6df8da87da9e8393699bac9477296",
+    "vout": 0,
+    "value": 100744,
+    "address": "2NEUmfWcqokFPQuhtCjLLD8kiRzhyG4HJSs",
+    "path": "49'/1'/0'/0/48991"
+  },
+  "expires": {
+    "at": "2020-06-07T20:02:34.695Z"
+  },
+  "from": "D0",
+  "id": "80c53f279393abe023f85f97bd8b2232aac6df8da87da9e8393699bac94772960000",
+  "retrieve": {
+    "broadcasted": -1,
+    "confirmed": -1,
+    "txid": ""
+  },
+  "state": "new",
+  "to": "2MwZGdA3vNTdwXtKRMX8FKh7Z8devPppayj",
+  "updatedAt": "2020-06-07T08:02:34.695Z",
+  "owner": "045492ca4eb8d15bce952d615d099b3bfb543426432a8f968ecf2209bd222321763e9e801b32ce51238df38dbe83d94f2999f3"
+} -->
