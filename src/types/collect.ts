@@ -17,20 +17,23 @@ type CollectRequest = {
  */
 interface Collectable {
   amount: number // the transfer amount in satoshi
-  collect: // collect information
+   collect: // collect info,
   {
-     broadcasted: number // block height at the moment the collect transaction has been broadcasted
-    confirmed: number // block height at the moment the transaction has been confirmed
-    txid: string // transaction ID
+    broadcasted: number // blockchain height
+    confirmed: number // block number of confirmed transaction
+    txid: string // the tx id of the transaction
   }
   createdAt: string
-  expires: { at?: string | Date; block?: number } // expiration details time/block height
-  from?: string // 'from' note
-  hint?: string // password hint
-  id: string // generated inidividual ID of transaction record
-  salt: string // salt is used to encrypt the 'collect' transaction
-  state: 'ready' | 'collecting' | 'collected' // state of the transaction
-  to: string // address of the recipient
+  expires: {
+    at?: string | Date
+    block?: number
+  }
+  from?: string // senders attached message
+  hint?: string // senders attached passcode hint
+  id: string // unique id
+  salt: string // salt use to encrypt the 'collect' transaction
+  state: 'ready' | 'collecting' | 'collected' // collect state
+  to: string // the destination address
   updatedAt: string
 }
 
