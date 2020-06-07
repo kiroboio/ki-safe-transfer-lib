@@ -13,6 +13,7 @@
   - [Get UTXOs](utxos.md#get-utxos)
   - [Get fresh UTXOs](utxos.md#get-fresh-utxos)
   - [Get used UTXOs](utxos.md#get-used-utxos)
+- [Sending transaction](send.md)
 - [Get retrievable transfers by owner ID](#get-retrievable-transfers-by-owner-id)
 - [Get collectable transactions](#get-collectable-transactions)
 - [Collecting transaction](collect.md)
@@ -52,10 +53,13 @@ async function run(): Promise<void> {
   // set a delay to allow the service proceed with initial connection, and authorization
   await wait(2000)
 
+  try {
   // request settings for instance
   const response = service.getSettings()
-
   console.log(response)
+  } catch (err) {
+    console.log(err)
+  }
 }
 
 // run the main function
@@ -111,8 +115,12 @@ async function run(): Promise<void> {
   // set a delay to allow the service proceed with initial connection, and authorization
   await wait(2000)
 
+  try {
   // call to disconnect
   service.disconnect()
+  } catch (err) {
+    console.log(err)
+  }
 }
 
 // run the main function
@@ -167,8 +175,12 @@ async function run(): Promise<void> {
   // set a delay to allow the service proceed with initial connection, and authorization
   await wait(2000)
 
+  try {
   // request status update and add it to 'watch' list, to receive further updates via eventBus
   service.getStatus({ watch: Watch.ADD })
+  } catch (err) {
+    console.log(err)
+  }
 }
 
 // run the main function
@@ -208,8 +220,12 @@ async function run(): Promise<void> {
   // set a delay to allow the service proceed with initial connection, and authorization
   await wait(2000)
 
+  try {
   // request status update and add it to 'watch' list, to receive further updates via eventBus
   service.getStatus({ watch: Watch.ADD })
+  } catch (err) {
+    console.log(err)
+  }
 }
 
 // run the main function
@@ -260,9 +276,9 @@ async function run(): Promise<void> {
   // set a delay to allow the service proceed with initial connection, and authorization
   await wait(2000)
 
+  try {
   // request status update with direct response (won't affect the global setting above)
   const response = await service.getStatus({ respondDirect: true })
-
   console.log('response',response)
   // this is the result you will get:
   //
@@ -274,6 +290,9 @@ async function run(): Promise<void> {
   //   fee: 100634,
   //   updatedAt: '2020-06-04T08:12:58.753Z'
   // }
+  } catch (err) {
+    console.log(err)
+  }
 
 }
 
@@ -321,8 +340,12 @@ async function run(): Promise<void> {
   // set a delay to allow the service proceed with initial connection, and authorization
   await wait(2000)
 
+  try {
   // request exchange rates from all available sources
   service.getRates()
+  } catch (err) {
+    console.log(err)
+  }
 }
 
 // run the main function
@@ -416,8 +439,12 @@ async function run(): Promise<void> {
   // set a delay to allow the service proceed with initial connection, and authorization
   await wait(2000)
 
+  try {
   // request exchange rates from preferred source
   service.getRate({ source: RatesSources.COINGECKO, options: { watch: Watch.ADD } })
+  } catch (err) {
+    console.log(err)
+  }
 }
 
 // run the main function
@@ -480,10 +507,14 @@ async function run(): Promise<void> {
   // set a delay to allow the service proceed with initial connection, and authorization
   await wait(2000)
 
+  try {
   // get all transactions with the owner ID
   service.getByOwnerId(
     'xxxxx',
   )
+  } catch (err) {
+    console.log(err)
+  }
 }
 
 // run the main function
@@ -573,8 +604,12 @@ async function run(): Promise<void> {
   // set a delay to allow the service proceed with initial connection, and authorization
   await wait(2000)
 
+  try {
   // get all transactions sent to address(es)
   service.getCollectables(['xxxxx'])
+  } catch (err) {
+    console.log(err)
+  }
 }
 
 // run the main function

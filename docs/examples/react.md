@@ -61,12 +61,20 @@ export const kiroboMiddleware = ({ dispatch }: Store) => (next: (action: Action)
 
       break;
     case 'request_rates':
-      service.getRates();
+      try {
+        service.getRates();
+      } catch (err) {
+        console.log(err)
+      }
 
       break;
     case 'get_settings':
-      const response = service.getSettings();
-      console.log('Settings', response);
+      try {
+        const response = service.getSettings();
+        console.log('Settings', response);
+      } catch (err) {
+        console.log(err)
+      }
   }
 };
 ```
@@ -94,7 +102,11 @@ After middleware receives ```action.type``` = __'request_rates'__, it will reque
 
 ```TypeScript
  case 'request_rates':
+    try {
       service.getRates();
+    } catch (err) {
+      console.log(err)
+    }
  break;
 ```
 
@@ -108,8 +120,12 @@ You can request data with direct response:
 
 ```TypeScript
 case 'get_settings':
+    try {
       const response = service.getSettings();
       console.log('Settings', response);
+    } catch (err) {
+      console.log(err)
+    }
 break;
 ```
 

@@ -47,8 +47,12 @@ async function run(): Promise<void> {
   // set a delay to allow the service proceed with initial connection, and authorization
   await wait(2000)
 
+  try {
   // get all UTXOs for address
   service.getUtxos(['xxxxx','yyyyy'])
+  } catch (err) {
+    console.log(err)
+  }
 }
 
 // run the main function
