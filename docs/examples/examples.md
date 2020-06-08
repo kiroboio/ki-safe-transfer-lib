@@ -674,8 +674,3 @@ Result:
 ```
 
 [⬑ _to top_](#contents)
-
-## Retrieve a transaction from deposit
-
-[⬑ _to top_](#contents)
-
