@@ -55,7 +55,7 @@ The methods for endpoints are:
 In order to use Kirobo API via HTTP, you need first obtain JSON token, via endpoint ```/authentication```:
 
 ```bash
-curl https://api.kirobo.me/authentication -H 'Content-Type: application/json' -d '{"key": <Your-Key>, "secret”:<Your-Secret>, "strategy": "local”}
+curl https://api.kirobo.me/authentication -H 'Content-Type: application/json' -d '{"key": <Your-Key>, "secret":<Your-Secret>, "strategy": "local"}'
 ```
 
 As response you will get:
