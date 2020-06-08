@@ -352,6 +352,37 @@ curl -XPOST 'https://api.kirobo.me/v1/btc/testnet/transfers' -H 'Content-Type: a
 
 More about encryption details you can find [here](encryption.md).
 
+Response:
+
+```bash
+{
+  "amount": 142857,
+  "collect": {},
+  "createdAt": "2020-06-08T09:13:01.580Z",
+  "deposit": {
+    "txid": "d3e344b8c5d1ab2ca458d8b20ad7f948b4776681c55b89c655e484d22b7adfd6",
+    "vout": 0,
+    "value": 143166,
+    "address": "2Muo8DiG9zkNgEvSrbWoyR4jHqEZKp5EGU2",
+    "path": "49'/1'/0'/0/0"
+  },
+  "expires": {
+    "at": "2020-06-08T21:13:01.580Z"
+  },
+  "from": "",
+  "id": "f1774c123ka85a75380k3bxcl907d3s7e33515b",
+  "retrieve": {
+    "broadcasted": -1,
+    "confirmed": -1,
+    "txid": ""
+  },
+  "state": "ready",
+  "to": "tb1q558cx45amcfvnemmxry4qt7q9ppm8zrtwr3wxh",
+  "updatedAt": "2020-06-08T09:13:01.663Z",
+  "owner": "a487m587ab4ec8268ff61453a5c69872497221288785f02aa83094kmsp20a14b2fe132afceb7e2d3e501a63b046cb985372aa3e024f6a13"
+}
+```
+
 [⬑ _to top_](#direct-work-with-kirobo-api)
 
 ### Collect
@@ -361,6 +392,7 @@ Collecting a transaction is very simple - just provide the transaction ID and a 
 ```bash
 curl -XPOST 'https://api.kirobo.me/v1/btc/testnet/action/collect' -H 'Content-Type: application/json' --data '{"id": "my-collectable-id", "key":"my-secret-key" }' -H 'Authorization: <Your-Access-Token>'
 ```
+In response you will receive transaction ID.
 
 [⬑ _to top_](#direct-work-with-kirobo-api)
 
@@ -371,4 +403,6 @@ To retrieve available transaction, you need to ensure that it's state is __ready
 ```bash
 curl -XPOST 'https://api.kirobo.me/v1/btc/testnet/action/retrieve' -H 'Content-Type: application/json' --data '{"id": "my-collectable-id", "raw":"transaction-hex" }' -H 'Authorization: <Your-Access-Token>'
 ```
+In response you will receive transaction ID.
+
 [⬑ _to top_](#direct-work-with-kirobo-api)
