@@ -31,12 +31,13 @@ export const TEXT = {
   },
 }
 
-export const listOfStatusKeys = ['height', 'online', 'fee', 'netId', 'timestamp', 'updatedAt']
+export const listOfStatusKeys = ['height', 'online', 'fee','fees', 'netId', 'timestamp', 'updatedAt']
 
 export const typeOfStatusValues: Record<string, string> = {
   height: 'number',
   online: 'boolean',
   fee: 'number',
+  fees: 'object',
   netId: 'string',
   timestamp: 'number',
   updatedAt: 'string',

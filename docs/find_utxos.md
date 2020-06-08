@@ -8,7 +8,7 @@
 
 ## What this service does?
 
-You can use library to get UTXOs for the aray of addresses provided. Search is done by the Kirobo server, with library providing convinient API and information workflow.
+You can use library to get UTXOs for the array of addresses provided. Search is done by the Kirobo server, with library providing convenient API and information workflow.
 
 [⬑ _to top_](#find-utxos)
 

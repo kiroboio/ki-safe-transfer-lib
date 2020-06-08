@@ -15,7 +15,7 @@
   - [Get fresh UTXOs](utxos.md#get-fresh-utxos)
   - [Get used UTXOs](utxos.md#get-used-utxos)
 - [Sending transaction](send.md)
-- [Get retrievable transfers by owner ID](#get-retrievable-transfers-by-owner-id)
+- [Get all transfers by owner ID](#get-all-transfers-by-owner-id)
 - [Get collectable transactions](#get-collectable-transactions)
 - [Collecting transaction](collect.md)
 - [Retrieving transaction](retrieve.md)
@@ -470,7 +470,7 @@ service.getRate({ options: { watch: Watch.ADD } })
 
 [⬑ _to top_](#contents)
 
-## Get retrievable transfers by owner ID
+## Get all transfers by owner ID
 
 Get all transactions sent with a certain owner ID:
 
