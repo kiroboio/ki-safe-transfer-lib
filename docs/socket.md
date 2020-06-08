@@ -12,4 +12,4 @@ To connect to Kirobo API server directly you will need FeathersJS ([client setup
 
 > ☝To work in other network, change ```testnet``` to the required one.
 
-[⬑ _to top_](#Socket Connection)
+[⬑ _to top_](#socket-connection)

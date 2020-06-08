@@ -127,7 +127,7 @@ The response will be:
 ```
 
 [⬑ _to top_](#contents)
-## Get usd UTXOs
+## Get used UTXOs
 You can easily also filter the addresses to get only those with used UTXOs:
 
 ```TypeScript
