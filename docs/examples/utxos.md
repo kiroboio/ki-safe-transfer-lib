@@ -8,6 +8,8 @@
 - [Get fresh UTXOs](#get-fresh-utxos)
 - [Get used UTXOs](#get-used-utxos)
 
+Kirobo API offers services to [get UTXOs](../find_utxos.md#how-to-use-the-library), [find fresh](../find_addresses.md#how-to-use-the-library) and [used](../find_addresses.md#how-to-use-the-library) addresses
+
 ## Get UTXOs
 
 Kirobo API offers service to find unspent transaction outputs for addresses, as simple as:
