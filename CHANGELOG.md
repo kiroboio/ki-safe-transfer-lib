@@ -1,37 +1,44 @@
 # Changelog
 
-##### v2.11.0 2020-06-02
+#### v2.12.0 2020-06-08
+
+  Updated:
+
+  - endpoints config
+  - docs
+
+#### v2.11.0 2020-06-02
 
   Updated:
 
   - reinstated onConnect process
   - increase socket timeout to 20s
 
-##### v2.10.0 2020-06-01
+#### v2.10.0 2020-06-01
 
   Updated:
 
   - connect check feature removed
 
-##### v2.9.1 2020-06-01
+#### v2.9.1 2020-06-01
 
   Updated:
 
   - paths
 
-##### v2.9.0 2020-06-01
+#### v2.9.0 2020-06-01
 
   New:
 
   - salt is manadatory when sending transaction
 
-##### v2.8.0 2020-05-31
+#### v2.8.0 2020-05-31
 
   New:
 
   - retrieve object in Retrievable
 
-##### v2.7.2 2020-05-24
+#### v2.7.2 2020-05-24
 
   Updated:
 
@@ -39,7 +46,7 @@
   - changed validateSend
   - updated tests
 
-##### v2.7.1 2020-05-21
+#### v2.7.1 2020-05-21
 
   Updated:
 
@@ -47,19 +54,19 @@
   - makeOptions process and makes choice for watch options in request vs global
   - updated tests
 
-##### v2.7 2020-05-21
+#### v2.7 2020-05-21
 
   New:
 
   - 'watch' option for requests
 
-##### v2.6 2020-05-20
+#### v2.6 2020-05-20
 
   New:
 
   - isAuthenticated() method
 
-##### v2.5 2020-05-13
+#### v2.5 2020-05-13
 
   New:
 
@@ -75,7 +82,7 @@
   - extra tests
   - faster tests
 
-##### v2.1 2020-05-12
+#### v2.1 2020-05-12
 
   New:
 
@@ -86,7 +93,7 @@
 
   - Made 'owner' a required setting
 
-##### v2 2020-04-23
+#### v2 2020-04-23
 
   New:
 
