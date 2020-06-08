@@ -4,6 +4,8 @@
 
 Try example [code](docs/examples/examples.md).
 
+> ☝In case you want to work with API directly, please find useful information [here](docs/socket.md).
+
 Library documentation is located [here](docs/README.md#kirobo-transfer-library-documentation).
 
 ## Scripts

@@ -31,7 +31,7 @@ Library have several method, not connected to the API responses: get stored sett
 import dotenv from 'dotenv'
 
 // import required class, types and tool
-import Service, { Responses, Event, DebugLevels, wait } from '../src'
+import Service, { Responses, Event, DebugLevels, wait } from '@kiroboio/safe-transfer-lib'
 
 // configure the library
 dotenv.config()
@@ -93,7 +93,7 @@ _connect()_/_disconnect()_ methods are provided for additional flexibility in wo
 import dotenv from 'dotenv'
 
 // import required class, types and tool
-import Service, { Responses, Event, DebugLevels, wait } from '../src'
+import Service, { Responses, Event, DebugLevels, wait } from '@kiroboio/safe-transfer-lib'
 
 // configure the library
 dotenv.config()
@@ -145,7 +145,7 @@ Request block height, online status, network ID, average fee of the last block. 
 import dotenv from 'dotenv'
 
  // import required class, types and tool
-import Service, { Responses, Event, DebugLevels, wait, Watch } from '../src'
+import Service, { Responses, Event, DebugLevels, wait, Watch } from '@kiroboio/safe-transfer-lib'
 
 // configure the library
 dotenv.config()
@@ -191,7 +191,7 @@ or importing from config file:
 
 ```TypeScript
 
-import Service, { Responses, Event, DebugLevels, wait, Watch } from '../src'
+import Service, { Responses, Event, DebugLevels, wait, Watch } from '@kiroboio/safe-transfer-lib'
 
 // get configuration for file
 import { CONFIG } from './env_config'
@@ -246,7 +246,7 @@ The data can be requested with direct response:
 import dotenv from 'dotenv'
 
  // import required class, types and tool
-import Service, { Responses, Event, DebugLevels, wait } from '../src'
+import Service, { Responses, Event, DebugLevels, wait } from '@kiroboio/safe-transfer-lib'
 
 // configure the library
 dotenv.config()
@@ -310,7 +310,7 @@ You can request exchange rates for BTC (currently to USD only) from 3 sources or
 import dotenv from 'dotenv'
 
 // import required class, types and tool
-import Service, { Responses, Event, DebugLevels, wait } from '../src'
+import Service, { Responses, Event, DebugLevels, wait } from '@kiroboio/safe-transfer-lib'
 
 // configure the library
 dotenv.config()
@@ -409,7 +409,7 @@ You can get the rates updates from a selected source only:
 import dotenv from 'dotenv'
 
 // import required class, types and tool
-import Service, { Responses, Event, DebugLevels, wait, Watch, RatesSources } from '../src'
+import Service, { Responses, Event, DebugLevels, wait, Watch, RatesSources } from '@kiroboio/safe-transfer-lib'
 
 // configure the library
 dotenv.config()
@@ -477,7 +477,7 @@ Get all transactions sent with a certain owner ID:
 import dotenv from 'dotenv'
 
 // import required class, types and tool
-import Service, { Responses, Event, DebugLevels, wait } from '../src'
+import Service, { Responses, Event, DebugLevels, wait } from '@kiroboio/safe-transfer-lib'
 
 // configure the library
 dotenv.config()
@@ -574,7 +574,7 @@ To get all collectables transactions for an address or addresses, simply send a 
 import dotenv from 'dotenv'
 
 // import required class, types and tool
-import Service, { Responses, Event, DebugLevels, wait, Watch } from '../src'
+import Service, { Responses, Event, DebugLevels, wait, Watch } from '@kiroboio/safe-transfer-lib'
 
 // configure the library
 dotenv.config()
@@ -675,7 +675,7 @@ Result:
 
 [⬑ _to top_](#contents)
 
-##
+## Retrieve a transaction from deposit
 
 [⬑ _to top_](#contents)
 

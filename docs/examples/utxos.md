@@ -17,7 +17,7 @@ Kirobo API offers service to find unspent transaction outputs for addresses, as 
 import dotenv from 'dotenv'
 
 // import required class, types and tool
-import Service, { Responses, Event, DebugLevels, wait } from '../src'
+import Service, { Responses, Event, DebugLevels, wait } from '@kiroboio/safe-transfer-lib'
 
 // configure the library
 dotenv.config()

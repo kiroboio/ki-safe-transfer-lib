@@ -9,9 +9,9 @@ const version = 'v1' as const
 const apiUrl = 'https://api.kirobo.me' as const
 
 const endpoints: Record<string, string> = {
-  collect: 'transfer/action/collect',
-  retrieve: 'transfer/action/retrieve',
-  inbox: 'transfer/inbox',
+  collect: 'action/collect',
+  retrieve: 'action/retrieve',
+  inbox: 'collectables',
   transfers: 'transfers',
   utxos: 'utxos',
   exists: 'exists',

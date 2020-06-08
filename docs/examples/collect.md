@@ -19,7 +19,7 @@ import dotenv from 'dotenv'
 import { generateDecryptionKey } from '@kiroboio/safe-transfer-crypto'
 
 // import required class, types and tool
-import Service, { Responses, Event, DebugLevels, wait } from '../src'
+import Service, { Responses, Event, DebugLevels, wait } from '@kiroboio/safe-transfer-lib'
 
 // configure the library
 dotenv.config()
