@@ -1,140 +1,125 @@
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
-import Service, { DebugLevels, Currencies, Networks, Responses, Event } from '../src'
-import { TEXT, valuesForSettings } from '../src/data'
-import { makeStringFromTemplate, compareBasicObjects } from '../src/tools'
-import { ENV } from '../src/env'
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function eventBus(event: Event): void {
-  return
-}
+import dotenv from 'dotenv'
+import { is } from 'ramda'
+
+import Service, { DebugLevels, Currencies, Networks, Responses, AuthDetails } from '../src/.'
+import { TEXT, valuesForSettings } from '../src/data'
+import { makeString, compareBasicObjects, checkSettings } from '../src/tools'
+import { wait } from './tools'
+
+dotenv.config()
+
+const { log } = console
+
+const authDetails: AuthDetails = { key: process.env.AUTH_KEY ?? '', secret: process.env.AUTH_SECRET ?? '' }
 
 process.on('unhandledRejection', () => {
   return
 })
 
+let service: Service
+
 describe('Library configuration', () => {
-  test('service runs without settings', async () => {
-    new Service({ authDetails: { ...ENV.auth } })
+  afterAll(async () => {
+    if (service) {
+      service.disconnect()
+      await wait(2000)
+    }
   })
-  describe('- incorrect settings', () => {
-    test('- null not considered as settings', async () => {
-      try {
-        new Service(null)
-      } catch (error) {
-        expect(error).toBeInstanceOf(TypeError)
-        expect(error).toHaveProperty('message', `${TEXT.errors.validation.missingArgument}: authDetails.`)
-      }
-    })
-    test('- no string', async () => {
+  describe('incorrect settings:', () => {
+    it('doesn\'t take null as settings', async () => {
       expect.assertions(2)
 
       try {
-        new Service('string')
+        // @ts-expect-error
+        service = Service.getInstance(null, true)
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
-        expect(error).toHaveProperty('message', TEXT.errors.validation.typeOfObject)
+        expect(error).toHaveProperty('message', 'Data is missing: authDetails.')
       }
     })
-    test('- no multiple parameters', async () => {
+    it('doesn\'t take wrong type of params', async () => {
       expect.assertions(2)
 
       try {
-        // @ts-ignore
-        new Service('string', 'string')
+        // @ts-expect-error
+        service = Service.getInstance('string', true)
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', TEXT.errors.validation.typeOfObject)
       }
     })
-    test('- no functions', async () => {
+    it('doesn\'t take multiple parameters', async () => {
       expect.assertions(2)
 
       try {
-        new Service(() => {
-          return
-        })
-      } catch (error) {
-        expect(error).toBeInstanceOf(TypeError)
-        expect(error).toHaveProperty('message', TEXT.errors.validation.noFunction)
-      }
-    })
-    test('- no numbers', async () => {
-      expect.assertions(2)
-
-      try {
-        new Service(7)
+        // @ts-expect-error
+        Service.getInstance('string', 'string')
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', TEXT.errors.validation.typeOfObject)
       }
     })
-    test('- no booleans', async () => {
+
+    it('doesn\'t take empty object', async () => {
       expect.assertions(2)
 
       try {
-        new Service(true)
-      } catch (error) {
-        expect(error).toBeInstanceOf(TypeError)
-        expect(error).toHaveProperty('message', TEXT.errors.validation.typeOfObject)
-      }
-    })
-    test('- no empty object', async () => {
-      expect.assertions(2)
-
-      try {
-        new Service({})
+        // @ts-expect-error
+        service = Service.getInstance({})
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', TEXT.errors.validation.emptyObject)
       }
     })
-
-    test('- no extra keys', async () => {
+    it('doesn\'t take settings with extra keys', async () => {
       expect.assertions(2)
 
       try {
-        new Service({
+        Service.getInstance({
+          // @ts-expect-error
           key1: '1',
           key2: '1',
           key3: '1',
           key4: '1',
           key5: '1',
           key6: '1',
-        })
+        },
+        true)
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', `${TEXT.errors.validation.unknownKeys}key1.`)
       }
     })
-    test('- no unknown keys', async () => {
+    it('doesn\'t take settings with unknown keys', async () => {
       expect.assertions(2)
 
       try {
-        new Service({ key1: '1' })
+        // @ts-expect-error
+        Service.getInstance({ key1: '1' }, true)
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', `${TEXT.errors.validation.unknownKeys}key1.`)
       }
     })
-    test('- wrong value type', async () => {
+    it('doesn\'t take settings with wrong value type', async () => {
       expect.assertions(2)
 
       try {
-        new Service({ debug: '1' })
+        // @ts-expect-error
+        Service.getInstance({ debug: '1' })
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
-        expect(error).toHaveProperty(
-          'message',
-          makeStringFromTemplate(TEXT.errors.validation.wrongValueType, ['debug', 'number']),
-        )
+        expect(error).toHaveProperty('message', makeString(TEXT.errors.validation.wrongValueType, ['debug', 'number']))
       }
     })
-    test('- wrong value', async () => {
+    it('doesn\'t take settings with wrong values', async () => {
       expect.assertions(2)
 
       try {
-        new Service({ debug: 5 })
+        // @ts-expect-error
+        Service.getInstance({ debug: 5 })
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
 
@@ -142,27 +127,41 @@ describe('Library configuration', () => {
 
         expect(error).toHaveProperty(
           'message',
-          makeStringFromTemplate(TEXT.errors.validation.wrongValue, ['5', 'debug', list.join(', ')]),
+          makeString(TEXT.errors.validation.wrongValue, ['5', 'debug', list.join(', ')]),
         )
       }
     })
   })
-  describe('- correct settings', () => {
-    test('- correct value provided & retrieved', async () => {
+  describe('correct settings:', () => {
+    it('runs without settings (auth is always required)', async () => {
+      try {
+        service = Service.getInstance({ authDetails })
+        expect(is(Object, service)).toBe(true)
+      } catch (err) {
+        log(err)
+      }
+    })
+    it('doesn\'t throw if provided correct settings', async () => {
+      expect.assertions(1)
+
       const settings = {
         debug: DebugLevels.VERBOSE,
         currency: Currencies.Bitcoin,
         network: Networks.Testnet,
         respondAs: Responses.Direct,
+        authDetails: {key:'',secret:''},
+        eventBus: () => { log() },
       }
 
-      const service = new Service({ ...settings, authDetails: { ...ENV.auth } })
+      try {
+        service = Service.getInstance({ ...settings, authDetails }, true)
 
-      const result = service.getSettings()
+        const compare = checkSettings(service.getSettings())
 
-      const compare = compareBasicObjects(result, { ...settings, version: 'v1' })
-
-      expect(compare).toBe(true)
+        expect(compare).toBe(true)
+      } catch (err) {
+        log(err)
+      }
     })
   })
 })

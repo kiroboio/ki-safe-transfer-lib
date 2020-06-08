@@ -1,8 +1,14 @@
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
-import Service, { DebugLevels } from '../src'
-import { TEXT } from '../src/data'
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 
-import { ENV } from '../src/env'
+import dotenv from 'dotenv'
+
+import Service, { DebugLevels } from '../src/.'
+import { wait } from './tools'
+import { validBitcoinAddresses } from './test_data'
+
+dotenv.config()
+
+const authDetails = { key: process.env.AUTH_KEY ?? '', secret: process.env.AUTH_SECRET ?? '' }
 
 process.on('unhandledRejection', () => {
   return
@@ -10,43 +16,69 @@ process.on('unhandledRejection', () => {
 
 describe('Send', () => {
   let service: Service
+
   beforeAll(async () => {
     try {
-      service = new Service({ debug: DebugLevels.MUTE, authDetails: { ...ENV.auth } })
-      await service.getStatus()
+      service = Service.getInstance({ debug: DebugLevels.MUTE, authDetails })
+      await wait(2000)
     } catch (e) {
       return
     }
   })
-  describe('- empty/incorrect argument validation', () => {
-    test('- throws Error on missing argument', async () => {
+   afterAll(async () => {
+     service.disconnect()
+     await wait(2000)
+   })
+  describe('empty/incorrect argument validation:', () => {
+    it('throws Error on missing argument', async () => {
+      expect.assertions(3)
+
       try {
-        // @ts-ignore
+        // @ts-expect-error
         await service.send()
-      } catch (error) {
-        expect(error).toBeInstanceOf(Error)
-        expect(error).toHaveProperty('message', TEXT.errors.validation.missingArgument)
+      } catch (err) {
+        expect(err).toBeInstanceOf(Object)
+        expect(err).toHaveProperty('name', 'BadProps')
+        expect(err).toHaveProperty('message', 'Data is missing')
       }
     })
-    test('- throws TypeError argument with wrong type', async () => {
+    it('throws TypeError argument with wrong type', async () => {
       try {
-        // @ts-ignore
+        // @ts-expect-error
         await service.send(1234)
-      } catch (error) {
-        expect(error).toBeInstanceOf(TypeError)
-        expect(error).toHaveProperty('message', TEXT.errors.validation.typeOfObject)
+      } catch (err) {
+         expect(err).toBeInstanceOf(Object)
+         expect(err).toHaveProperty('name', 'BadProps')
+         expect(err).toHaveProperty('message', 'Wrong type of argument')
       }
     })
-    test('- throws TypeError argument with empty object', async () => {
+    it('throws TypeError argument with empty object', async () => {
       try {
-        // @ts-ignore
+        // @ts-expect-error
         await service.send({})
-      } catch (error) {
-        expect(error).toBeInstanceOf(TypeError)
-        expect(error).toHaveProperty(
-          'message',
-          `${TEXT.errors.validation.malformedData} ${TEXT.errors.validation.missingValues}to, amount, collect, deposit.`,
-        )
+      } catch (err) {
+         expect(err).toBeInstanceOf(Object)
+         expect(err).toHaveProperty('name', 'BadProps')
+         expect(err).toHaveProperty('message', 'Data is missing')
+      }
+    })
+    it('throws TypeError for argument with unknown keys', async () => {
+      try {
+        await service.send({
+        // @ts-expect-error
+          id: 'string',
+          to: validBitcoinAddresses[2],
+          amount: 123,
+          collect: 'qwerty',
+          deposit: 'qwerty',
+          owner: '0123456789012345678901234567890',
+          depositPath: 'qwerty',
+          salt: 'qwerty'
+        })
+      } catch (err) {
+         expect(err).toBeInstanceOf(Object)
+         expect(err).toHaveProperty('name', 'BadProps')
+         expect(err).toHaveProperty('message', 'Wrong keys present: id.')
       }
     })
   })

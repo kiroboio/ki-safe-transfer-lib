@@ -1,13 +1,21 @@
-# Kirobo Retrievable Transfer Library
+![Kirobo](https://kirobo.io/wp-content/uploads/2020/01/cropped-logo.png)
 
-Please, find the documentation [here](docs/README.md#kirobo-retrievable-transfer-library-documentation).
+# Kirobo Transfer Library
+
+Try example [code](docs/examples/examples.md).
+
+> ☝In case you want to work with API directly, please find useful information [here](docs/direct.md).
+
+Library documentation is located [here](docs/README.md#kirobo-transfer-library-documentation).
 
 ## Scripts
 
  - ```build``` - build library
  - ```test``` - single run tests
  - ```test:watch``` - tests in watch mode
- - ```dev``` - run ```client.ts``` from ```tests``` folder - please, use ```client_sample.ts```, located in the same folder for quick start
+ - ```test:watch:clean``` - tests without code coverage
+ - ```test:push``` - __CI__ mode tests
+ - ```dev``` - run ```client.ts``` from ```tests``` folder - please, rename and use ```client_sample.ts```, located in the same folder for quick start
   - ```dev:production``` - run the same in __production__ mode
  - ```lint``` - lint check
 

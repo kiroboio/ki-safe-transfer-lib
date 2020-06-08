@@ -1,7 +1,15 @@
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
-import Service, { SwitchActions } from '../src'
-import { ENV } from '../src/env'
-import { TEXT } from '../src/data'
+
+
+import dotenv from 'dotenv'
+
+import Service, { Responses } from '../src'
+import { wait } from './tools'
+
+dotenv.config()
+
+const { log } = console
+
+const authDetails = { key: process.env.AUTH_KEY ?? '', secret: process.env.AUTH_SECRET ?? '' }
 
 process.on('unhandledRejection', () => {
   return
@@ -11,33 +19,54 @@ describe('Connect', () => {
   let service: Service
   beforeAll(async () => {
     try {
-      service = new Service({ authDetails: { ...ENV.auth } })
-      await service.getStatus()
+      service = Service.getInstance({ authDetails, respondAs: Responses.Direct }, true)
+      await wait(2000)
     } catch (e) {
+      log(e)
       return
     }
   })
-  it('should not connect without authentication details', async () => {
-    expect.assertions(2)
-
+  afterAll(async () => {
     try {
-      // @ts-ignore
-      new Service()
-    } catch (error) {
-      expect(error).toBeInstanceOf(TypeError)
-      expect(error).toHaveProperty('message', `${TEXT.errors.validation.missingArgument}: authDetails.`)
+      service.disconnect()
+      await wait(2000)
+    } catch (e) {
+      log(e)
+      return
     }
   })
   it('provides status', () => {
-    expect(service.connect({ action: SwitchActions.STATUS })).toBe(true)
+    expect(service.getConnectionStatus()).toBe(true)
   })
-  it('allows to disconnect', () => {
+  it('allows to disconnect, checks for options', async () => {
     expect.assertions(2)
-    expect(service.connect({ action: SwitchActions.STATUS })).toBe(true)
-    service.connect({ action: SwitchActions.CONNECT, value: false })
-    expect(service.connect({ action: SwitchActions.STATUS })).toBe(false)
+
+    try {
+      expect(service.connect()).toBe(true)
+      service.disconnect({ respondDirect: true })
+      await wait(1000)
+      expect(service.getConnectionStatus()).toBe(false)
+    } catch (e) {
+      log(e)
+    }
   })
-  afterAll(() => {
-    service.connect({ action: SwitchActions.CONNECT, value: false })
+  it('allows to connect, checks for options', async () => {
+    expect.assertions(2)
+
+    try {
+
+      /** if connected - disconnect */
+      if (service.getConnectionStatus()) service.disconnect()
+
+      await wait(1000)
+      expect(service.getConnectionStatus()).toBe(false)
+
+      /** try to connect */
+      service.connect({ respondDirect: true })
+      await wait(2000)
+      expect(service.getConnectionStatus()).toBe(true)
+    } catch (e) {
+      log(e)
+    }
   })
 })

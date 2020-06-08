@@ -3,6 +3,10 @@ node_modules
 *.log
 coverage
 client.ts
+client2.ts
 *.swp
 .eslintcache
 dist
+.env
+backup
+env_config.ts

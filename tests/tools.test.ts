@@ -1,14 +1,20 @@
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
-import { capitalize, makeStringFromTemplate, compareBasicObjects } from '../src/tools'
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+
+import { capitalize, makeString, compareBasicObjects, makeOptions } from '../src/tools'
+import { Watch } from '../src'
+import { wait } from './tools'
 
 process.on('unhandledRejection', () => {
   return
 })
 
 describe('Tools', () => {
+  afterAll(async () => {
+    await wait(2000)
+  })
   describe('- "capitalize"', () => {
     test('- doesn\'t crash at non-string, and returns empty string', () => {
-      // @ts-ignore
+      // @ts-expect-error
       expect(capitalize(123)).toBe('')
     })
     test('- returns string with capitalized 1st letter', () => {
@@ -18,41 +24,41 @@ describe('Tools', () => {
       expect(capitalize('qwerty qwerty')).toBe('Qwerty qwerty')
     })
   })
-  describe('- "makeStringFromTemplate"', () => {
+  describe('- "makeString"', () => {
     test('- doesn\'t crash at no arguments', () => {
-      // @ts-ignore
-      expect(makeStringFromTemplate(123)).toBe('')
+      // @ts-expect-error
+      expect(makeString(123)).toBe('')
     })
     test('- doesn\'t crash at missing some arguments', () => {
-      // @ts-ignore
-      expect(makeStringFromTemplate(123)).toBe('')
+      // @ts-expect-error
+      expect(makeString(123)).toBe('')
     })
     test('- doesn\'t crash at wrong argument types', () => {
-      // @ts-ignore
-      expect(makeStringFromTemplate('qwerty')).toBe('')
+      // @ts-expect-error
+      expect(makeString('qwerty')).toBe('')
     })
     test('- doesn\'t crash at wrong argument types #2', () => {
-      // @ts-ignore
-      expect(makeStringFromTemplate('qwerty', [2, {}])).toBe('')
+      // @ts-expect-error
+      expect(makeString('qwerty', [2, {}])).toBe('')
     })
     test('- correctly creates string with one parameter', () => {
-      expect(makeStringFromTemplate('- correctly creates string with %1 parameter', ['one'])).toBe(
+      expect(makeString('- correctly creates string with %1 parameter', ['one'])).toBe(
         '- correctly creates string with one parameter',
       )
     })
     test('- correctly creates string with several parameters', () => {
-      expect(makeStringFromTemplate('- correctly %1 string with %2 parameters', ['creates', 'several'])).toBe(
+      expect(makeString('- correctly %1 string with %2 parameters', ['creates', 'several'])).toBe(
         '- correctly creates string with several parameters',
       )
     })
   })
   describe('- \'compareBasicObjects\'', () => {
     test('- doesn\'t crash at no arguments', () => {
-      // @ts-ignore
+      // @ts-expect-error
       expect(compareBasicObjects()).toBe(false)
     })
     test('- doesn\'t crash without some arguments', () => {
-      // @ts-ignore
+      // @ts-expect-error
       expect(compareBasicObjects(123)).toBe(false)
     })
     test('- different objects, don\'t match', () => {
@@ -66,6 +72,18 @@ describe('Tools', () => {
     })
     test('- objects with same basic values match', () => {
       expect(compareBasicObjects({ key: 'qwerty', keyTwo: 2 }, { key: 'qwerty', keyTwo: 2 })).toBe(true)
+    })
+  })
+  // TODO: test other features
+  describe('- \'makeOptions\'', () => {
+    test('- returns default pagination options without arguments', () => {
+      // @ts-expect-error
+      expect(JSON.stringify(makeOptions())).toBe(JSON.stringify({ $limit: 100, $skip: 0 }))
+    })
+    test('- chooses \'watch\' options correctly', () => {
+      expect(JSON.stringify(makeOptions({ watch: Watch.ADD }, Watch.DISABLE))).toBe(
+        JSON.stringify({ $limit: 100, $skip: 0, watch: 'add' }),
+      )
     })
   })
 })

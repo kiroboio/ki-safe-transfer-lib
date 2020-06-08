@@ -15,7 +15,7 @@ Encryption is required to ensure additional layer of client's data protection, e
 - recipient's address - can't be encrypted, as it is required for the recipient to receive the transaction, sent to his address;
 - 'from' value - which is optional, and even if provided can be a non-meaningful string;
 - 'hint' value - which is also optional, and might have meaning only for  automated recipient;
-- salt - if provided;
+- salt;
 - amount.
 
 The main element - the signed collect transaction, is encrypted to ensure it can't be used without the key. The passcode is not sent with Retrievable. The key for collection, when being sent to server, is an encrypted passcode;  The expiration policies ensure, that data is wiped and not stored - the successful transactions can be found on the blockchain.

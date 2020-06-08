@@ -1,10 +1,20 @@
-import Service, { DebugLevels, Responses, Event } from '../src'
-import { validBitcoinAddresses, listOfStatusKeys, typeOfStatusValues } from '../src/data'
-import { validateObject } from '../src/validators'
-import { ObjectWithStringKeysAnyValues, Status } from '../src/types'
-import { ENV } from '../src/env'
+import dotenv from 'dotenv'
 
-let storedEvent: Event | {}
+import Service, { DebugLevels, Responses, Event, Status, AuthDetails } from '../src/.'
+import { listOfStatusKeys, typeOfStatusValues } from '../src/data'
+
+import { changeType } from '../src/tools/other'
+import { validateObject } from '../src/validators'
+import { wait } from './tools'
+import { validBitcoinAddresses } from './test_data'
+
+dotenv.config()
+
+const { log } = console
+
+const authDetails: AuthDetails = { key: process.env.AUTH_KEY ?? '', secret: process.env.AUTH_SECRET ?? '' }
+
+let storedEvent: Event | Record<string, unknown>
 
 function eventBus(event: Event): void {
   storedEvent = event
@@ -12,14 +22,22 @@ function eventBus(event: Event): void {
 
 let service: Service
 
-async function setAsync(): Promise<Status> {
-  service = new Service({
-    debug: DebugLevels.MUTE,
-    eventBus,
-    respondAs: Responses.Callback,
-    authDetails: { ...ENV.auth },
-  })
-  return await service.getStatus()
+async function setAsync(): Promise<Status | void> {
+  try {
+    service = Service.getInstance(
+      {
+        debug: DebugLevels.MUTE,
+        eventBus,
+        respondAs: Responses.Callback,
+        authDetails,
+      },
+      true,
+    )
+    await wait(2000)
+    return await service.getStatus()
+  } catch (err) {
+    log(err)
+  }
 }
 
 process.on('unhandledRejection', () => {
@@ -29,7 +47,7 @@ process.on('unhandledRejection', () => {
 describe('Smaller functions', () => {
   beforeAll(async () => {
     try {
-      service = new Service({ debug: DebugLevels.MUTE, authDetails: { ...ENV.auth } })
+      service = Service.getInstance({ debug: DebugLevels.MUTE, authDetails })
       await service.getStatus()
     } catch (e) {
       return
@@ -38,11 +56,14 @@ describe('Smaller functions', () => {
   beforeEach(() => {
     storedEvent = {}
   })
-  describe('- getStatus', () => {
-    test('- returns information in "Direct" mode', async () => {
-      // await setDirect()
 
-      const result = await service.getStatus()
+  afterAll(async () => {
+    service.disconnect()
+    await wait(2000)
+  })
+  describe(' getStatus:', () => {
+    it('returns information in "Direct" mode', async () => {
+      const result = await service.getStatus({ respondDirect: true })
 
       let keysValuesCheck = true
 
@@ -52,19 +73,22 @@ describe('Smaller functions', () => {
         keysValuesCheck = false
       }
 
-      Object.keys(result).forEach(key => {
-        if (!listOfStatusKeys.includes(key)) keysValuesCheck = false
+      if (result) {
+        Object.keys(result).forEach((key) => {
+          if (!listOfStatusKeys.includes(key)) keysValuesCheck = false
+          else {
+            const resValType = typeof changeType<Record<string, string | number | boolean>>(result)[key]
 
-        const resValType = typeof result[key]
+            const reqValType = typeOfStatusValues[key]
 
-        const reqValType = typeOfStatusValues[key]
-
-        if (resValType !== reqValType) keysValuesCheck = false
-      })
+            if (resValType !== reqValType) keysValuesCheck = false
+          }
+        })
+      }
 
       expect(keysValuesCheck).toBe(true)
     })
-    test('- returns information in "Callback" mode', async () => {
+    it('returns information in "Callback" mode', async () => {
       expect.assertions(2)
       await setAsync()
       await service.getStatus()
@@ -73,7 +97,8 @@ describe('Smaller functions', () => {
 
       expect(eventReceived.type).toBe('service_update_status')
 
-      const result: ObjectWithStringKeysAnyValues = eventReceived.payload
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = changeType<Record<string, any>>(eventReceived.payload)
 
       let keysValuesCheck = true
 
@@ -83,7 +108,7 @@ describe('Smaller functions', () => {
         keysValuesCheck = false
       }
 
-      Object.keys(result).forEach(key => {
+      Object.keys(result).forEach((key) => {
         if (!listOfStatusKeys.includes(key)) keysValuesCheck = false
 
         const resValType = typeof result[key]
@@ -96,35 +121,40 @@ describe('Smaller functions', () => {
       expect(keysValuesCheck).toBe(true)
     })
   })
-  describe('- cached addresses functions', () => {
+  describe('cached addresses functions', () => {
     // eslint-disable-next-line @typescript-eslint/quotes
-    test(`- doesn't cache address in case of incorrect request`, async () => {
-      await service.getCollectables([validBitcoinAddresses[1]])
+    it(`doesn't cache address in case of incorrect request`, async () => {
+      expect.assertions(2)
+
+      try {
+        await service.getCollectables([validBitcoinAddresses[1]])
+
+        service.getLastAddresses()
+      } catch (error) {
+        expect(error).toBeInstanceOf(Object)
+        expect(error).toHaveProperty('name', 'BadProps')
+      }
+    })
+
+    it('caches address in case of correct request', async () => {
+      await service.getCollectables([validBitcoinAddresses[2]])
 
       const result = service.getLastAddresses()
 
-      expect(result.length).toBe(0)
+      expect(result.addresses[0]).toBe(validBitcoinAddresses[2])
     })
-
-    test('- caches address in case of correct request', async () => {
-      await service.getCollectables([validBitcoinAddresses[2]])
-
-      const result = service.getLastAddresses()[0]
-
-      expect(result).toBe(validBitcoinAddresses[2])
-    })
-    test('- clears cache', async () => {
+    it('clears cache', async () => {
       expect.assertions(2)
       await service.getCollectables([validBitcoinAddresses[2]])
 
-      const result = service.getLastAddresses()[0]
+      const result = service.getLastAddresses()
 
-      expect(result).toBe(validBitcoinAddresses[2])
+      expect(result.addresses[0]).toBe(validBitcoinAddresses[2])
       service.clearLastAddresses()
 
       const clear = service.getLastAddresses()
 
-      expect(clear.length).toBe(0)
+      expect(clear.addresses.length).toBe(0)
     })
   })
 })
