@@ -92,4 +92,4 @@ This will allow you to get 1 result, starting from result #2.
 
 [⬑ _to top_](#find-free-and-used-addresses)
 
-[◅ _return to documentation_](api.md#api-documentation)
+[◅ _return to documentation_](api.md)

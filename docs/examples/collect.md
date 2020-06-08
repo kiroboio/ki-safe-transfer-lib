@@ -1,5 +1,5 @@
 # Collecting transaction
-[◅ _return to examples_](examples.md#contents)
+[◅ _return to Examples_](examples.md#contents)
 
 Collecting a transaction is very simple - just provide the transaction ID and a key, encrypted with [@kiroboio/safe-transfer-crypto](https://www.npmjs.com/package/@kiroboio/safe-transfer-crypto) and salt from Collectable transaction you want to collect:
 

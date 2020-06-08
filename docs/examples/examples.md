@@ -1,4 +1,5 @@
 # Example Code
+[◅ _return home_](documentation.md#documentation)
 
 ## Contents
 
@@ -17,6 +18,7 @@
 - [Get retrievable transfers by owner ID](#get-retrievable-transfers-by-owner-id)
 - [Get collectable transactions](#get-collectable-transactions)
 - [Collecting transaction](collect.md)
+- [Retrieving transaction](retrieve.md)
 - [React app with Redux](react.md#react-app-with-redux)
 
 ## Get settings, connect & disconnect

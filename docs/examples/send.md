@@ -1,5 +1,5 @@
 # Sending transaction
-[◅ _return to examples_](examples.md#contents)
+[◅ _return to Examples_](examples.md#contents)
 
 To send a transaction, first the SendRequest has to be formed:
 

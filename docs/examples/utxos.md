@@ -1,5 +1,5 @@
 # Working with UTXOs
-[◅ _return to examples_](examples.md#contents)
+[◅ _return to Examples_](examples.md#contents)
 
 ## Contents
 
