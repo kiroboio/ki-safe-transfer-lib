@@ -5,9 +5,17 @@
 
 - [Endpoints](#endpoints)
 - [Direct HTTP use](#direct-http-use)
+  - [Methods](#methods)
   - [Login](#login)
   - [Networks](#networks)
   - [UTXOs](#utxos)
+  - [Exists](#exists)
+  - [Rates](#rates)
+  - [Get collectable transfers](#get-collectable-transfers)
+  - [Get (retrievable) transfers](#get-(retrievable)-transfers)
+  - [Send](#send)
+  - [Collect](#collect)
+  - [Retrieve](#retrieve)
 
 ## Endpoints
 
@@ -29,12 +37,25 @@ To connect to Kirobo API server directly you will need FeathersJS ([client setup
 
 You can use Kirobo API via HTTP (REST).
 
+### Methods
+
+The methods for endpoints are:
+
+- Networks = ```GET```
+- Utxos = ```GET```
+- Exists = ```GET```
+- Rates = ```GET```
+- Collectables = ```GET```
+- Transfers  = ```GET```, ```POST``` (to send)
+- Collect = ```POST``` (to collect)
+- Retrieve = ```POST``` (to retrieve)
+
 ### Login
 
 In order to use Kirobo API via HTTP, you need first obtain JSON token, via endpoint ```/authentication```:
 
 ```bash
-curl https://api.kirobo.me/authentication -H 'Content-Type: application/json' -d '{"key": <Your-Key>, "secret”:<Your-Secret>, "strategy": "local”} | jq
+curl https://api.kirobo.me/authentication -H 'Content-Type: application/json' -d '{"key": <Your-Key>, "secret”:<Your-Secret>, "strategy": "local”}
 ```
 
 As response you will get:
@@ -63,7 +84,7 @@ You can use the __accessToken__ in further requests.
 Now you can get networks status, using ```v1/btc/networks``` endpoint:
 
 ```bash
-curl https://api.kirobo.me/v1/btc/networks -H 'Authorization: <Your-Access-Token>' | jq
+curl https://api.kirobo.me/v1/btc/networks -H 'Authorization: <Your-Access-Token>'
 ```
 Response:
 ```bash
@@ -97,7 +118,7 @@ Response:
 To get UTXOs for address:
 
 ```bash
-curl 'https://api.kirobo.me/v1/btc/testnet/utxos/?address=address1;address2' -H 'Authorization: <Your-Access-Token>' | jq
+curl 'https://api.kirobo.me/v1/btc/testnet/utxos/?address=address1;address2' -H 'Authorization: <Your-Access-Token>'
 ```
 
 Result:
@@ -109,20 +130,20 @@ Result:
   "limit": 100,
   "data": [
     {
-      "address": "aaaaa",
+      "address": "address1",
       "height": 1746524,
-      "hex": "bbbbb",
+      "hex": "a914023992f7ce9aa99ad2cb7dc8ba2e16d95217b16b87",
       "type": "SCRIPTHASH",
-      "txid": "ccccc",
+      "txid": "5d26df3a0a4c6142d7ccf1d020ea08fedba578f3a7dce826a7de786213adc36a",
       "value": 200000,
       "vout": 0
     },
     {
-      "address": "ddddd",
+      "address": "address1",
       "height": 1746692,
-      "hex": "eeeee",
+      "hex": "a91403e0269195c1fda0ca2b1bf43c1924fef2ce56f387",
       "type": "SCRIPTHASH",
-      "txid": "fffff",
+      "txid": "5c1b700a5000c3108e04327fe3c5a1e22c8571a49b9e00e1a26619ac76a4fd26",
       "value": 200000,
       "vout": 0
     },
@@ -132,8 +153,105 @@ Result:
 
 [⬑ _to top_](#direct-work-with-kirobo-api)
 
-### exists
+### Exists
 
 ```bash
-
+curl 'https://api.kirobo.me/v1/btc/testnet/exists/?address=address1;address2;address3' -H 'Authorization: <Your-Access-Token>'
 ```
+
+Result:
+
+```bash
+{
+  "total": 2,
+  "skip": 0,
+  "limit": 100,
+  "data": [
+    {
+      "address": "address2"
+    },
+    {
+      "address": "address3"
+    }
+  ]
+}
+```
+[⬑ _to top_](#direct-work-with-kirobo-api)
+
+### Rates
+
+```bash
+curl 'https://api.kirobo.me/v1/btc/to/usd' -H 'Authorization: <Your-Access-Token>'
+```
+
+Choose sources:
+
+```bash
+curl 'https://api.kirobo.me/v1/btc/to/usd/?source=bitfinex.com;blockchain.info' -H 'Authorization: <Your-Access-Token>'
+```
+
+Response in this case will be only:
+
+```bash
+{
+  "total": 2,
+  "limit": 100,
+  "skip": 0,
+  "data": [
+    {
+      "source": "blockchain.info",
+      "timestamp": 1591625640,
+      "online": true,
+      "value": 9677.82
+    },
+    {
+      "source": "bitfinex.com",
+      "timestamp": 1591625640,
+      "online": true,
+      "value": 9672
+    }
+  ]
+}
+```
+
+[⬑ _to top_](#direct-work-with-kirobo-api)
+
+
+
+### Get collectable transfers
+
+```bash
+curl 'https://api.kirobo.me/v1/btc/testnet/collectables?to=address' -H 'Authorization: <Your-Access-Token>'
+```
+
+[⬑ _to top_](#direct-work-with-kirobo-api)
+
+### Get (retrievable) transfers
+
+```bash
+curl 'https://api.kirobo.me/v1/btc/testnet/transfers?owner=owner_id' -H 'Authorization: <Your-Access-Token>'
+```
+
+[⬑ _to top_](#direct-work-with-kirobo-api)
+
+### Send
+
+```bash
+curl -XPOST 'https://api.kirobo.me/v1/btc/testnet/transfers' -H 'Content-Type: application/json' --data '{"amount": 2343, "to":"address1", "collect":"collect_trx", "owner":"owner_id","salt":"salt"}' -H 'Authorization: <Your-Access-Token>'
+```
+
+[⬑ _to top_](#direct-work-with-kirobo-api)
+
+### Collect
+
+```bash
+curl -XPOST 'https://api.kirobo.me/v1/btc/testnet/action/collect' -H 'Content-Type: application/json' --data '{"id": "my-collecable-id", "key":"my-secret-key" }' -H 'Authorization: <Your-Access-Token>'
+```
+
+[⬑ _to top_](#direct-work-with-kirobo-api)
+
+### Retrieve
+```bash
+curl -XPOST 'https://api.kirobo.me/v1/btc/testnet/action/retrieve' -H 'Content-Type: application/json' --data '{"id": "my-collecable-id", "raw":"transaction-hex" }' -H 'Authorization: <Your-Access-Token>'
+```
+[⬑ _to top_](#direct-work-with-kirobo-api)
