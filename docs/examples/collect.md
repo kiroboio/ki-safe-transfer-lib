@@ -79,7 +79,7 @@ Event bus (or directly, if requested) will get the following event:
   }
 }
 ```
-If you have used watch options on this collect or on previous [getCollectables()](examples.md#get-collectable-transactions) / [getRetrievables()](examples.md#get-retrievable-transfers-by-owner-id) requests, you will start getting updates about this transaction. First will be:
+If you have used [watch](query_options.md#watch) options on this collect or on previous [getCollectables()](examples.md#get-collectable-transactions) / [getRetrievables()](examples.md#get-retrievable-transfers-by-owner-id) requests, you will start getting updates about this transaction. First will be:
 
 ```TypeScript
 {

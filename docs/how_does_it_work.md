@@ -7,7 +7,6 @@
 - [Creation](#creation)
 - [Life on server](#life-on-server)
   - [Expiration](#expiration)
-  - [Watch](#watch)
 - [Collection](#collection)
 
 ## Steps
@@ -109,14 +108,6 @@ export type Collectable = {
 Once transaction is sent to server - there are 5 minutes to start the collection process, after which the transaction will be wiped from the server. Once collection has been requested, the transaction changes state to 'collecting' and will be wiped after 10 blocks from confirmation block. The expiration information is provided for your convenience by both Retrievable and Collectable objects.
 
 ID strings are different for security purposes. The Retrievable has an ID, based on deposits' _hash_ and _vout_, while Collectable has a random ID, to avoid compromising the deposit hash, and thus leaking the sender's information. You can check out how to create ID [here](create_retrievable_id.md#create_retrievable_id).
-
-[⬑ _to top_](#how-does-it-work)
-
-### Subscription
-
-Subscription is an automated feature. Every new session of the library use (```const service = new Service({ authDetails })```) creates an individual real-time socket connection to the server. Every request for/about Retrievable and Collectable subscribes this session to the updates about the subject.
-
-For example, a request for all Collectable transactions for address 'xxxxx', will subscribe the session to events about all transactions with 'to: "xxxxx"' in the body, even those, not yet created. A request for Retrievable transaction or creation of Retrievable with 'id: "yyyyy"' will subscribe the session, which was used for that, to all the updates of this transaction.
 
 [⬑ _to top_](#how-does-it-work)
 

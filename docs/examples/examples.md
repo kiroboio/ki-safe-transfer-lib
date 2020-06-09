@@ -235,7 +235,7 @@ run()
 
 ```
 
-On the initial connection (when we __replace__ instance), library will automatically request status update, but it will not add it to watch list. It is done in this way so you can decide whether you want to 'watch' it or not. Without __eventBus__ callback function provided no real-time updates can be provided, such as transaction state updates, collection/retrieving information update and others.
+On the initial connection (when we __replace__ instance), library will automatically request status update, but it will not add it to [watch](../query_options.md#watch) list. It is done in this way so you can decide whether you want to 'watch' it or not. Without __eventBus__ callback function provided no real-time updates can be provided, such as transaction state updates, collection/retrieving information update and others.
 
  [⬑ _to top_](#contents)
 
@@ -378,7 +378,7 @@ You can utilize [paging](../paging.md) options to narrow down the results:
 ```TypeScript
 service.getRates({ limit: 2, skip: 1 })
 ```
-or add it to a 'watch' list to get updates:
+or add it to a [watch](../query_options.md#watch) list to get updates:
 ```TypeScript
 service.getRates({ limit: 2, skip: 1, watch: Watch.ADD })
 ```
@@ -557,7 +557,7 @@ Event bus will get [Results](response.md#results-object-with-data) object with [
 ```
 > Transaction type is [Retrievable](../how_does_it_work.md#retrievable-type).
 
-You can use [paging](../paging.md) and [watch](../watch.md#watch) options with this request:
+You can use [paging](../query_options.md#paging) and [watch](../query_options.md#watch) options with this request:
 
 ```TypeScript
 service.getByOwnerId(
@@ -643,7 +643,7 @@ The event bus function will receive [Results](response.md#results-object-with-da
 ```
 > Transaction type is [Collectable](../how_does_it_work.md#collectable-type).
 
-With [paging](../paging.md), [watch](../watch.md#watch) and [direct respond options](../query_options.md#query-options):
+With [paging](../query_options.md#paging), [watch](../query_options.md#watch) and [direct respond options](../query_options.md#respondDirect):
 
 ```TypeScript
 const result = await service.getCollectables(['xxxxx'], { limit: 1, watch: Watch.ADD, respondDirect: true })

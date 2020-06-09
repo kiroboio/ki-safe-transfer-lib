@@ -57,11 +57,11 @@ const service = Service.getInstance({
   }, true)
 
 ```
-From now on, the updates of status and/or regarding transactions will be coming automatically only in case use of [Watch](query_options.md) parameter in query options.
+From now on, the updates of status and/or regarding transactions will be coming automatically only in case use of [Watch](query_options.md#watch) parameter in query options.
 
-eventBus will be receiving all results of async functions, as well as events, connected to [watched](how_does_it_work.md#watch) transactions or events.
+eventBus will be receiving all results of async functions, as well as events, connected to [watched](query_options.md#watch) transactions or events.
 
-To use the eventBus feature, two settings has to be set - ```respondAs``` and ```eventBus```. ```respondAs``` should have ```Responses.Callback``` if you use TypeScript or ```'callback'``` if you use JavaScript. Callback response setting can be overridden for each individual request with a [respondDirect](query_options.md) parameter (where applicable).
+To use the eventBus feature, two settings has to be set - ```respondAs``` and ```eventBus```. ```respondAs``` should have ```Responses.Callback``` if you use TypeScript or ```'callback'``` if you use JavaScript. Callback response setting can be overridden for each individual request with a [respondDirect](query_options.md#respondDirect) parameter (where applicable).
 
 [⬑ _to top_](#eventbus)
 

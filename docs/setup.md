@@ -57,7 +57,7 @@ interface ConnectProps {
 
 > ¹ Event bus implementation is built with [Flux](https://facebook.github.io/flux/docs/dispatcher) logic in mind.
 
- > ² Please, see [Watch]() for details on ```watch``` feature.
+ > ² Please, see [Watch](query_options.md#watch) for details on ```watch``` feature.
 
  > Please, see [Default settings](#default-settings) for details on defaults.
 
@@ -208,7 +208,7 @@ There is an way to override the system-wide setting of ```respond``` per method:
 
    run()
    ```
-> More about QueryOptions is covered [here](query_options.md#query-options).
+> More about QueryOptions is covered [here](query_options.md#respondDirect).
 
 [⬑ _to top_](#setup)
 
