@@ -1,6 +1,6 @@
 # Library API
 
-[◅ _return home_](documentation.md#documentation)
+[◅ _return to documentation_](documentation.md)
 
 ## Contents
 
@@ -25,9 +25,6 @@
   - [async _getRate()_](#async-getrate)
   - [async _getRates()_](#async-getrates)
   - [async _retrieve ()_](#async-retrieve)
-  - [Additional tools]()
-    - [generateId](#generateid)
-    - [validateAddress](#validateaddress)
 
 ---
 
@@ -489,7 +486,7 @@ Event bus will get [Results](response.md#results-object-with-data) object with [
    }
 }
 ```
-> Transaction type is [Retrievable](../how_does_it_work.md#retrievable-type).
+> Transaction type is [Retrievable](how_does_it_work.md#life-on-server).
 
 [⬑ _to top_](#library-api)
 
@@ -606,45 +603,4 @@ and you will get:
 ```
 [⬑ _to top_](#library-api)
 
-
-## Additional tools
-
-In addition, library exposing several useful tools, provided by the libraries it is using:
-
-- generateId
-- validateAddress
-
-
-### async ___generateId()___
-
-This method generates random id, using the [uuid](https://www.npmjs.com/package/uuid#create-version-4-random-uuids)  library. Use:
-
-```typescript
-import { generateId } from '@kiroboio/safe-transfer-lib'
-
-const id = generateId()
-
-// f04eebd3-6580-4c0b-bedd-f9e358d80b2b
-```
-
-[⬑ _to top_](#library-api)
-
-### async ___validateAddress()___
-
-This method allows to validate crypto currency address, using [multicoin-address-validator]() library. Use:
-
-```typescript
-import { validateAddress } from '@kiroboio/safe-transfer-lib'
-
-const isOK = validateAddress({
-          address: 'xxxx',
-          currency: 'btc',
-          networkType: 'mainnet',
-        })
-
-// true
-```
-
-[⬑ _to top_](#library-api)
-
-[◅ _return home_](api.md#api-documentation)
+[◅ _return to documentation_](documentation.md)

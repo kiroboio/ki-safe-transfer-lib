@@ -1,5 +1,11 @@
 # Changelog
 
+#### v2.14.0 2020-06-09
+
+  Updated:
+
+  - final docs structure & contents
+
 #### v2.13.0 2020-06-09
 
   New:

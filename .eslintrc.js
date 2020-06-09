@@ -41,6 +41,7 @@ module.exports = {
     'no-multiple-empty-lines': ['error'],
     'no-spaced-func': ['error'],
     'no-whitespace-before-property': ['error'],
+    '@typescript-eslint/no-var-requires': [0],
     'space-before-blocks': ['error', 'always'],
     'spaced-comment': ['error', 'always', { markers: ['/'] }],
     'newline-per-chained-call': ['error', { ignoreChainWithDepth: 2 }],

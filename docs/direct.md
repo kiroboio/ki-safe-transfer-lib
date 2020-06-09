@@ -1,4 +1,5 @@
 # Direct work with Kirobo API
+
 [◅ _return home_](../README.md)
 
 ## Contents
@@ -16,6 +17,7 @@
   - [Send](#send)
   - [Collect](#collect)
   - [Retrieve](#retrieve)
+  - [Raw Transactions](#raw-transactions)
 
 ## Endpoints
 
@@ -28,6 +30,7 @@ To connect to Kirobo API server directly you will need FeathersJS ([client setup
 - ```v1/btc/testnet/transfers``` to [get list of (retrievable) transactions](examples/examples.md#get-retrievable-transfers-by-owner-id).
 - ```v1/btc/testnet/utxos``` to [get list of UTXOs](examples/utxos.md#get-utxos).
 - ```v1/btc/testnet/exists``` to check for existing UTXOs (to get [fresh](examples/utxos.md#get-fresh-utxos) or [used](examples/utxos.md#get-used-utxos) addresses).
+- ```v1/btc/testnet/transactions``` to get raw transactions for provided transaction ID
 
 > ☝To work in other network, change ```testnet``` to the required one.
 
@@ -406,3 +409,31 @@ curl -XPOST 'https://api.kirobo.me/v1/btc/testnet/action/retrieve' -H 'Content-T
 In response you will receive transaction ID.
 
 [⬑ _to top_](#direct-work-with-kirobo-api)
+
+## Raw Transactions
+
+To get raw transaction, you need to send transaction ID (or multiple IDs, delimited by ```;```):
+
+```bash
+curl 'https://api.kirobo.me/v1/btc/testnet/transactions?txid=123' -H 'Authorization: <Your-Access-Token>'
+```
+
+In response you will get result:
+
+```bash
+{
+  "total": 1,
+  "limit": 100,
+  "skip": 0,
+  "data": [
+    {
+      "hex": "020001gkh014901a664b63e61e3ae482c273d0ceacc4291676448a3ad16ea3e66ad23d1d1fe00000000171600147b180f450256ed5ff125aa1fb6fa28f67a7d313h4gk2345j3n266810000000000016001442cdef46488424c6807d290a9a1dc3347f1f31f2c2726a3200000016001405512bb294536a141d3f806aaedd7740c398815202473044022069369fa016479741d3603f61b351c97da7e30dbe7d5a944b2kj3lh4124e9a0c63eb0e2ff9022078d6fba225fc238ea36b0d0bbd8df653d09081e61532100fb86c85957e7a3a6c0121029d484446f7e9318eb67e0e86cb7b9d9c8fd4f88fd9232bb69969fd5846cad4ce22eb1a00",
+      "txid": "123"
+    }
+  ]
+}
+```
+
+[⬑ _to top_](#direct-work-with-kirobo-api)
+
+[◅ _return home_](../README.md)

@@ -124,7 +124,7 @@ class Connect extends Base {
         } else {
           this._logTechnical(MESSAGES.technical.notAllowed)
 
-          // show tech message, that exeed connection qty
+          // show tech message, that exceed connection qty
           if (this._connectionCounter > connectionTriesMax) {
             this._exceededQtyLog(connectionTriesMax)
             this._socket.disconnect().close()

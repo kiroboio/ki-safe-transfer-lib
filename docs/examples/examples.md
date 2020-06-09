@@ -1,5 +1,6 @@
 # Example Code
-[◅ _return home_](documentation.md#documentation)
+
+[◅ _return home_](../README.md)
 
 ## Contents
 
@@ -373,7 +374,7 @@ _eventBus_ will receive the following:
 }
 ```
 
-You can utilize [paging](../paging.md) options to narrow down the results:
+You can utilize [paging](../query_options.md#paging) options to narrow down the results:
 
 ```TypeScript
 service.getRates({ limit: 2, skip: 1 })
@@ -523,7 +524,7 @@ async function run(): Promise<void> {
 run()
 ```
 
-Event bus will get [Results](response.md#results-object-with-data) object with [paging](../paging.md) details and with array of transactions or empty array if non has been found:
+Event bus will get [Results](response.md#results-object-with-data) object with [paging](../query_options.md#paging) details and with array of transactions or empty array if non has been found:
 
 ```TypeScript
 { type: 'service_get_by_owner_id',
@@ -617,7 +618,7 @@ async function run(): Promise<void> {
 // run the main function
 run()
 ```
-The event bus function will receive [Results](response.md#results-object-with-data) object with [paging](../paging.md) details and with array of collectable transactions:
+The event bus function will receive [Results](response.md#results-object-with-data) object with [paging](../query_options.md#paging) details and with array of collectable transactions:
 
 ```TypeScript
 { type: 'service_get_collectables',
@@ -676,3 +677,5 @@ Result:
 ```
 
 [⬑ _to top_](#contents)
+
+[◅ _return home_](../README.md)

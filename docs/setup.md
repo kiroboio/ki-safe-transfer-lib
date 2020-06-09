@@ -1,5 +1,6 @@
 # Setup
-[◅ _return home_](api.md#api-documentation)
+
+[◅ _return to documentation_](documentation.md)
 
 ## Contents
 
@@ -13,6 +14,8 @@
   - [eventBus](#eventbus)
   - [network](#network)
   - [respondAs](#respondas)
+
+---
 
 ## Setting things up
 
@@ -290,4 +293,4 @@ Library comes with default settings. You can request the current settings (defau
 
   [⬑ _to top_](#setup)
 
-[◅ _return home_](api.md#api-documentation)
+[◅ _return to documentation_](documentation.md)

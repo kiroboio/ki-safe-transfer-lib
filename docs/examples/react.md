@@ -1,4 +1,5 @@
 # React app with Redux.
+
 [◅ _return to Examples_](examples.md)
 
 Below is the real life example of the library connected to a React app with Redux via middleware:
@@ -136,3 +137,5 @@ The result will be:
 > ☝By the way, _getSettings()_ is one of the few methods in the library that have __only__ direct response.
 
 [⬑ _to top_](#react-app-with-redux)
+
+[◅ _return to Examples_](examples.md)

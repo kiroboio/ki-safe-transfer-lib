@@ -1,5 +1,6 @@
 # Encryption
-[◅ _return home_](api.md#api-documentation)
+
+[◅ _return to documentation_](documentation.md)
 
 ## Contents
 
@@ -7,6 +8,8 @@
 - [What is being encrypted?](#what-is-being-encrypted)
 - [How to do it?](#how-to-do-it)
 - [What about collecting?](#what-about-collecting)
+
+---
 
 ## Why encryption?
 
@@ -63,4 +66,4 @@ const createCollectKey = (passcode: string, salt: string) => generateDecryptionK
 
 [⬑ _to top_](#encryption)
 
-[◅ _return home_](api.md#api-documentation)
+[◅ _return to documentation_](documentation.md)

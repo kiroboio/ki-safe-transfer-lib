@@ -1,5 +1,6 @@
 # Working with UTXOs
-[◅ _return to Examples_](examples.md#contents)
+
+[◅ _return to Examples_](examples.md)
 
 ## Contents
 
@@ -7,6 +8,8 @@
   - [Data type](#data-type)
 - [Get fresh UTXOs](#get-fresh-utxos)
 - [Get used UTXOs](#get-used-utxos)
+
+---
 
 Kirobo API offers services to [get UTXOs](../find_utxos.md#how-to-use-the-library), [find fresh](../find_addresses.md#how-to-use-the-library) and [used](../find_addresses.md#how-to-use-the-library) addresses
 
@@ -145,3 +148,5 @@ With response:
 ```
 
 [⬑ _to top_](#contents)
+
+[◅ _return to Examples_](examples.md)

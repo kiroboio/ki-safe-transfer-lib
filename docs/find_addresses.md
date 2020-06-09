@@ -1,14 +1,17 @@
 # Find Free and Used Addresses
-[◅ _return to documentation_](api.md#api-documentation)
+
+[◅ _return to documentation_](documentation.md)
 
 ## Contents
 
 - [What this service does?](#what-this-service-does)
 - [How to use the library?](#how-to-use-library)
 
+---
+
 ## What this service does?
 
-You can use library to send an array of addresses to check and receive either __only__ free or __only__ used addresses from the array. Search is done by the Kirobo server, with library providing convinient API and information workflow.
+You can use library to send an array of addresses to check and receive either __only__ free or __only__ used addresses from the array. Search is done by the Kirobo server, with library providing convenient API and information workflow.
 
 [⬑ _to top_](#find-free-and-used-addresses)
 
@@ -41,7 +44,7 @@ try {
 }
 ```
 
-Now, with ```service``` we have access to two methods: [getUsed]() and [getFresh](), which are taking array of addresses as parameter as following:
+Now, with ```service``` we have access to two methods: ```getUsed()``` and ```getFresh()```, which are taking array of addresses as parameter as following:
 
 ```TypeScript
 service.getUsed([ 'used_address_1', 'unused_address', 'used_address_2' ])
@@ -69,9 +72,9 @@ service.getFresh([ 'used_address_1', 'unused_address', 'used_address_2' ])
 //  }
 ```
 
-These similar methods provide opposite results: [getUsed]() returns only used addresses from your list, while the [getFree]() method returns only free addresses from your list.
+These similar methods provide opposite results: ```getUsed()``` returns only used addresses from your list, while the ```getFree()``` method returns only free addresses from your list.
 
-Optionally you can override the [default paging settings]():
+Optionally you can override the [default paging settings](query_options.md#paging):
 
 ```TypeScript
 service.getUsed([ 'used_address_1', 'unused_address', 'used_address_2' ], { limit: 1, skip: 1 })
@@ -92,4 +95,4 @@ This will allow you to get 1 result, starting from result #2.
 
 [⬑ _to top_](#find-free-and-used-addresses)
 
-[◅ _return to documentation_](api.md)
+[◅ _return to documentation_](documentation.md)

@@ -1,5 +1,6 @@
 # eventBus
-[◅ _return home_](api.md#api-documentation)
+
+[◅ _return to documentation_](documentation.md)
 
 eventBus feature is build with  [Flux](https://facebook.github.io/flux/docs/dispatcher) logic in mind. It uses provided callback function (for example, __dispatch__ one of [Redux](https://redux.js.org/api/store#dispatchaction)), capable of taking one object as argument. The object has only two keys: ```type``` and ```payload```. Type is a string, describing an event, starting with ```'service_'``` marker:
 
@@ -66,4 +67,4 @@ To use the eventBus feature, two settings has to be set - ```respondAs``` and ``
 
 [⬑ _to top_](#eventbus)
 
-[◅ _return home_](api.md#api-documentation)
+[◅ _return to documentation_](documentation.md)

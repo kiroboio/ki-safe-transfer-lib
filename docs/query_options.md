@@ -1,6 +1,6 @@
 # Query Options
 
-[◅ _return home_](README.md#kirobo-retrievable-transfer-library-documentation)
+[◅ _return to documentation_](documentation.md)
 
 ## Contents
 
@@ -9,6 +9,8 @@
 - [Actions](#actions)
   - [respondDirect](#respondDirect)
   - [watch](#watch)
+
+---
 
 ## Options
 
@@ -185,4 +187,5 @@ enum Watch {
 ```
 
 [⬑ _to top_](#query-options)
-[◅ _return home_](README.md#kirobo-retrievable-transfer-library-documentation)
+
+[◅ _return to documentation_](documentation.md)

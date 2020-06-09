@@ -87,7 +87,7 @@ class Base {
     )
   }
 
-  protected _authDetailsIsPresent() {
+  protected _authDetailsIsPresent(): string | boolean {
     if (!this._auth) return 'not present'
 
     if (isEmpty(this._auth)) return 'empty'

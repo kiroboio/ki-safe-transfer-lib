@@ -1,5 +1,6 @@
 # How does it work?
-[◅ _return home_](README.md#kirobo-retrievable-transfer-library-documentation)
+
+[◅ _return home_](README.md)
 
 ## Contents
 
@@ -8,6 +9,8 @@
 - [Life on server](#life-on-server)
   - [Expiration](#expiration)
 - [Collection](#collection)
+
+---
 
 ## Steps
 
@@ -77,7 +80,7 @@ interface Retrievable {
   expires: { at?: string; block?: number } // expiration details time/block height
   from?: string // 'from' note
   hint?: string // password hint
-  id: string // generated inidividual ID of transaction record
+  id: string // generated individual ID of transaction record
   state: string // state of the transaction
   to: string // address of the recipient
   updatedAt: string | Date
@@ -136,4 +139,4 @@ Collection of the transaction is a rather simple process. To do that you just ne
 
 [⬑ _to top_](#how-does-it-work)
 
-[◅ _return home_](README.md#kirobo-retrievable-transfer-library-documentation)
+[◅ _return home_](README.md)

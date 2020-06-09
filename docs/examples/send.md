@@ -1,5 +1,6 @@
 # Sending transaction
-[◅ _return to Examples_](examples.md#contents)
+
+[◅ _return to Examples_](examples.md)
 
 To send a transaction, first the SendRequest has to be formed:
 
@@ -112,3 +113,5 @@ Once transaction is accepted, the event will be sent (or library will respond di
 }
 ```
 [⬑ _to top_](#sending-transaction)
+
+[◅ _return to Examples_](examples.md)
