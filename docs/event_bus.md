@@ -5,7 +5,7 @@ eventBus feature is build with  [Flux](https://facebook.github.io/flux/docs/disp
 
 ```TypeScript
 enum EventTypes {
-   COLLECT_TRANSACTION = 'service_collect_transaction',
+  COLLECT_TRANSACTION = 'service_collect_transaction',
   CONNECT = 'service_connect',
   CREATED_COLLECTABLE = 'service_created_collectable',
   DISCONNECT = 'service_disconnect',
@@ -16,6 +16,7 @@ enum EventTypes {
   GET_CONNECTION_STATUS = 'service_get_connection_status',
   GET_FRESH = 'service_get_fresh',
   GET_ONLINE_NETWORKS = 'service_get_online_networks',
+  GET_RAW_TRANSACTIONS = 'service_get_raw_transactions',
   GET_RETRIEVABLE = 'service_get_retrievable',
   GET_RETRIEVABLES = 'service_get_retrievables',
   GET_USED = 'service_get_used',
