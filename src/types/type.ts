@@ -102,6 +102,11 @@ interface DataSpec {
   }
 }
 
+interface RawTransaction {
+  txid: string
+  hex: string
+}
+
 // eslint-disable-next-line max-len
 export {
   LastAddresses,
@@ -117,4 +122,5 @@ export {
   Utxo,
   MinMax,
   DataSpec,
+  RawTransaction,
 }

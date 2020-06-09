@@ -18,6 +18,7 @@ import {
   RequestOptions,
   ConnectProps,
   RatesSources,
+  RawTransaction,
 } from './types'
 import {
   validateOptions,
@@ -131,7 +132,7 @@ class Service extends Connect {
 
     /** validate props */
     try {
-      validateObjectWithStrings(changeType< Record<string, unknown>>(request), 'request', 'collect')
+      validateObjectWithStrings(changeType<Record<string, unknown>>(request), 'request', 'collect')
 
       /** validate options, if present */
       if (options) {
@@ -268,6 +269,64 @@ class Service extends Connect {
   }
 
   // TODO: add desc
+  // TODO: add test
+  public async getRawTransactions(
+    txids: string[],
+    options?: Omit<QueryOptions, 'watch'>,
+  ): Promise<Results<RawTransaction[]> | void> {
+
+    /** validate props */
+    try {
+      validatePropsArray(txids, 'string', 'txids', 'getRawTransactions')
+
+      /** validate options, if present */
+      if (options) {
+        validateOptions(options, 'getRawTransactions')
+      }
+    } catch (err) {
+
+      /** log error */
+      this._logError(makeString(ERRORS.service.gotError, ['getRawTransactions', 'validation']), err)
+
+      /** throw appropriate error */
+      throw makePropsResponseError(err)
+    }
+
+    /** make request */
+    let response: Results<RawTransaction[]>
+
+    try {
+      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getRawTransactions']))
+
+      response = await this._transactions.find({
+        query: {
+          txid: join(';', txids),
+          ...makeOptions(options, this._watch),
+        },
+      })
+
+      this._log(makeString(MESSAGES.technical.gotResponse, ['getRawTransactions']), response)
+    } catch (err) {
+      this._logApiError(makeString(ERRORS.service.gotError, ['getRawTransactions', 'request']), err)
+      throw makeReturnError(err.message, err)
+    }
+
+    /** return results */
+
+    try {
+
+      this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getRawTransactions', 'return']))
+
+      if (shouldReturnDirect(options, this._respondAs)) return response
+
+      this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getRawTransactions']))
+      this._useEventBus(EventTypes.GET_RAW_TRANSACTIONS, response)
+    } catch (err) {
+      throw makeReturnError(err.message, err)
+    }
+  }
+
+  // TODO: add desc
   public async getUtxos(addresses: string[], options?: Omit<QueryOptions, 'watch'>): Promise<Results<Utxo> | void> {
 
     /** validate props */
@@ -322,7 +381,7 @@ class Service extends Connect {
 
       /** validate options, if present */
       if (options) {
-        validateOptions(options, 'getUtxos')
+        validateOptions(options, 'getUsed')
       }
     } catch (err) {
 
@@ -415,7 +474,7 @@ class Service extends Connect {
     } catch (err) {
 
       /** log error */
-      this._logApiError('Service (getUtxos) caught [request] error.', err.message)
+      this._logApiError('Service (getFresh) caught [request] error.', err.message)
 
       /** throw error */
       throw makeApiResponseError(err)
@@ -539,7 +598,9 @@ class Service extends Connect {
 
     try {
       this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getRates']))
+
       response = await this._rateBtcToUsd.find({ query: { ...makeOptions(options, this._watch) } })
+
       this._log(makeString(MESSAGES.technical.gotResponse, ['getRates']), response)
     } catch (err) {
       this._logApiError(makeString(ERRORS.service.gotError, ['getRates', 'request']), err)

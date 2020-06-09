@@ -11,9 +11,9 @@
 
 ## Steps
 
-The Retrievable Transfer process consists of several blocks:
+The Retrievable Transfer process consists of several steps:
 - [ creation of retrievable transfer and sending it's details to server ](#creation)
-- [ life-cycle of transaction on server ](#life-on-server)
+- [ life-cycle of transaction details on server ](#life-on-server)
 - [ collection of the transfer and it's life-cycle after that ](#collection)
 
 [⬑ _to top_](#how-does-it-work)
@@ -23,7 +23,7 @@ The Retrievable Transfer process consists of several blocks:
 To create a retrievable transfer (or just Retrievable), that can be collected the following steps have to be made:
 
 - make deposit transaction (create, sign, transmit)
-- create collection transaction from deposit to recipient's address (create, sign, ___but not transmit___)
+- create raw collection transaction from deposit to recipient's address (create, sign, ___but not transmit___)
 - form an object, based on the following structure:
 
   ```TypeScript
@@ -34,20 +34,21 @@ To create a retrievable transfer (or just Retrievable), that can be collected th
     to: string, // recipient's address
     from?: string, // free-form text to describe sender, optional
     hint?: string, // this is for automated systems to send a hint of passcode to use, thus not revealing either passcode or logic to the Kirobo, optional
+    owner: string // owner ID to identify your transactions later
+    salt: string // salt used to encrypt collect transaction, so the passcode provided on collect can decrypt collect transaction
   }
   ```
   > ¹ for encrypting transaction, please refer [this section](encryption.md).
 
-- send the above object with data to Kirobo, using [send()](endpoints.md#async-send) function.
+- send the above object with data to Kirobo, using [send()](api.md#async-send) function.
 
-After the positive response from server that the transaction has been accepted, current session will be receiving the updates through [eventBus] on the changes of the transaction status. This is how the [subscription](#subscription) mechanism works.
-To check manually or to start getting updates in the new session (connection) use either [getRetrievable()](endpoints.md#async-getretrievable) with id, or [getCollectables()](endpoints.md#async-getcollectables) using the array of recipient's addresses.
+After the positive response from blockchain server, you can receive updates on transaction status, in case you are using [watch](query_options.md#watch) options. that the transaction has been accepted. To check manually or to start getting updates in the new session (connection) use either [getByOwnerId()](endpoints.md#async-getbyownerid) with owner ID, or [getCollectables()](endpoints.md#async-getcollectables) using the array of recipient's addresses.
 
 [⬑ _to top_](#how-does-it-work)
 
 ## Life on server
 
-After creation of the Retrievable transaction a Collectable one appears and those, [subscribed](#subscription) to recipient's address, will receive an event, with Collectable object. We'll talk about subscription mechanism in a bit. The difference between the Retrievable and Collectable objects is slight - after all, both of them are the same transaction. Here are the types of them:
+After creation of the Retrievable transaction a Collectable one appears and those, [watching](query_options.md#watch) after  recipient's address, will receive an event, with Collectable object. We'll talk about watch (subscription) mechanism in a bit. The difference between the Retrievable and Collectable objects is slight - after all, both of them are the same transaction. Here are the types of them:
 
 ```TypeScript
 interface Retrievable {
@@ -83,26 +84,28 @@ interface Retrievable {
   owner: string // owner ID
 }
 
-export type Collectable = {
-  amount: number
-  collect: {
-    broadcasted: number;
-    confirmed: number;
-    txid: string
+interface Collectable {
+  amount: number // the transfer amount in satoshi
+   collect: // collect info,
+  {
+    broadcasted: number // blockchain height
+    confirmed: number // block number of confirmed transaction
+    txid: string // the tx id of the transaction
   }
   createdAt: string
-  expires: { at: string }
-  from?: string
-  hint?: string
-  id: string // transaction id on server, different from the Retrievable one¹
-  salt: string // salt for passcode encryption
-  state: string
-  to: string
+  expires: {
+    at?: string | Date
+    block?: number
+  }
+  from?: string // senders attached message
+  hint?: string // senders attached passcode hint
+  id: string // unique id
+  salt: string // salt use to encrypt the 'collect' transaction
+  state: 'ready' | 'collecting' | 'collected' // collect state
+  to: string // the destination address
   updatedAt: string
 }
 ```
-> ¹ We'll cover this below.
-
 #### Expiration
 
 Once transaction is sent to server - there are 5 minutes to start the collection process, after which the transaction will be wiped from the server. Once collection has been requested, the transaction changes state to 'collecting' and will be wiped after 10 blocks from confirmation block. The expiration information is provided for your convenience by both Retrievable and Collectable objects.

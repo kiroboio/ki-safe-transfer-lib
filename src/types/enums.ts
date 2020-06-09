@@ -6,7 +6,8 @@ enum Endpoints {
   Utxos = 'utxos',
   Exists = 'exists',
   RateToUsd = 'to/usd',
-  Retrieve = 'retrieve'
+  Retrieve = 'retrieve',
+  Transactions = 'transactions'
 }
 
 // who the service should respond from methods:
@@ -33,6 +34,7 @@ enum EventTypes {
   GET_RETRIEVABLES = 'service_get_retrievables',
   GET_USED = 'service_get_used',
   GET_UTXOS = 'service_get_utxos',
+  GET_RAW_TRANSACTIONS = 'service_get_raw_transactions',
   REMOVED_COLLECTABLE = 'service_removed_collectable',
   REMOVED_RETRIEVABLE = 'service_removed_retrievable',
   RETRIEVE = 'service_retrieve',
