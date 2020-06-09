@@ -7,7 +7,7 @@
 - [Creation](#creation)
 - [Life on server](#life-on-server)
   - [Expiration](#expiration)
-  - [Subscription](#subscription)
+  - [Watch](#watch)
 - [Collection](#collection)
 
 ## Steps

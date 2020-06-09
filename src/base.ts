@@ -33,6 +33,8 @@ class Base {
 
   protected _watch: Watch | undefined = undefined
 
+  public isAuthed = false
+
   constructor(debug: DebugLevels) {
     this._debug = debug
 
@@ -105,6 +107,7 @@ class Base {
       currency: this._currency,
       debug: this._debug,
       eventBus: !!this._eventBus,
+      isAuthed: this.isAuthed,
       lastAddresses: this._lastAddresses,
       network: this._network,
       respondAs: this._respondAs,

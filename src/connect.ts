@@ -65,8 +65,6 @@ class Connect extends Base {
 
   protected _manuallyDisconnected = false
 
-  public isAuthed = false
-
   constructor(props: ConnectProps) {
     super(debugLevelSelector(props?.debug))
 

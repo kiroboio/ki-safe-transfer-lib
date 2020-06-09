@@ -4,6 +4,7 @@
 ## Contents
 
   - [_getSettings()_](#getsettings)
+    - [_isAuthed_](#isAuthed)
   - [_getLastAddresses()_](#getlastaddresses)
   - [_clearLastAddresses()_](#clearlastaddresses)
   - [_connect()_](#connect)
@@ -26,7 +27,11 @@
 
 ---
 
+> ☝ "only _direct_ response" message means, that this method has response and it can only be received via direct response, not via [eventBus](event_bus.md).
+
 ## ___getSettings()___
+
+  > only _direct_ response
 
   Function to check the current settings of the library session:
 
@@ -38,25 +43,55 @@
   const result = service.getSettings()
 
   console.log(result)
-  //   {
+  // {
   //   authDetails: true,
   //   currency: 'btc',
   //   debug: 1,
   //   eventBus: true,
+  //   isAuthed: true,
   //   lastAddresses: { addresses: [] },
   //   network: 'testnet',
   //   respondAs: 'callback',
   //   version: 'v1'
   // }
   ```
+  > ¹ Here and further we are not going to show the imports and settings of the library in the code. You can get into details [here](setup.md#setup) or see more in [examples](examples/examples.md).
 
-  > ¹ Here and further we are not going to show the imports and settings of the library in the code. You can get into details [here](setup.md#setup).
+  > ☝ Check more details about [debug levels](setup.md#debug) and [default settings](setup.md#default-settings).
 
-  > Check more details about [debug levels](setup.md#debug) and [default settings](setup.md#default-settings).
+  The object in response contains settings and statuses as following:
 
-  [⬑ _to top_](#library-api)
+  - __authDetails__ - if authentication details are present (__not__ that they are correct)
+  - __currency__ - crypto currency
+  - __debug__ - [debug level](setup.md#debug)
+  - __eventBus__ - if eventBus (callback) function has been set
+  - __isAuthed__ - if connection to Kirobo API has been established and authorized
+  - __lastAddresses__ - addresses cache for [getCollectables()](#caching-of-get-collectables-request) function
+  - __network__ - blockchain network
+  - __respondAs__ - global setting for [respond](setup.md#respondas)
+  - __version__ - API target version
+
+[⬑ _to top_](#library-api)
+
+### ___isAuthed___
+
+  > only _direct_ response
+
+  To ensure the library has connected correctly to the API and ready to use, you can get the value of _isAuthed_ state from inside of the library:
+
+  ```TypeScript
+  ...
+
+  const { isAuthed } = service
+
+  console.log(isAuthed) // true
+  ```
+
+[⬑ _to top_](#library-api)
 
 ## ___getLastAddresses()___
+
+  > only _direct_ response
 
   Show [cached](#caching-of-get-collectables-request) addresses, saved after last [getCollectables()](#async-getcollectables):
 
@@ -65,11 +100,19 @@
 
   const result = service.getLastAddresses()
 
-  console.log(result) // ['xxxxxx', 'xxxxxx']
+  console.log(result) // { addresses: ['xxxxxx', 'xxxxxx'] }
+  ```
+  or simply:
 
+  ```TypeScript
+  ...
+
+  const { addresses } = service.getLastAddresses()
+
+  console.log(addresses) // ['xxxxxx', 'xxxxxx']
   ```
 
-  > Also available through [getSettings()](#getsettings)
+  > Also available via [getSettings()](#getsettings)
 
   [⬑ _to top_](#library-api)
 
@@ -80,8 +123,21 @@
   ```TypeScript
   ...
 
+  // check for collectables
+  await service.getCollectables(['address1'])
+
+  // get cached addresses
+  const checkOne = service.getLastAddresses().addresses
+
+  console.log(checkOne) // [ 'address1' ]
+
+  // clear addresses
   service.clearLastAddresses()
 
+  // get cached addresses again
+  const checkTwo = service.getLastAddresses().addresses
+
+  console.log(checkTwo) // []
   ```
 
   [⬑ _to top_](#library-api)
@@ -94,7 +150,6 @@
   ...
 
   service.connect()
-
   ```
 
   [⬑ _to top_](#library-api)
@@ -107,8 +162,8 @@
   ...
 
   service.disconnect()
-
   ```
+  > ☝ If library has been manually disconnected, it will __not__ reconnect itself.
 
   [⬑ _to top_](#library-api)
 
