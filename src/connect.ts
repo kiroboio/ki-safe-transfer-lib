@@ -3,7 +3,7 @@ import io from 'socket.io-client'
 import crypto from 'crypto-js'
 import socket from '@feathersjs/socketio-client'
 import { AuthenticationResult } from '@feathersjs/authentication'
-import auth, { Storage, defaultStorage } from '@feathersjs/authentication-client'
+import auth, { Storage, getDefaultStorage } from '@feathersjs/authentication-client'
 
 import { Base } from './base'
 import {
@@ -104,12 +104,12 @@ class Connect extends Base {
 
 
     class safeStorage implements Storage {
-      private storage: Storage
+      private storage: Me
 
       private key: string
 
       constructor (key = 'd83du2') {
-        this.storage = defaultStorage
+        this.storage = getDefaultStorage()
         this.key = key
       }
 
@@ -125,11 +125,11 @@ class Connect extends Base {
       async setItem(key: string, value: any) {
         const cipherText = crypto.AES.encrypt(JSON.stringify(value), this.key)
 
-        return await this.storage.setItem!(key, cipherText.toString())
+        return await this.storage.setItem(key, cipherText.toString())
       }
 
       async removeItem(key: string) {
-        return await this.storage.removeItem!(key)
+        return await this.storage.removeItem(key)
       }
     }
 
