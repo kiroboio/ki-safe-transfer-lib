@@ -3,7 +3,7 @@ import io from 'socket.io-client'
 import crypto from 'crypto-js'
 import socket from '@feathersjs/socketio-client'
 import { AuthenticationResult } from '@feathersjs/authentication'
-import auth, { Storage, getDefaultStorage } from '@feathersjs/authentication-client'
+import auth, { Storage, getDefaultStorage, MemoryStorage } from '@feathersjs/authentication-client'
 
 import { Base } from './base'
 import {
@@ -38,6 +38,7 @@ import {
 
 import { apiUrl, version, endpoints, connectionTriesMax, connectionTimeout } from './config'
 import { WARNINGS, ERRORS, MESSAGES } from './text'
+import { StorageWrapper } from '@feathersjs/authentication-client/lib/storage'
 
 class Connect extends Base {
   private _connect: Application<unknown>
@@ -104,7 +105,7 @@ class Connect extends Base {
 
 
     class safeStorage implements Storage {
-      private storage: Storage
+      private storage: MemoryStorage | StorageWrapper
 
       private key: string
 
