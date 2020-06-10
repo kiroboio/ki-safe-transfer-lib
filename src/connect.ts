@@ -104,7 +104,7 @@ class Connect extends Base {
 
 
     class safeStorage implements Storage {
-      private storage: Me
+      private storage: Storage
 
       private key: string
 
