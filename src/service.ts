@@ -270,6 +270,63 @@ class Service extends Connect {
 
   // TODO: add desc
   // TODO: add test
+  public async getRawTransaction(
+    txid: string,
+    options?: Omit<QueryOptions, 'limit' | 'skip' | 'watch'>,
+  ): Promise<Results<RawTransaction[]> | void> {
+
+    /** validate props */
+    try {
+      if (isNil(txid)) throw new TypeError(makeString(ERRORS.validation.missingArgument, ['txid','', 'getRawTransaction']))
+
+      if (typeof txid !== 'string')
+        throw new TypeError(
+          makeString(ERRORS.validation.wrongTypeArgument, ['txid', 'getRawTransaction', typeof txid, 'string']),
+        )
+
+      /** validate options, if present */
+      if (options) {
+        validateOptions(options, 'getRawTransaction')
+      }
+    } catch (err) {
+
+      /** log error */
+      this._logError(makeString(ERRORS.service.gotError, ['getRawTransaction', 'validation']), err)
+
+      /** throw appropriate error */
+      throw makePropsResponseError(err)
+    }
+
+    /** make request */
+    let response: Results<RawTransaction[]>
+
+    try {
+      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getRawTransaction']))
+
+      response = await this._transactions.get(txid)
+
+      this._log(makeString(MESSAGES.technical.gotResponse, ['getRawTransaction']), response)
+    } catch (err) {
+      this._logApiError(makeString(ERRORS.service.gotError, ['getRawTransaction', 'request']), err)
+      throw makeReturnError(err.message, err)
+    }
+
+    /** return results */
+
+    try {
+      this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getRawTransaction', 'return']))
+
+      if (shouldReturnDirect(options, this._respondAs)) return response
+
+      this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getRawTransaction']))
+      this._useEventBus(EventTypes.GET_RAW_TRANSACTIONS, response)
+    } catch (err) {
+      throw makeReturnError(err.message, err)
+    }
+  }
+
+  // TODO: add desc
+  // TODO: add test
   public async getRawTransactions(
     txids: string[],
     options?: Omit<QueryOptions, 'watch'>,
@@ -314,7 +371,6 @@ class Service extends Connect {
     /** return results */
 
     try {
-
       this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getRawTransactions', 'return']))
 
       if (shouldReturnDirect(options, this._respondAs)) return response

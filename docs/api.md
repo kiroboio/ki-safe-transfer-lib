@@ -19,7 +19,8 @@
   - [async _getUtxos()_](find_utxos.md#how-to-use-the-library)
   - [async _getFresh()_](find_addresses.md#how-to-use-the-library)
   - [async _getUsed()_](find_addresses.md#how-to-use-the-library)
-  - [async _getRawTransactions()_](#getrawtransactions)
+  - [async _getRawTransaction()_](#async-getrawtransaction)
+  - [async _getRawTransactions()_](#async-getrawtransactions)
   - [async _getByOwnerId()_](#async-getbyownerid)
   - [async _getOnlineNetworks()_](#async-getonlinenetworks)
   - [async _getRate()_](#async-getrate)
@@ -397,25 +398,43 @@ async function run() {
 
 run()
 ```
+[⬑ _to top_](#library-api)
+[
+## async  ___getRawTransaction()___
+
+Working with hardware wallet one might face situation when raw transactions are required for certain transaction IDs. Kirobo API provides such a service. You can request raw transactions for a single transaction ID (below) or [multiple IDs](#async-getrawtransactions).
+
+```TypeScript
+try {
+  service.getRawTransaction('transaction_id')
+} catch (err) {
+  console.log(err)
+}
+```
+The response will be:
+```TypeScript
+{ type: 'service_get_raw_transactions',
+  payload:
+   { hex:
+      '5g9caZjdzDNX1JZMFWDv39YXq9Qn41ncLSSHc4yRBxiRjTTB0vaKNtlyqVJp9i0a4e2fr72XhxzUrHvmf2Q8mRrY43iwV9dlFYYjKOnfAhlWkPHuXROqgnaCsmTul1rqG8ZdKQFtBagKdSGSDLyJwgCdwHB4gbsrj4yjArthgG4zAODKC6ZoybRBBNt6ioOq78PKFmW7KsK0OCAruOTmBVuDQ0X9YjAu323nf6nf1MVnRFF1vNIjMxgKWcegfPwV5g9caZjdzDNX1JZMFWDv39YXq9Qn41ncLSSHc4yRBxiRjTTB0vaKNtlyqVJp9i0a4e2fr72XhxzUrHvmf2Q8mRrY43iwV9dlFYYjKOnfAhlWkPHuXROqgnaCsmTul1rqG8ZdKQFtBagKdSGSDLyJwgCdwHB4gbsrj4yjArthgG4zAODKC6ZoybRBBNt6ioOq78PKFmW7KsK0OCAruOTmBVuDQ0X9YjAu323nf6nf1MVnRFF1vNIjMxgKWcegfPwV',
+     txid: 'transaction_id'
+   }
+}
+```
+
+⬑ _to top_](#library-api)
 
 ## async  ___getRawTransactions()___
 
-Working with hardware wallet one might face situation when raw transactions are required for certain transaction IDs. Kirobo API provides such a service:
+If you want to use multiple transaction IDs (you can check single method above), do the following:
 
 ```TypeScript
-async function run(): Promise<void> {
-  // set a delay to allow the service proceed with initial connection, and authorization
-  await wait(2000)
-
   try {
-    service.getRawTransactions(['txid1','txid2'])
+    service.getRawTransactions(['transaction_id1','transaction_id2'])
   } catch (err) {
     console.log(err)
   }
 }
-
-// run the main function
-run()
 ```
 
 For this the response will be:
@@ -428,10 +447,12 @@ For this the response will be:
      skip: 0,
      data:
       [ { hex:
-           '02000001014901a664b63e61e3ae482c273d0ceacc4291676448a3ad16ea3e66ad23d1d1fe00000000171600147b180f450256ed5ff125aa1fb6fa28f67a7d31aefeffffff02266810000000000016001442cdef4648842j23h4l123h2j1k234gh12jkh4g122c2726a3200000016001405512bb29453141d3f806aaedd7740c3988152024730440220699fa016479741d3603f61b351c97da7e30db944b4e9a0c63eb0e2ff9022078d6fba225fc238e0bbd8df653d09081e61532100fb86c85957e7a3a6c0121029d484446f7e9318eb67e0e86cb7b9d9c8fd4f88fd9232bb69969fd5846cad4ce22eb1a00',
-          txid: 'txid1' },{ hex:
-           'asjdhlasjdhfl014901a664b63e61e3ae482c273d0ceacc4291676448a3ad16ea3e66ad23d1d1fe00000000171600147b180f450256ed5ff125aa1fb6fa28f67a7d31aefeffffff02266810000000000016001442cdef4648842j23h4l123h2j1k234gh12jkh4g122c2726a3200000016001405512bb29453141d3f806aaedd7740c3988152024730440220699fa016479741d3603f61b351c97da7e30db944b4e9a0c63eb0e2ff9022078d6fba225fc238e0bbd8df653d09081e61532100fb86c85957e7a3a6c0121029d484446f7e9318eb67e0e86cb7b9d9c8fd4f88fd9232bb69969fd5846cad4ce22eb1a00',
-          txid: 'txid2' }
+           '5g9caZjdzDNX1JZMFWDv39YXq9Qn41ncLSSHc4yRBxiRjTTB0vaKNtlyqVJp9i0a4e2fr72XhxzUrHvmf2Q8mRrY43iwV9dlFYYjKOnfAhlWkPHuXROqgnaCsmTul1rqG8ZdKQFtBagKdSGSDLyJwgCdwHB4gbsrj4yjArthgG4zAODKC6ZoybRBBNt6ioOq78PKFmW7KsK0OCAruOTmBVuDQ0X9YjAu323nf6nf1MVnRFF1vNIjMxgKWcegfPwV5g9caZjdzDNX1JZMFWDv39YXq9Qn41ncLSSHc4yRBxiRjTTB0vaKNtlyqVJp9i0a4e2fr72XhxzUrHvmf2Q8mRrY43iwV9dlFYYjKOnfAhlWkPHuXROqgnaCsmTul1rqG8ZdKQFtBagKdSGSDLyJwgCdwHB4gbsrj4yjArthgG4zAODKC6ZoybRBBNt6ioOq78PKFmW7KsK0OCAruOTmBVuDQ0X9YjAu323nf6nf1MVnRFF1vNIjMxgKWcegfPwV',
+          txid: 'transaction_id1'
+        },
+        { hex:
+           'AtupzJHwKvCEYZvi2pekq35nlM4K9P0hDkctPIlGEPnwpfHX8tx4lVt2kNhYC0EVr6tHFoBEpJLTqX7Kdd25CVFaQjcMSlDGhV1mDM0ce2ATnXKFSBkxtEgpAeshgjqr5meNreXLAzj4SM15wR5QSuJ0uKOmuRb89qer27eCkMgBpAsh9uYRH2A7eStEmvptebsga2ZC9fdplqjQxyFuWMyf0XD4F3QpsH3BEGNfQsnXBjMLlibIhnkLaGlM4O1BAtupzJHwKvCEYZvi2pekq35nlM4K9P0hDkctPIlGEPnwpfHX8tx4lVt2kNhYC0EVr6tHFoBEpJLTqX7Kdd25CVFaQjcMSlDGhV1mDM0ce2ATnXKFSBkxtEgpAeshgjqr5meNreXLAzj4SM15wR5QSuJ0uKOmuRb89qer27eCkMgBpAsh9uYRH2A7eStEmvptebsga2ZC9fdplqjQxyFuWMyf0XD4F3QpsH3BEGNfQsnXBjMLlibIhnkLaGlM4O1B',
+          txid: 'transaction_id2' }
       ]
    }
 }

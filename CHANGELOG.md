@@ -1,5 +1,15 @@
 # Changelog
 
+#### v2.15.0 2020-06-10
+
+  New:
+
+  - getRawTransaction
+
+  Updated:
+
+  - docs
+
 #### v2.14.0 2020-06-09
 
   Updated:
