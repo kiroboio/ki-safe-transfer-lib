@@ -1,5 +1,6 @@
 # Errors and handling them
-[◅ _return home_](api.md#api-documentation)
+
+[◅ _return to documentation_](documentation.md)
 
 ## Contents
 
@@ -7,6 +8,7 @@
 - [What types of error?](#what-types-of-error)
 - [How to handle them?](#how-to-handle-them)
 
+---
 
 ## Why throwing errors?
 
@@ -75,4 +77,4 @@ run()
 
 [⬑ _to top_](#errors-and-handling-them)
 
-[◅ _return home_](api.md#api-documentation)
+[◅ _return to documentation_](documentation.md)

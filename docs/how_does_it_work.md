@@ -1,5 +1,6 @@
 # How does it work?
-[◅ _return home_](README.md#kirobo-retrievable-transfer-library-documentation)
+
+[◅ _return home_](README.md)
 
 ## Contents
 
@@ -7,14 +8,15 @@
 - [Creation](#creation)
 - [Life on server](#life-on-server)
   - [Expiration](#expiration)
-  - [Subscription](#subscription)
 - [Collection](#collection)
+
+---
 
 ## Steps
 
-The Retrievable Transfer process consists of several blocks:
+The Retrievable Transfer process consists of several steps:
 - [ creation of retrievable transfer and sending it's details to server ](#creation)
-- [ life-cycle of transaction on server ](#life-on-server)
+- [ life-cycle of transaction details on server ](#life-on-server)
 - [ collection of the transfer and it's life-cycle after that ](#collection)
 
 [⬑ _to top_](#how-does-it-work)
@@ -24,7 +26,7 @@ The Retrievable Transfer process consists of several blocks:
 To create a retrievable transfer (or just Retrievable), that can be collected the following steps have to be made:
 
 - make deposit transaction (create, sign, transmit)
-- create collection transaction from deposit to recipient's address (create, sign, ___but not transmit___)
+- create raw collection transaction from deposit to recipient's address (create, sign, ___but not transmit___)
 - form an object, based on the following structure:
 
   ```TypeScript
@@ -35,20 +37,21 @@ To create a retrievable transfer (or just Retrievable), that can be collected th
     to: string, // recipient's address
     from?: string, // free-form text to describe sender, optional
     hint?: string, // this is for automated systems to send a hint of passcode to use, thus not revealing either passcode or logic to the Kirobo, optional
+    owner: string // owner ID to identify your transactions later
+    salt: string // salt used to encrypt collect transaction, so the passcode provided on collect can decrypt collect transaction
   }
   ```
   > ¹ for encrypting transaction, please refer [this section](encryption.md).
 
-- send the above object with data to Kirobo, using [send()](endpoints.md#async-send) function.
+- send the above object with data to Kirobo, using [send()](api.md#async-send) function.
 
-After the positive response from server that the transaction has been accepted, current session will be receiving the updates through [eventBus] on the changes of the transaction status. This is how the [subscription](#subscription) mechanism works.
-To check manually or to start getting updates in the new session (connection) use either [getRetrievable()](endpoints.md#async-getretrievable) with id, or [getCollectables()](endpoints.md#async-getcollectables) using the array of recipient's addresses.
+After the positive response from blockchain server, you can receive updates on transaction status, in case you are using [watch](query_options.md#watch) options. that the transaction has been accepted. To check manually or to start getting updates in the new session (connection) use either [getByOwnerId()](endpoints.md#async-getbyownerid) with owner ID, or [getCollectables()](endpoints.md#async-getcollectables) using the array of recipient's addresses.
 
 [⬑ _to top_](#how-does-it-work)
 
 ## Life on server
 
-After creation of the Retrievable transaction a Collectable one appears and those, [subscribed](#subscription) to recipient's address, will receive an event, with Collectable object. We'll talk about subscription mechanism in a bit. The difference between the Retrievable and Collectable objects is slight - after all, both of them are the same transaction. Here are the types of them:
+After creation of the Retrievable transaction a Collectable one appears and those, [watching](query_options.md#watch) after  recipient's address, will receive an event, with Collectable object. We'll talk about watch (subscription) mechanism in a bit. The difference between the Retrievable and Collectable objects is slight - after all, both of them are the same transaction. Here are the types of them:
 
 ```TypeScript
 interface Retrievable {
@@ -77,46 +80,40 @@ interface Retrievable {
   expires: { at?: string; block?: number } // expiration details time/block height
   from?: string // 'from' note
   hint?: string // password hint
-  id: string // generated inidividual ID of transaction record
+  id: string // generated individual ID of transaction record
   state: string // state of the transaction
   to: string // address of the recipient
   updatedAt: string | Date
   owner: string // owner ID
 }
 
-export type Collectable = {
-  amount: number
-  collect: {
-    broadcasted: number;
-    confirmed: number;
-    txid: string
+interface Collectable {
+  amount: number // the transfer amount in satoshi
+   collect: // collect info,
+  {
+    broadcasted: number // blockchain height
+    confirmed: number // block number of confirmed transaction
+    txid: string // the tx id of the transaction
   }
   createdAt: string
-  expires: { at: string }
-  from?: string
-  hint?: string
-  id: string // transaction id on server, different from the Retrievable one¹
-  salt: string // salt for passcode encryption
-  state: string
-  to: string
+  expires: {
+    at?: string | Date
+    block?: number
+  }
+  from?: string // senders attached message
+  hint?: string // senders attached passcode hint
+  id: string // unique id
+  salt: string // salt use to encrypt the 'collect' transaction
+  state: 'ready' | 'collecting' | 'collected' // collect state
+  to: string // the destination address
   updatedAt: string
 }
 ```
-> ¹ We'll cover this below.
-
 #### Expiration
 
 Once transaction is sent to server - there are 5 minutes to start the collection process, after which the transaction will be wiped from the server. Once collection has been requested, the transaction changes state to 'collecting' and will be wiped after 10 blocks from confirmation block. The expiration information is provided for your convenience by both Retrievable and Collectable objects.
 
 ID strings are different for security purposes. The Retrievable has an ID, based on deposits' _hash_ and _vout_, while Collectable has a random ID, to avoid compromising the deposit hash, and thus leaking the sender's information. You can check out how to create ID [here](create_retrievable_id.md#create_retrievable_id).
-
-[⬑ _to top_](#how-does-it-work)
-
-### Subscription
-
-Subscription is an automated feature. Every new session of the library use (```const service = new Service({ authDetails })```) creates an individual real-time socket connection to the server. Every request for/about Retrievable and Collectable subscribes this session to the updates about the subject.
-
-For example, a request for all Collectable transactions for address 'xxxxx', will subscribe the session to events about all transactions with 'to: "xxxxx"' in the body, even those, not yet created. A request for Retrievable transaction or creation of Retrievable with 'id: "yyyyy"' will subscribe the session, which was used for that, to all the updates of this transaction.
 
 [⬑ _to top_](#how-does-it-work)
 
@@ -142,4 +139,4 @@ Collection of the transaction is a rather simple process. To do that you just ne
 
 [⬑ _to top_](#how-does-it-work)
 
-[◅ _return home_](README.md#kirobo-retrievable-transfer-library-documentation)
+[◅ _return home_](README.md)

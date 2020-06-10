@@ -1,5 +1,27 @@
 # Changelog
 
+#### v2.15.0 2020-06-10
+
+  New:
+
+  - getRawTransaction
+
+  Updated:
+
+  - docs
+
+#### v2.14.0 2020-06-09
+
+  Updated:
+
+  - final docs structure & contents
+
+#### v2.13.0 2020-06-09
+
+  New:
+
+  - getRawTransactions
+
 #### v2.12.0 2020-06-08
 
   Updated:

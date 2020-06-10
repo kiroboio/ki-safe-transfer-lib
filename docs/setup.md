@@ -1,5 +1,6 @@
 # Setup
-[◅ _return home_](api.md#api-documentation)
+
+[◅ _return to documentation_](documentation.md)
 
 ## Contents
 
@@ -13,6 +14,8 @@
   - [eventBus](#eventbus)
   - [network](#network)
   - [respondAs](#respondas)
+
+---
 
 ## Setting things up
 
@@ -57,7 +60,7 @@ interface ConnectProps {
 
 > ¹ Event bus implementation is built with [Flux](https://facebook.github.io/flux/docs/dispatcher) logic in mind.
 
- > ² Please, see [Watch]() for details on ```watch``` feature.
+ > ² Please, see [Watch](query_options.md#watch) for details on ```watch``` feature.
 
  > Please, see [Default settings](#default-settings) for details on defaults.
 
@@ -208,7 +211,7 @@ There is an way to override the system-wide setting of ```respond``` per method:
 
    run()
    ```
-> More about QueryOptions is covered [here](query_options.md#query-options).
+> More about QueryOptions is covered [here](query_options.md#respondDirect).
 
 [⬑ _to top_](#setup)
 
@@ -290,4 +293,4 @@ Library comes with default settings. You can request the current settings (defau
 
   [⬑ _to top_](#setup)
 
-[◅ _return home_](api.md#api-documentation)
+[◅ _return to documentation_](documentation.md)

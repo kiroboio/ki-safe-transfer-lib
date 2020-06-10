@@ -127,7 +127,7 @@ describe('Getters', () => {
       expect(err).toHaveProperty('name', 'BadProps')
       expect(err).toHaveProperty(
         'message',
-        'Required argument (addresses) in getUtxos argument of [%3] function is missing.',
+        'Required argument (addresses) in  argument of [getUtxos] function is missing.',
       )
     }
   })

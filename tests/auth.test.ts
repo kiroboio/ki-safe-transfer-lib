@@ -35,7 +35,7 @@ describe('Authentication', () => {
     await wait(2000)
   })
   it('throws error on incorrect auth details', async () => {
-    expect.assertions(0)
+    expect.assertions(1)
 
     //  TODO: check
     try {

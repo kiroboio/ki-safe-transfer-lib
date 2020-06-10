@@ -1,3 +1,3 @@
 # Results
 
-## Resuts Object with Data
+## Results Object with Data

@@ -8,7 +8,7 @@ interface AuthDetails {
   secret: string
 }
 
-type Status = Omit<NetworkTip, 'netId' | 'timestamp'>
+type Status = NetworkTip
 
 interface ConnectProps {
   debug?: DebugLevels
@@ -25,6 +25,7 @@ interface NetworkTip {
   online: boolean
   netId: string
   timestamp: number
+  fees: number[]
   fee: number
   updatedAt: string | Date
 }
@@ -101,6 +102,11 @@ interface DataSpec {
   }
 }
 
+interface RawTransaction {
+  txid: string
+  hex: string
+}
+
 // eslint-disable-next-line max-len
 export {
   LastAddresses,
@@ -116,4 +122,5 @@ export {
   Utxo,
   MinMax,
   DataSpec,
+  RawTransaction,
 }

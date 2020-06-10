@@ -44,6 +44,7 @@ export function checkSettings(settings: Record<string, unknown>): boolean {
     network: 'testnet',
     respondAs: 'direct',
     version: 'v1',
+    isAuthed: true
   }
 
   // check if object

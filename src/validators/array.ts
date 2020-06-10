@@ -21,7 +21,7 @@ function validateArray(arr: unknown[], type: string[]): boolean {
 // TODO: desc
 // TODO: test
 function validatePropsArray(params: unknown[], type: string, paramName: string, method: string): void {
-  if (isNil(params)) throw new TypeError(makeString(ERRORS.validation.missingArgument, [paramName, method]))
+  if (isNil(params)) throw new TypeError(makeString(ERRORS.validation.missingArgument, [paramName, '', method]))
 
   if (not(is(Array, params)))
     throw new TypeError(makeString(ERRORS.validation.wrongTypeArgument, [paramName, method, typeof params, 'string[]']))

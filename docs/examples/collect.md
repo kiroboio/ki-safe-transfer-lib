@@ -1,4 +1,5 @@
 # Collecting transaction
+
 [◅ _return to Examples_](examples.md#contents)
 
 Collecting a transaction is very simple - just provide the transaction ID and a key, encrypted with [@kiroboio/safe-transfer-crypto](https://www.npmjs.com/package/@kiroboio/safe-transfer-crypto) and salt from Collectable transaction you want to collect:
@@ -79,7 +80,7 @@ Event bus (or directly, if requested) will get the following event:
   }
 }
 ```
-If you have used watch options on this collect or on previous [getCollectables()](examples.md#get-collectable-transactions) / [getRetrievables()](examples.md#get-retrievable-transfers-by-owner-id) requests, you will start getting updates about this transaction. First will be:
+If you have used [watch](query_options.md#watch) options on this collect or on previous [getCollectables()](examples.md#get-collectable-transactions) / [getRetrievables()](examples.md#get-retrievable-transfers-by-owner-id) requests, you will start getting updates about this transaction. First will be:
 
 ```TypeScript
 {
@@ -109,3 +110,5 @@ Updates will be coming on on each state change __ready__ > __collecting__ > __co
 ![alt](https://github.com/kiroboio/ki-safe-transfer-lib/raw/develop/docs/examples/screenshots/collected.jpg)
 
 [⬑ _to top_](#collecting-transaction)
+
+[◅ _return to Examples_](examples.md)

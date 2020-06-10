@@ -15,6 +15,7 @@ const endpoints: Record<string, string> = {
   transfers: 'transfers',
   utxos: 'utxos',
   exists: 'exists',
+  transactions: 'transactions'
 } as const
 
 export { version, apiUrl, endpoints, connectionTriesMax, connectionTimeout }

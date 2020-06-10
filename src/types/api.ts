@@ -28,10 +28,10 @@ interface Results<T> extends Paging {
  * @name Watch
  */
 export enum Watch {
-  DISABLE = 'disable', // to cancel all subscriptions (was ’none’ before) - this is the default behaviour when watch param does not exist
+  DISABLE = 'disable', // to cancel all subscriptions (was ’none’ before) - this is the default behavior when watch param does not exist
   ADD = 'add', // to add this query to the existing subscriptions (or create a new subscription for the current query when there is none)
-  REPLACE = 'replace', // to remove old subscriptions and create a new subsciption for the current query
-  IGNORE = 'ignore', // the current query won’t affect the exisiting subscription
+  REPLACE = 'replace', // to remove old subscriptions and create a new subscription for the current query
+  IGNORE = 'ignore', // the current query won’t affect the existing subscription
 }
 
 /**
