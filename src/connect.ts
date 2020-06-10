@@ -1,8 +1,9 @@
 import feathers, { Application } from '@feathersjs/feathers'
 import io from 'socket.io-client'
+import crypto from 'crypto-js'
 import socket from '@feathersjs/socketio-client'
 import { AuthenticationResult } from '@feathersjs/authentication'
-import auth from '@feathersjs/authentication-client'
+import auth, { Storage, defaultStorage } from '@feathersjs/authentication-client'
 
 import { Base } from './base'
 import {
@@ -101,7 +102,38 @@ class Connect extends Base {
       }),
     )
 
-    this._connect = connect.configure(auth({ storageKey: 'auth' }))
+
+    class safeStorage implements Storage {
+      private storage: Storage
+
+      private key: string
+
+      constructor (key = 'd83du2') {
+        this.storage = defaultStorage
+        this.key = key
+      }
+
+      async getItem(key: string) {
+        const cipherText = await this.storage.getItem(key)
+
+        const bytes = crypto.AES.encrypt(cipherText, this.key)
+
+        return JSON.parse(bytes.toString(crypto.enc.Utf8))
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      async setItem(key: string, value: any) {
+        const cipherText = crypto.AES.encrypt(JSON.stringify(value), this.key)
+
+        return await this.storage.setItem!(key, cipherText.toString())
+      }
+
+      async removeItem(key: string) {
+        return await this.storage.removeItem!(key)
+      }
+    }
+
+    this._connect = connect.configure(auth({ storageKey: 'auth', storage: new safeStorage() }))
 
     // connect/disconnect event processes
     this._logTechnical('Service is setting up connect/disconnect listeners...')

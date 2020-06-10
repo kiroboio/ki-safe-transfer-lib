@@ -59,6 +59,8 @@
     "@feathersjs/authentication-client": "4.5.4",
     "@feathersjs/feathers": "4.5.3",
     "@feathersjs/socketio-client": "4.5.4",
+    "@types/crypto-js": "^3.1.47",
+    "crypto-js": "^4.0.0",
     "multicoin-address-validator": "0.4.4",
     "ramda": "0.27.0",
     "socket.io-client": "2.3.0",
