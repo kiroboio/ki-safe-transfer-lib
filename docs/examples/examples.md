@@ -524,7 +524,7 @@ async function run(): Promise<void> {
 run()
 ```
 
-Event bus will get [Results](response.md#results-object-with-data) object with [paging](../query_options.md#paging) details and with array of transactions or empty array if non has been found:
+Event bus will get [Results](results.md) object with [paging](../query_options.md#paging) details and with array of transactions or empty array if non has been found:
 
 ```TypeScript
 { type: 'service_get_by_owner_id',
@@ -618,7 +618,7 @@ async function run(): Promise<void> {
 // run the main function
 run()
 ```
-The event bus function will receive [Results](response.md#results-object-with-data) object with [paging](../query_options.md#paging) details and with array of collectable transactions:
+The event bus function will receive [Results](results.md) object with [paging](../query_options.md#paging) details and with array of collectable transactions:
 
 ```TypeScript
 { type: 'service_get_collectables',
