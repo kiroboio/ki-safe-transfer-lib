@@ -140,7 +140,7 @@ class Connect extends Base {
 
     try {
       this._connect.io.on('connect', (): void => {
-        this._useEventBus(EventTypes.CONNECT, true)
+        // this._useEventBus(EventTypes.CONNECT, true)
         this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['is connected', 'authorization']))
 
         this._logTechnical(makeString(MESSAGES.technical.serviceIs, ['checking if it\'s allowed to proceed:']))
@@ -183,7 +183,7 @@ class Connect extends Base {
       this._connect.io.on(
         'disconnect',
         (payload: string) => this._logApiWarning(WARNINGS.connect.disconnect, capitalize(payload)),
-        this._useEventBus(EventTypes.DISCONNECT, true),
+        // this._useEventBus(EventTypes.DISCONNECT, true),
       )
     } catch (err) {
       this._logApiError(ERRORS.connect.on.disconnect.direct, err)
