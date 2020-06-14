@@ -1,5 +1,12 @@
 # Changelog
 
+#### v2.16.0 2020-06-14
+
+  New:
+
+  - send event on connect
+  - send event on disconnect
+
 #### v2.15.0 2020-06-10
 
   New:

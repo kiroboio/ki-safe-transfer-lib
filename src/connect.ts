@@ -103,13 +103,12 @@ class Connect extends Base {
       }),
     )
 
-
     class safeStorage implements Storage {
       private storage: MemoryStorage | StorageWrapper
 
       private key: string
 
-      constructor (key = 'd83du2') {
+      constructor(key = 'd83du2') {
         this.storage = getDefaultStorage()
         this.key = key
       }
@@ -141,6 +140,7 @@ class Connect extends Base {
 
     try {
       this._connect.io.on('connect', (): void => {
+        this._useEventBus(EventTypes.CONNECT, true)
         this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['is connected', 'authorization']))
 
         this._logTechnical(makeString(MESSAGES.technical.serviceIs, ['checking if it\'s allowed to proceed:']))
@@ -180,8 +180,10 @@ class Connect extends Base {
     }
 
     try {
-      this._connect.io.on('disconnect', (payload: string) =>
-        this._logApiWarning(WARNINGS.connect.disconnect, capitalize(payload)),
+      this._connect.io.on(
+        'disconnect',
+        (payload: string) => this._logApiWarning(WARNINGS.connect.disconnect, capitalize(payload)),
+        this._useEventBus(EventTypes.DISCONNECT, true),
       )
     } catch (err) {
       this._logApiError(ERRORS.connect.on.disconnect.direct, err)
