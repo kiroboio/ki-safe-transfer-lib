@@ -1,5 +1,6 @@
 import feathers, { Application } from '@feathersjs/feathers'
 import io from 'socket.io-client'
+import encrypt from 'socket.io-encrypt'
 import crypto from 'crypto-js'
 import socket from '@feathersjs/socketio-client'
 import { AuthenticationResult } from '@feathersjs/authentication'
@@ -96,6 +97,7 @@ class Connect extends Base {
 
     this._logTechnical('Service is configuring connection...')
     this._socket = io.connect(apiUrl)
+    encrypt('afhas83hsfd09q')(this._socket)
 
     const connect = feathers().configure(
       socket(this._socket, {
