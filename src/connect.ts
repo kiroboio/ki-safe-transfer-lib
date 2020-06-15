@@ -140,7 +140,6 @@ class Connect extends Base {
 
     try {
       this._connect.io.on('connect', (): void => {
-        // this._useEventBus(EventTypes.CONNECT, true)
         this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['is connected', 'authorization']))
 
         this._logTechnical(makeString(MESSAGES.technical.serviceIs, ['checking if it\'s allowed to proceed:']))
@@ -153,6 +152,7 @@ class Connect extends Base {
           (!this._lastConnect || diff(this._lastConnect) > connectionTimeout)
         ) {
           this._logTechnical(MESSAGES.technical.isAllowed)
+          // this._useEventBus(EventTypes.CONNECT, true)
           this._runAuth()
         } else {
           this._logTechnical(MESSAGES.technical.notAllowed)
@@ -554,7 +554,7 @@ class Connect extends Base {
     /** make request */
     try {
       this._logTechnical(makeString(MESSAGES.technical.requestingData, ['disconnect']))
-      this._socket.disconnect().close()
+      this._connect.io.destroy()
       response = true
       this._manuallyDisconnected = true
       this._log(makeString(MESSAGES.technical.gotResponse, ['disconnect']), response)
