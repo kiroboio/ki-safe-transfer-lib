@@ -1,5 +1,11 @@
 # Changelog
 
+#### v2.17.2 2020-06-15
+
+  Fix:
+
+  - restore sending events connect/disconnect
+
 #### v2.17.1 2020-06-15
 
   Fix:
