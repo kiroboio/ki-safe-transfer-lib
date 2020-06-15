@@ -1,5 +1,11 @@
 # Changelog
 
+#### v2.17.1 2020-06-15
+
+  Fix:
+
+  - connection test
+
 #### v2.17.0 2020-06-15
 
   New:
