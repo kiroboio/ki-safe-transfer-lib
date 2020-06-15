@@ -152,7 +152,7 @@ class Connect extends Base {
           (!this._lastConnect || diff(this._lastConnect) > connectionTimeout)
         ) {
           this._logTechnical(MESSAGES.technical.isAllowed)
-          // this._useEventBus(EventTypes.CONNECT, true)
+          this._useEventBus(EventTypes.CONNECT, true)
           this._runAuth()
         } else {
           this._logTechnical(MESSAGES.technical.notAllowed)
@@ -183,7 +183,7 @@ class Connect extends Base {
       this._connect.io.on(
         'disconnect',
         (payload: string) => this._logApiWarning(WARNINGS.connect.disconnect, capitalize(payload)),
-        // this._useEventBus(EventTypes.DISCONNECT, true),
+        this._useEventBus(EventTypes.DISCONNECT, true),
       )
     } catch (err) {
       this._logApiError(ERRORS.connect.on.disconnect.direct, err)
