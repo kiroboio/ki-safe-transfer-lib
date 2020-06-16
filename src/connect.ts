@@ -97,7 +97,7 @@ class Connect extends Base {
 
     this._logTechnical('Service is configuring connection...')
     this._socket = io.connect(apiUrl)
-    encrypt('afhas83hsfd09q')(this._socket)
+    // encrypt('afhas83hsfd09q')(this._socket)
 
     const connect = feathers().configure(
       socket(this._socket, {
