@@ -73,18 +73,16 @@ const encrypt = async (args: any[], key: string) => {
     const encoded = enc.encode(JSON.stringify(arg))
     const binaryDer = str2ab(key)
     const publicKey = await window.crypto.subtle.importKey(
-      'pkcs8',
+      'spki',
       binaryDer,
       {
-        name: 'RSA-PSS',
-        // modulusLength: 2048,
-        // publicExponent: new Uint8Array([1, 0, 1]),
+        name: 'RSA-OAEP',
         hash: 'SHA-256',
       },
       true,
       ['encrypt'],
     )
-    const encrypted = await window.crypto.subtle.encrypt({ name: 'RSA-OAEP' }, publicKey, encoded)
+    const encrypted = window.crypto.subtle.encrypt({ name: 'RSA-OAEP' }, publicKey, encoded)
     args[1] = { encrypted }
   }
   return args
