@@ -1,6 +1,6 @@
 import feathers, { Application } from '@feathersjs/feathers'
 import io from 'socket.io-client'
-import encrypt from 'socket.io-encrypt'
+// import encrypt from 'socket.io-encrypt'
 import crypto from 'crypto-js'
 import socket from '@feathersjs/socketio-client'
 import { AuthenticationResult } from '@feathersjs/authentication'
@@ -41,10 +41,59 @@ import { apiUrl, version, endpoints, connectionTriesMax, connectionTimeout } fro
 import { WARNINGS, ERRORS, MESSAGES } from './text'
 import { StorageWrapper } from '@feathersjs/authentication-client/lib/storage'
 
+function str2ab(str: string) {
+  const buf = new ArrayBuffer(str.length)
+  const bufView = new Uint8Array(buf)
+  for (let i = 0, strLen = str.length; i < strLen; i++) {
+    bufView[i] = str.charCodeAt(i)
+  }
+  return buf
+}
+
+const reservedEvents = {
+  error: true,
+  connect: true,
+  disconnect: true,
+  disconnecting: true,
+  newListener: true,
+  removeListener: true,
+  ping: true,
+  pong: true,
+}
+
+const encrypt = async (args: any[], key: string) => {
+  if (!window || !key) {
+    return args
+  }
+  const arg = args[args.length - 1]
+  if (!(typeof arg === 'function')) {
+    let enc = new TextEncoder()
+    const encoded = enc.encode(JSON.stringify(arg))
+    const binaryDer = str2ab(key)
+    const publicKey = await window.crypto.subtle.importKey(
+      'pkcs8',
+      binaryDer,
+      {
+        name: 'RSA-PSS',
+        // modulusLength: 2048,
+        // publicExponent: new Uint8Array([1, 0, 1]),
+        hash: 'SHA-256',
+      },
+      true,
+      ['encrypt'],
+    )
+    const encrypted = await window.crypto.subtle.encrypt({ name: 'RSA-OAEP' }, publicKey, encoded)
+    args[args.length - 1] = { encrypted }
+  }
+  return args
+}
+
 class Connect extends Base {
   private _connect: Application<unknown>
 
   private _socket: SocketIOClient.Socket
+
+  private _payloadKey: string
 
   protected _connectionCounter = 0
 
@@ -73,7 +122,7 @@ class Connect extends Base {
   constructor(props: ConnectProps) {
     super(debugLevelSelector(props?.debug))
 
-    this._logTechnical('Service (connect > constructor) sent \'debug\' setting to super, validating props')
+    this._logTechnical("Service (connect > constructor) sent 'debug' setting to super, validating props")
 
     this._validateProps(props)
 
@@ -97,8 +146,19 @@ class Connect extends Base {
 
     this._logTechnical('Service is configuring connection...')
     this._socket = io.connect(apiUrl)
-    // encrypt('afhas83hsfd09q')(this._socket)
+    this._payloadKey = ''
+    const emit = this._socket.emit
+    this._socket.emit = (event: string, ...args) => {
+      if (!this._payloadKey || (reservedEvents as any)[event]) return emit(event, ...args)
+      encrypt(args, this._payloadKey)
+        .then((encryptedArgs) => emit(event, ...encryptedArgs))
+        .catch(() => emit(event, ...args))
+      return this._socket
+    }
 
+    this._socket.on('encrypt', (publicKey: string) => {
+      this._payloadKey = publicKey
+    })
     const connect = feathers().configure(
       socket(this._socket, {
         timeout: 20000,
@@ -144,7 +204,7 @@ class Connect extends Base {
       this._connect.io.on('connect', (): void => {
         this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['is connected', 'authorization']))
 
-        this._logTechnical(makeString(MESSAGES.technical.serviceIs, ['checking if it\'s allowed to proceed:']))
+        this._logTechnical(makeString(MESSAGES.technical.serviceIs, ["checking if it's allowed to proceed:"]))
 
         this._logTechnical(`➜ connectionCounter: ${this._connectionCounter}`)
         this._logTechnical(`➜ lastConnect: ${this._lastConnect}`)
@@ -381,7 +441,6 @@ class Connect extends Base {
         })
         this._log(makeString(MESSAGES.technical.gotResponse, ['refreshInbox']), response)
       } catch (err) {
-
         /** log error */
         this._logApiError(makeString(ERRORS.service.gotError, ['refreshInbox', 'request']), err)
 
@@ -452,7 +511,6 @@ class Connect extends Base {
         validateOptions(options, 'getStatus', true)
       }
     } catch (err) {
-
       /** log error */
       this._logError(makeString(ERRORS.service.gotError, ['getStatus', 'validation']), err)
 
@@ -468,7 +526,6 @@ class Connect extends Base {
       response = await this._networks.find({ query: { netId: this._network, ...makeOptions(options, this._watch) } })
       this._log(makeString(MESSAGES.technical.gotResponse, ['getStatus']), response)
     } catch (err) {
-
       /** log error */
       this._logApiError(makeString(ERRORS.service.gotError, ['getStatus', 'request']), err)
 
@@ -497,7 +554,6 @@ class Connect extends Base {
         validateOptions(options, 'getConnectionStatus')
       }
     } catch (err) {
-
       /** log error */
       this._logError(makeString(ERRORS.service.gotError, ['getConnectionStatus', 'validation']), err)
 
@@ -513,7 +569,6 @@ class Connect extends Base {
       response = this._socket.connected
       this._log(makeString(MESSAGES.technical.gotResponse, ['getConnectionStatus']), response)
     } catch (err) {
-
       /** log error */
       this._logApiError(makeString(ERRORS.service.gotError, ['getConnectionStatus', 'request']), err)
 
@@ -542,7 +597,6 @@ class Connect extends Base {
         validateOptions(options, 'disconnect')
       }
     } catch (err) {
-
       /** log error */
       this._logError(makeString(ERRORS.service.gotError, ['disconnect', 'validation']), err)
 
@@ -560,7 +614,6 @@ class Connect extends Base {
       this._manuallyDisconnected = true
       this._log(makeString(MESSAGES.technical.gotResponse, ['disconnect']), response)
     } catch (err) {
-
       /** log error */
       this._logApiError(makeString(ERRORS.service.gotError, ['disconnect', 'request']), err)
 
@@ -589,7 +642,6 @@ class Connect extends Base {
         validateOptions(options, 'connect')
       }
     } catch (err) {
-
       /** log error */
       this._logError(makeString(ERRORS.service.gotError, ['connect', 'validation']), err)
 
@@ -607,7 +659,6 @@ class Connect extends Base {
       this._manuallyDisconnected = false
       this._log(makeString(MESSAGES.technical.gotResponse, ['connect']), response)
     } catch (err) {
-
       /** log error */
       this._logApiError(makeString(ERRORS.service.gotError, ['connect', 'request']), err)
 
