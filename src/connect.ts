@@ -71,7 +71,7 @@ const encrypt = async (args: any[], key: string) => {
   if (typeof arg === 'object') {
     let enc = new TextEncoder()
     const encoded = enc.encode(JSON.stringify(arg))
-    const binaryDer = str2ab(key)
+    const binaryDer = str2ab(window.atob(window.atob(key)))
     const publicKey = await window.crypto.subtle.importKey(
       'spki',
       binaryDer,
@@ -82,7 +82,7 @@ const encrypt = async (args: any[], key: string) => {
       true,
       ['encrypt'],
     )
-    const encrypted = window.crypto.subtle.encrypt({ name: 'RSA-OAEP' }, publicKey, encoded)
+    const encrypted =await window.crypto.subtle.encrypt({ name: 'RSA-OAEP' }, publicKey, encoded)
     args[1] = { encrypted }
   }
   return args
