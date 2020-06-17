@@ -59,14 +59,16 @@ const reservedEvents = {
   removeListener: true,
   ping: true,
   pong: true,
+  connecting: true,
+  reconnect: true,
 }
 
 const encrypt = async (args: any[], key: string) => {
-  if (!window || !key) {
+  if (typeof window === 'undefined' || !key) {
     return args
   }
-  const arg = args[args.length - 1]
-  if (!(typeof arg === 'function')) {
+  const arg = args[1]
+  if (typeof arg === 'object') {
     let enc = new TextEncoder()
     const encoded = enc.encode(JSON.stringify(arg))
     const binaryDer = str2ab(key)
@@ -83,7 +85,7 @@ const encrypt = async (args: any[], key: string) => {
       ['encrypt'],
     )
     const encrypted = await window.crypto.subtle.encrypt({ name: 'RSA-OAEP' }, publicKey, encoded)
-    args[args.length - 1] = { encrypted }
+    args[1] = { encrypted }
   }
   return args
 }
