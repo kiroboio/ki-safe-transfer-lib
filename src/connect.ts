@@ -1,6 +1,6 @@
 import feathers, { Application } from '@feathersjs/feathers'
 import io from 'socket.io-client'
-import encrypt from 'socket.io-encrypt'
+// import encrypt from 'socket.io-encrypt'
 import crypto from 'crypto-js'
 import socket from '@feathersjs/socketio-client'
 import { AuthenticationResult } from '@feathersjs/authentication'
