@@ -87,7 +87,7 @@ const encrypt = async (args: any[], key: string) => {
       ['encrypt'],
     )
     const ciphertext = await window.crypto.subtle.encrypt({ name: 'RSA-OAEP' }, publicKey, encoded)
-    const buffer = new Uint8Array(ciphertext, 0, 5)
+    const buffer = new Uint8Array(ciphertext)
     const encrypted = JSON.parse(`${buffer}`)
     args[1] = { encrypted }
   }
