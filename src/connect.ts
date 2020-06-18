@@ -166,17 +166,17 @@ class Connect extends Base {
     (this._socket as any)._on = this._socket.on
     this._socket.on = (event, handler) => {
       if (!this._cryptr && (reservedEvents as any)[event]) return (this._socket as any)._on(event, handler);
-      const that = this
-      return (this._socket as any)._on(event, function (this:any, ...args:any[]) {
-        if (args[0] && args[0].encrypted && that._cryptr) {
+
+      return (this._socket as any)._on(event, (...args:any[]) => {
+        if (args[0] && args[0].encrypted && this._cryptr) {
           try {
-            args = JSON.parse(that._cryptr.decrypt(args[0].encrypted));
+            args = JSON.parse(this._cryptr.decrypt(args[0].encrypted));
           } catch (error) {
-            (that._socket as any)._emit('error', error);
+            (this._socket as any)._emit('error', error);
             return;
           }
         }
-        return handler.call(this, ...args);
+        return handler.call(this._socket, ...args);
       });
     };
 
@@ -185,7 +185,7 @@ class Connect extends Base {
       this._payloadKey = publicKey
       const secret = '1234'
       this._cryptr = new Cryptr(secret)
-      this._socket.emit('decrypt', 'method1', secret)
+      this._socket.emit('decrypt', 'method1', { secret })
     })
     const connect = feathers().configure(
       socket(this._socket, {
