@@ -153,7 +153,7 @@ class Connect extends Base {
     this._payloadKey = '';
     (this._socket as any)._emit = this._socket.emit
     this._socket.emit = (event: string, ...args) => {
-      if (!this._payloadKey || (reservedEvents as any)[event]) return (this._socket as any).emit(event, ...args)
+      if (!this._payloadKey || (reservedEvents as any)[event]) return (this._socket as any)._emit(event, ...args)
       encrypt(args, this._payloadKey)
         .then((encryptedArgs) => (this._socket as any)._emit(event, ...encryptedArgs))
         .catch(() => (this._socket as any)._emit(event, ...args))
