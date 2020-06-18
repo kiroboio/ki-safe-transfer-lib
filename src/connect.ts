@@ -1,6 +1,6 @@
 import feathers, { Application } from '@feathersjs/feathers'
 import io from 'socket.io-client'
-// import encrypt from 'socket.io-encrypt'
+import encrypt from 'socket.io-encrypt'
 import crypto from 'crypto-js'
 import socket from '@feathersjs/socketio-client'
 import { AuthenticationResult } from '@feathersjs/authentication'
@@ -147,16 +147,16 @@ class Connect extends Base {
     if (eventBus) this._eventBus = eventBus
 
     // setup
-
+    const emit = Symbol
     this._logTechnical('Service is configuring connection...')
     this._socket = io.connect(apiUrl)
-    this._payloadKey = ''
-    const emit = this._socket.emit
+    this._payloadKey = '';
+    (this._socket as any)._emit = this._socket.emit
     this._socket.emit = (event: string, ...args) => {
-      if (!this._payloadKey || (reservedEvents as any)[event]) return emit(event, ...args)
+      if (!this._payloadKey || (reservedEvents as any)[event]) return (this._socket as any).emit(event, ...args)
       encrypt(args, this._payloadKey)
-        .then((encryptedArgs) => emit(event, ...encryptedArgs))
-        .catch(() => emit(event, ...args))
+        .then((encryptedArgs) => (this._socket as any)._emit(event, ...encryptedArgs))
+        .catch(() => (this._socket as any)._emit(event, ...args))
       return this._socket
     }
 
