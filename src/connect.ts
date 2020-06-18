@@ -185,7 +185,7 @@ class Connect extends Base {
       this._payloadKey = publicKey
       const secret = '1234'
       this._cryptr = new Cryptr(secret)
-      this._socket.emit('decrypt', secret)
+      this._socket.emit('decrypt', 'method1', secret)
     })
     const connect = feathers().configure(
       socket(this._socket, {
