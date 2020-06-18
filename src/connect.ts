@@ -1,7 +1,7 @@
 import feathers, { Application } from '@feathersjs/feathers'
 import io from 'socket.io-client'
-// import encrypt from 'socket.io-encrypt'
 import crypto from 'crypto-js'
+import Cryptr from 'cryptr'
 import socket from '@feathersjs/socketio-client'
 import { AuthenticationResult } from '@feathersjs/authentication'
 import auth, { Storage, getDefaultStorage, MemoryStorage } from '@feathersjs/authentication-client'
@@ -51,7 +51,7 @@ function str2ab(str: string) {
 }
 
 function ab2str(buf: ArrayBuffer) {
-  return String.fromCharCode.apply(null, new Uint16Array(buf) as any);
+  return String.fromCharCode.apply(null, new Uint8Array(buf) as any);
 }
 
 const reservedEvents = {
@@ -87,9 +87,10 @@ const encrypt = async (args: any[], key: string) => {
       ['encrypt'],
     )
     const ciphertext = await window.crypto.subtle.encrypt({ name: 'RSA-OAEP' }, publicKey, encoded)
-    // const buffer = new Uint8Array(ciphertext)
+    const buffer = new Uint8Array(ciphertext)
     // const encrypted = `${buffer}`
-    const encrypted  = Buffer.from(ciphertext).toString('base64')
+
+    const encrypted  =  btoa(String.fromCharCode.apply(null, buffer as any)) // Buffer.from(ciphertext).toString('hex')
     args[1] = { encrypted }
   }
   return args
@@ -100,7 +101,8 @@ class Connect extends Base {
 
   private _socket: SocketIOClient.Socket
 
-  private _payloadKey: string
+  private _payloadKey: string | undefined
+  private _cryptr: Cryptr | undefined
 
   protected _connectionCounter = 0
 
@@ -150,11 +152,9 @@ class Connect extends Base {
     if (eventBus) this._eventBus = eventBus
 
     // setup
-    const emit = Symbol
     this._logTechnical('Service is configuring connection...')
     this._socket = io.connect(apiUrl)
-    this._payloadKey = '';
-    (this._socket as any)._emit = this._socket.emit
+    ;(this._socket as any)._emit = this._socket.emit
     this._socket.emit = (event: string, ...args) => {
       if (!this._payloadKey || (reservedEvents as any)[event]) return (this._socket as any)._emit(event, ...args)
       encrypt(args, this._payloadKey)
@@ -163,8 +163,29 @@ class Connect extends Base {
       return this._socket
     }
 
+    (this._socket as any)._on = this._socket.on
+    this._socket.on = (event, handler) => {
+      if (!this._cryptr && (reservedEvents as any)[event]) return (this._socket as any)._on(event, handler);
+      const that = this
+      return (this._socket as any)._on(event, function (this:any, ...args:any[]) {
+        if (args[0] && args[0].encrypted && that._cryptr) {
+          try {
+            args = JSON.parse(that._cryptr.decrypt(args[0].encrypted));
+          } catch (error) {
+            (that._socket as any)._emit('error', error);
+            return;
+          }
+        }
+        return handler.call(this, ...args);
+      });
+    };
+
+
     this._socket.on('encrypt', (publicKey: string) => {
       this._payloadKey = publicKey
+      const secret = '1234'
+      this._cryptr = new Cryptr(secret)
+      this._socket.emit('decrypt', secret)
     })
     const connect = feathers().configure(
       socket(this._socket, {
