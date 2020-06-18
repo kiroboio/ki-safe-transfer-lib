@@ -50,6 +50,10 @@ function str2ab(str: string) {
   return buf
 }
 
+function ab2str(buf: ArrayBuffer) {
+  return String.fromCharCode.apply(null, new Uint16Array(buf) as any);
+}
+
 const reservedEvents = {
   error: true,
   connect: true,
@@ -82,8 +86,8 @@ const encrypt = async (args: any[], key: string) => {
       true,
       ['encrypt'],
     )
-    const encrypted =await window.crypto.subtle.encrypt({ name: 'RSA-OAEP' }, publicKey, encoded)
-    args[1] = { encrypted }
+    const encrypted = await window.crypto.subtle.encrypt({ name: 'RSA-OAEP' }, publicKey, encoded)
+    args[1] = { encrypted: JSON.parse(ab2str(encrypted)) }
   }
   return args
 }
