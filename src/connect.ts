@@ -112,15 +112,15 @@ const authEncrypt = async (args: unknown[], key?: string) => {
       true,
       ['encrypt'],
     )
-    
+
     const ciphertext = await window.crypto.subtle.encrypt({ name: 'RSA-OAEP' }, publicKey, encoded)
-    
-    const buffer = new Uint8Array(ciphertext)
+
+    const buffer = ciphertext ? new Uint8Array(ciphertext) : new Uint8Array()
     // const encrypted = `${buffer}`
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const encrypted = btoa(String.fromCharCode.apply(null, buffer as any))
-    
+
     args[1] = { encrypted }
   }
   
@@ -128,7 +128,7 @@ const authEncrypt = async (args: unknown[], key?: string) => {
 }
 
 const encrypt = async (args: unknown[], crypt?: { key: CryptoKey, iv: ArrayBuffer }) => {
-  if (typeof window === 'undefined' || !crypt) {
+  if (typeof window === 'undefined' || !crypt || typeof args[1] !== 'object') {
     return args
   }
   
@@ -241,31 +241,30 @@ class Connect extends Base {
     
     this._socket = (io.connect(apiUrl) as never)
     
+    /*
     this._socket._emit = this._socket.emit
     
     this._socket.emit = (event: string, ...args) => {
-      if (!this._socket._emit) {
-        return this._socket
-      }
-      
+
       if (!this._authKey || reservedEvents[event]) {
         return this._socket._emit(event, ...args)
       }
 
-      if (args[1] === 'authentication') {
+      console.warn('event', event, 'args[0]', args[0])
+
+      if (event === 'create' && args[0] === 'authentication' && typeof args[1] === 'object') {
+        console.warn('gen key')
         generateKey().then(({key, iv}) => {
           window.crypto.subtle.exportKey('raw', key)
-          .then(keydata => {
-            
-            const payload = JSON.parse(args[2])
-       
-            payload.encrypt = { 
+          .then(keyData => {       
+            console.warn('got key ', args[1])
+            args[1].encrypt = { 
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              key: btoa(String.fromCharCode.apply(null, new Uint8Array(keydata) as any)),
+              key: Buffer.from(keyData).toString('base64'),
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              iv: btoa(String.fromCharCode.apply(null, new Uint8Array(iv) as any)),
+              iv: Buffer.from(iv).toString('base64'),
             }
-            args[2] = JSON.stringify(payload)
+            console.warn('auth encrypt', args[1])
             authEncrypt(args, this._authKey)
             .then((encryptedArgs) => {
               this._payloadKey = { key, iv }
@@ -273,11 +272,17 @@ class Connect extends Base {
             })
           })
         })
-        .catch(() => this._socket._emit(event, ...args))
+        .catch((e) => {
+          console.error('error', e)
+          this._socket._emit(event, ...args)
+        })
       } else {
         encrypt(args, this._payloadKey)
         .then((encryptedArgs) => this._socket._emit(event, ...encryptedArgs))
-        .catch(() => this._socket._emit(event, ...args))
+        .catch((e) => {
+          console.error('error', e)
+          this._socket._emit(event, ...args)
+        })
       }
       
       return this._socket
@@ -285,27 +290,34 @@ class Connect extends Base {
 
     this._socket._on = this._socket.on
     this._socket.on = (event, handler) => {
+      console.warn('on event', event)
+
       if (!this._payloadKey && reservedEvents[event]) return this._socket._on(event, handler);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return (this._socket._on(event, async (...args: any[]) => {
+      return (this._socket._on(event, (...args: any[]) => {
+        console.warn('got', event)
+        
         if (args[0] && args[0].encrypted && this._payloadKey) {
-          try {
-            args = JSON.parse(await decrypt(args[0].encrypted, this._payloadKey))
-          } catch (error) {
+          decrypt(args[0].encrypted, this._payloadKey)
+          .then((res) =>{
+            args[0] = JSON.parse(res)
+            handler.call(this._socket, ...args)
+          })
+          .catch(error => {
             this._socket._emit('error', error)
-            return;
-          }
+          })
+          return;
         }
-  
-        return handler.call(this._socket, ...args);
+
+        handler.call(this._socket, ...args);
       }));
     };
 
-    this._socket.on('encrypt', (publicKey: string) => {
+    this._socket._on('encrypt', (publicKey: string) => {
       this._authKey = publicKey
     })
-  
+    */
     const connect = feathers().configure(
       socket(this._socket, {
         timeout: 20000,
