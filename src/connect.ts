@@ -1,4 +1,4 @@
-import feathers, { Application } from '@feathersjs/feathers'
+import feathers, { Application, HookContext } from '@feathersjs/feathers'
 import io from 'socket.io-client'
 import crypto from 'crypto-js'
 import socket from '@feathersjs/socketio-client'
@@ -621,7 +621,20 @@ class Connect extends Base {
   private _getService(endpoint: Endpoints): ApiService {
     this._logTechnical(makeString(MESSAGES.technical.service, ['getService']), endpoint)
 
-    return this._connect.service(this._makeEndpointPath(endpoint))
+    return this._connect.service(this._makeEndpointPath(endpoint)).hooks({
+      before: {
+        all: [(context: HookContext) => console.warn('BEFORE', endpoint)
+        ]
+      },
+      after: {
+        all: [(context: HookContext) => console.warn('AFTER', endpoint)
+        ]
+      },
+      error: {
+        all: [(context: HookContext) => console.warn('ERROR', endpoint)
+        ]
+      },
+    })
   }
 
   /**
