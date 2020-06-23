@@ -1,7 +1,6 @@
 import feathers, { Application } from '@feathersjs/feathers'
 import io from 'socket.io-client'
 import crypto from 'crypto-js'
-import Cryptr from 'cryptr'
 import socket from '@feathersjs/socketio-client'
 import { AuthenticationResult } from '@feathersjs/authentication'
 import auth, { Storage, getDefaultStorage, MemoryStorage } from '@feathersjs/authentication-client'
@@ -43,18 +42,21 @@ import { StorageWrapper } from '@feathersjs/authentication-client/lib/storage'
 
 function str2ab(str: string) {
   const buf = new ArrayBuffer(str.length)
+  
   const bufView = new Uint8Array(buf)
+
   for (let i = 0, strLen = str.length; i < strLen; i++) {
     bufView[i] = str.charCodeAt(i)
   }
+  
   return buf
 }
 
-function ab2str(buf: ArrayBuffer) {
-  return String.fromCharCode.apply(null, new Uint8Array(buf) as any);
-}
+// function ab2str(buf: ArrayBuffer) {
+//   return String.fromCharCode.apply(null, new Uint8Array(buf) as any);
+// }
 
-const reservedEvents = {
+const reservedEvents: Record<string, boolean> = {
   error: true,
   connect: true,
   disconnect: true,
@@ -67,15 +69,39 @@ const reservedEvents = {
   reconnect: true,
 }
 
-const encrypt = async (args: any[], key: string) => {
+const generateKey = async () => {
+  if (typeof window === 'undefined') {
+    throw Error('Only Browser Support Encryption')
+  }
+
+  const key = await window.crypto.subtle.generateKey(
+    {
+        name: 'AES-CBC',
+        length: 128,
+    },
+    true,
+    ['encrypt', 'decrypt']
+  )
+  
+  const iv = window.crypto.getRandomValues(new Uint8Array(16))
+  
+  return { key, iv }
+}
+
+const authEncrypt = async (args: unknown[], key?: string) => {
   if (typeof window === 'undefined' || !key) {
     return args
   }
+
   const arg = args[1]
+
   if (typeof arg === 'object') {
-    let enc = new TextEncoder()
+    const enc = new TextEncoder()
+
     const encoded = enc.encode(JSON.stringify(arg))
+    
     const binaryDer = str2ab(window.atob(window.atob(key)))
+    
     const publicKey = await window.crypto.subtle.importKey(
       'spki',
       binaryDer,
@@ -86,24 +112,83 @@ const encrypt = async (args: any[], key: string) => {
       true,
       ['encrypt'],
     )
+    
     const ciphertext = await window.crypto.subtle.encrypt({ name: 'RSA-OAEP' }, publicKey, encoded)
+    
     const buffer = new Uint8Array(ciphertext)
     // const encrypted = `${buffer}`
 
-    const encrypted  =  btoa(String.fromCharCode.apply(null, buffer as any)) // Buffer.from(ciphertext).toString('hex')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const encrypted = btoa(String.fromCharCode.apply(null, buffer as any))
+    
     args[1] = { encrypted }
   }
+  
   return args
+}
+
+const encrypt = async (args: unknown[], crypt?: { key: CryptoKey, iv: ArrayBuffer }) => {
+  if (typeof window === 'undefined' || !crypt) {
+    return args
+  }
+  
+  const { key, iv } = crypt
+
+  const arg = args[1]
+
+  if (typeof arg === 'object') {
+    const enc = new TextEncoder()
+  
+    const encoded = enc.encode(JSON.stringify(arg))
+  
+    const ciphertext = await window.crypto.subtle.encrypt({ name: 'AES-CBC', iv }, key, encoded)    
+  
+    const buffer = new Uint8Array(ciphertext)
+  
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const encrypted = btoa(String.fromCharCode.apply(null, buffer as any))
+  
+    args[1] = { encrypted }
+  }  
+
+  return args
+}
+
+const decrypt = async (encrypted: string, crypt?: { key: CryptoKey, iv: ArrayBuffer }) => {
+  if (typeof window === 'undefined' || !crypt) {
+    return JSON.stringify({ encrypted })
+  }
+
+  const { key, iv } = crypt
+  
+  const enc = new TextEncoder()
+  
+  const encoded = enc.encode(JSON.stringify(encrypted))
+  
+  const ciphertext = await window.crypto.subtle.decrypt({ name: 'AES-CBC', iv }, key, encoded)    
+  
+  const buffer = new Uint8Array(ciphertext)
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const decrypted = btoa(String.fromCharCode.apply(null, buffer as any))
+    
+  return decrypted
 }
 
 class Connect extends Base {
   private _connect: Application<unknown>
 
-  private _socket: SocketIOClient.Socket
+  private _socket: SocketIOClient.Socket & {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    _emit: (event: string, ...args: any[]) => SocketIOClient.Socket,
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    _on: (event: string, fn: Function) => SocketIOClient.Emitter
+  }
 
-  private _payloadKey: string | undefined
-  private _cryptr: Cryptr | undefined
-
+  private _authKey: string | undefined
+  
+  private _payloadKey: { key: CryptoKey, iv: ArrayBuffer } | undefined
+  
   protected _connectionCounter = 0
 
   protected _lastConnect: number | undefined = undefined
@@ -131,7 +216,7 @@ class Connect extends Base {
   constructor(props: ConnectProps) {
     super(debugLevelSelector(props?.debug))
 
-    this._logTechnical("Service (connect > constructor) sent 'debug' setting to super, validating props")
+    this._logTechnical('Service (connect > constructor) sent \'debug\' setting to super, validating props')
 
     this._validateProps(props)
 
@@ -153,40 +238,74 @@ class Connect extends Base {
 
     // setup
     this._logTechnical('Service is configuring connection...')
-    this._socket = io.connect(apiUrl)
-    ;(this._socket as any)._emit = this._socket.emit
+    
+    this._socket = (io.connect(apiUrl) as never)
+    
+    this._socket._emit = this._socket.emit
+    
     this._socket.emit = (event: string, ...args) => {
-      if (!this._payloadKey || (reservedEvents as any)[event]) return (this._socket as any)._emit(event, ...args)
-      encrypt(args, this._payloadKey)
-        .then((encryptedArgs) => (this._socket as any)._emit(event, ...encryptedArgs))
-        .catch(() => (this._socket as any)._emit(event, ...args))
+      if (!this._socket._emit) {
+        return this._socket
+      }
+      
+      if (!this._authKey || reservedEvents[event]) {
+        return this._socket._emit(event, ...args)
+      }
+
+      if (args[1] === 'authentication') {
+        generateKey().then(({key, iv}) => {
+          window.crypto.subtle.exportKey('raw', key)
+          .then(keydata => {
+            
+            const payload = JSON.parse(args[2])
+       
+            payload.encrypt = { 
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              key: btoa(String.fromCharCode.apply(null, new Uint8Array(keydata) as any)),
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              iv: btoa(String.fromCharCode.apply(null, new Uint8Array(iv) as any)),
+            }
+            args[2] = JSON.stringify(payload)
+            authEncrypt(args, this._authKey)
+            .then((encryptedArgs) => {
+              this._payloadKey = { key, iv }
+              this._socket._emit(event, ...encryptedArgs)
+            })
+          })
+        })
+        .catch(() => this._socket._emit(event, ...args))
+      } else {
+        encrypt(args, this._payloadKey)
+        .then((encryptedArgs) => this._socket._emit(event, ...encryptedArgs))
+        .catch(() => this._socket._emit(event, ...args))
+      }
+      
       return this._socket
     }
 
-    (this._socket as any)._on = this._socket.on
+    this._socket._on = this._socket.on
     this._socket.on = (event, handler) => {
-      if (!this._cryptr && (reservedEvents as any)[event]) return (this._socket as any)._on(event, handler);
+      if (!this._payloadKey && reservedEvents[event]) return this._socket._on(event, handler);
 
-      return (this._socket as any)._on(event, (...args:any[]) => {
-        if (args[0] && args[0].encrypted && this._cryptr) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (this._socket._on(event, async (...args: any[]) => {
+        if (args[0] && args[0].encrypted && this._payloadKey) {
           try {
-            args = JSON.parse(this._cryptr.decrypt(args[0].encrypted));
+            args = JSON.parse(await decrypt(args[0].encrypted, this._payloadKey))
           } catch (error) {
-            (this._socket as any)._emit('error', error);
+            this._socket._emit('error', error)
             return;
           }
         }
+  
         return handler.call(this._socket, ...args);
-      });
+      }));
     };
 
-
     this._socket.on('encrypt', (publicKey: string) => {
-      this._payloadKey = publicKey
-      const secret = '1234'
-      this._cryptr = new Cryptr(secret)
-      this._socket.emit('decrypt', 'method1', { secret })
+      this._authKey = publicKey
     })
+  
     const connect = feathers().configure(
       socket(this._socket, {
         timeout: 20000,
@@ -232,7 +351,7 @@ class Connect extends Base {
       this._connect.io.on('connect', (): void => {
         this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['is connected', 'authorization']))
 
-        this._logTechnical(makeString(MESSAGES.technical.serviceIs, ["checking if it's allowed to proceed:"]))
+        this._logTechnical(makeString(MESSAGES.technical.serviceIs, ['checking if it\'s allowed to proceed:']))
 
         this._logTechnical(`➜ connectionCounter: ${this._connectionCounter}`)
         this._logTechnical(`➜ lastConnect: ${this._lastConnect}`)
@@ -469,6 +588,7 @@ class Connect extends Base {
         })
         this._log(makeString(MESSAGES.technical.gotResponse, ['refreshInbox']), response)
       } catch (err) {
+
         /** log error */
         this._logApiError(makeString(ERRORS.service.gotError, ['refreshInbox', 'request']), err)
 
@@ -539,6 +659,7 @@ class Connect extends Base {
         validateOptions(options, 'getStatus', true)
       }
     } catch (err) {
+
       /** log error */
       this._logError(makeString(ERRORS.service.gotError, ['getStatus', 'validation']), err)
 
@@ -554,6 +675,7 @@ class Connect extends Base {
       response = await this._networks.find({ query: { netId: this._network, ...makeOptions(options, this._watch) } })
       this._log(makeString(MESSAGES.technical.gotResponse, ['getStatus']), response)
     } catch (err) {
+
       /** log error */
       this._logApiError(makeString(ERRORS.service.gotError, ['getStatus', 'request']), err)
 
@@ -582,6 +704,7 @@ class Connect extends Base {
         validateOptions(options, 'getConnectionStatus')
       }
     } catch (err) {
+
       /** log error */
       this._logError(makeString(ERRORS.service.gotError, ['getConnectionStatus', 'validation']), err)
 
@@ -597,6 +720,7 @@ class Connect extends Base {
       response = this._socket.connected
       this._log(makeString(MESSAGES.technical.gotResponse, ['getConnectionStatus']), response)
     } catch (err) {
+
       /** log error */
       this._logApiError(makeString(ERRORS.service.gotError, ['getConnectionStatus', 'request']), err)
 
@@ -625,6 +749,7 @@ class Connect extends Base {
         validateOptions(options, 'disconnect')
       }
     } catch (err) {
+
       /** log error */
       this._logError(makeString(ERRORS.service.gotError, ['disconnect', 'validation']), err)
 
@@ -642,6 +767,7 @@ class Connect extends Base {
       this._manuallyDisconnected = true
       this._log(makeString(MESSAGES.technical.gotResponse, ['disconnect']), response)
     } catch (err) {
+
       /** log error */
       this._logApiError(makeString(ERRORS.service.gotError, ['disconnect', 'request']), err)
 
@@ -670,6 +796,7 @@ class Connect extends Base {
         validateOptions(options, 'connect')
       }
     } catch (err) {
+
       /** log error */
       this._logError(makeString(ERRORS.service.gotError, ['connect', 'validation']), err)
 
@@ -687,6 +814,7 @@ class Connect extends Base {
       this._manuallyDisconnected = false
       this._log(makeString(MESSAGES.technical.gotResponse, ['connect']), response)
     } catch (err) {
+
       /** log error */
       this._logApiError(makeString(ERRORS.service.gotError, ['connect', 'request']), err)
 
