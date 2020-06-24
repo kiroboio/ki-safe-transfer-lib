@@ -52,23 +52,6 @@ function str2ab(str: string) {
   return buf
 }
 
-// function ab2str(buf: ArrayBuffer) {
-//   return String.fromCharCode.apply(null, new Uint8Array(buf) as any);
-// }
-
-const reservedEvents: Record<string, boolean> = {
-  error: true,
-  connect: true,
-  disconnect: true,
-  disconnecting: true,
-  newListener: true,
-  removeListener: true,
-  ping: true,
-  pong: true,
-  connecting: true,
-  reconnect: true,
-}
-
 const generateKey = async () => {
   if (typeof window === 'undefined') {
     throw Error('Only Browser Support Encryption')
@@ -88,106 +71,118 @@ const generateKey = async () => {
   return { key, iv }
 }
 
-const authEncrypt = async (args: unknown[], key?: string) => {
-  if (typeof window === 'undefined' || !key) {
-    return args
+const chunkSubstr = (str: string, size: number) => {
+  const numChunks = Math.ceil(str.length / size)
+
+  const chunks = new Array(numChunks)
+
+  for (let i = 0, o = 0; i < numChunks; ++i, o += size) {
+    chunks[i] = str.substr(o, size)
   }
 
-  const arg = args[1]
+  return chunks
+}
 
-  if (typeof arg === 'object') {
-    const enc = new TextEncoder()
+let _authKey: string | undefined = undefined
+let _payloadKey: { key: CryptoKey, iv: ArrayBuffer } | undefined = undefined
+  
+const authEncrypt = async (payload: Record<string, unknown>) => {
+  if (typeof window === 'undefined' || typeof _authKey === 'undefined') {
+    return payload
+  }
 
-    const encoded = enc.encode(JSON.stringify(arg))
-    
-    const binaryDer = str2ab(window.atob(window.atob(key)))
-    
-    const publicKey = await window.crypto.subtle.importKey(
-      'spki',
-      binaryDer,
-      {
-        name: 'RSA-OAEP',
-        hash: 'SHA-256',
-      },
-      true,
-      ['encrypt'],
+  _payloadKey = await generateKey()
+   
+  const keyData = await window.crypto.subtle.exportKey('raw', _payloadKey.key)
+
+  const encrypt = { 
+    key: Buffer.from(keyData).toString('base64'),
+    iv: Buffer.from(_payloadKey.iv).toString('base64'),
+  }
+  
+  const binaryDer = str2ab(window.atob(window.atob(_authKey )))
+  
+  const publicKey = await window.crypto.subtle.importKey(
+    'spki',
+    binaryDer,
+    {
+      name: 'RSA-OAEP',
+      hash: 'SHA-256',
+    },
+    true,
+    ['encrypt'],
     )
+      
+  const chunks = chunkSubstr(JSON.stringify({ ...payload, encrypt }), 60)
+  
+  const encrypted : string[] = []
 
+  for (const chunk of chunks) {
+    const enc = new TextEncoder()
+    
+    const encoded = enc.encode(chunk)
+  
     const ciphertext = await window.crypto.subtle.encrypt({ name: 'RSA-OAEP' }, publicKey, encoded)
 
     const buffer = ciphertext ? new Uint8Array(ciphertext) : new Uint8Array()
-    // const encrypted = `${buffer}`
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const encrypted = btoa(String.fromCharCode.apply(null, buffer as any))
-
-    args[1] = { encrypted }
+    encrypted.push(btoa(String.fromCharCode.apply(null, buffer as any)))
   }
-  
-  return args
+
+  return { encrypted }
 }
 
-const encrypt = async (args: unknown[], crypt?: { key: CryptoKey, iv: ArrayBuffer }) => {
-  if (typeof window === 'undefined' || !crypt || typeof args[1] !== 'object') {
-    return args
+const encrypt = async (payload: Record<string, unknown>) => {
+  if (typeof window === 'undefined' || typeof _payloadKey === 'undefined') {
+    return payload
   }
-  
-  const { key, iv } = crypt
-
-  const arg = args[1]
-
-  if (typeof arg === 'object') {
-    const enc = new TextEncoder()
-  
-    const encoded = enc.encode(JSON.stringify(arg))
-  
-    const ciphertext = await window.crypto.subtle.encrypt({ name: 'AES-CBC', iv }, key, encoded)    
-  
-    const buffer = new Uint8Array(ciphertext)
-  
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const encrypted = btoa(String.fromCharCode.apply(null, buffer as any))
-  
-    args[1] = { encrypted }
-  }  
-
-  return args
-}
-
-const decrypt = async (encrypted: string, crypt?: { key: CryptoKey, iv: ArrayBuffer }) => {
-  if (typeof window === 'undefined' || !crypt) {
-    return JSON.stringify({ encrypted })
-  }
-
-  const { key, iv } = crypt
   
   const enc = new TextEncoder()
   
-  const encoded = enc.encode(JSON.stringify(encrypted))
+  const encoded = enc.encode(JSON.stringify(payload))
   
-  const ciphertext = await window.crypto.subtle.decrypt({ name: 'AES-CBC', iv }, key, encoded)    
+  const ciphertext = await window.crypto.subtle.encrypt({
+    name: 'AES-CBC',
+    iv:_payloadKey.iv
+    }, 
+    _payloadKey.key,
+    encoded
+  )    
   
   const buffer = new Uint8Array(ciphertext)
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const decrypted = btoa(String.fromCharCode.apply(null, buffer as any))
-    
-  return decrypted
+  const encrypted = btoa(String.fromCharCode.apply(null, buffer as any))
+  
+  return { encrypted }
+}
+
+const decrypt = async (payload: Record<string, unknown>) => {
+  if (typeof window === 'undefined' || typeof _payloadKey === 'undefined' || typeof payload.encrypted !== 'string') {
+    return payload
+  }
+  
+  const ciphertext = await window.crypto.subtle.decrypt({
+    name: 'AES-CBC',
+    iv: _payloadKey.iv
+    }, 
+    _payloadKey.key,
+    str2ab(window.atob(payload.encrypted))
+  )    
+  
+  const buffer = new Uint8Array(ciphertext)
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const decrypted = String.fromCharCode.apply(null, buffer as any)
+
+  return JSON.parse(decrypted)
 }
 
 class Connect extends Base {
   private _connect: Application<unknown>
 
-  private _socket: SocketIOClient.Socket & {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    _emit: (event: string, ...args: any[]) => SocketIOClient.Socket,
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    _on: (event: string, fn: Function) => SocketIOClient.Emitter
-  }
-
-  private _authKey: string | undefined
-  
-  private _payloadKey: { key: CryptoKey, iv: ArrayBuffer } | undefined
+  private _socket: SocketIOClient.Socket
   
   protected _connectionCounter = 0
 
@@ -240,84 +235,11 @@ class Connect extends Base {
     this._logTechnical('Service is configuring connection...')
     
     this._socket = (io.connect(apiUrl) as never)
-    
-    /*
-    this._socket._emit = this._socket.emit
-    
-    this._socket.emit = (event: string, ...args) => {
 
-      if (!this._authKey || reservedEvents[event]) {
-        return this._socket._emit(event, ...args)
-      }
-
-      console.warn('event', event, 'args[0]', args[0])
-
-      if (event === 'create' && args[0] === 'authentication' && typeof args[1] === 'object') {
-        console.warn('gen key')
-        generateKey().then(({key, iv}) => {
-          window.crypto.subtle.exportKey('raw', key)
-          .then(keyData => {       
-            console.warn('got key ', args[1])
-            args[1].encrypt = { 
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              key: Buffer.from(keyData).toString('base64'),
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              iv: Buffer.from(iv).toString('base64'),
-            }
-            console.warn('auth encrypt', args[1])
-            authEncrypt(args, this._authKey)
-            .then((encryptedArgs) => {
-              this._payloadKey = { key, iv }
-              this._socket._emit(event, ...encryptedArgs)
-            })
-          })
-        })
-        .catch((e) => {
-          console.error('error', e)
-          this._socket._emit(event, ...args)
-        })
-      } else {
-        encrypt(args, this._payloadKey)
-        .then((encryptedArgs) => this._socket._emit(event, ...encryptedArgs))
-        .catch((e) => {
-          console.error('error', e)
-          this._socket._emit(event, ...args)
-        })
-      }
-      
-      return this._socket
-    }
-
-    this._socket._on = this._socket.on
-    this._socket.on = (event, handler) => {
-      console.warn('on event', event)
-
-      if (!this._payloadKey && reservedEvents[event]) return this._socket._on(event, handler);
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return (this._socket._on(event, (...args: any[]) => {
-        console.warn('got', event)
-        
-        if (args[0] && args[0].encrypted && this._payloadKey) {
-          decrypt(args[0].encrypted, this._payloadKey)
-          .then((res) =>{
-            args[0] = JSON.parse(res)
-            handler.call(this._socket, ...args)
-          })
-          .catch(error => {
-            this._socket._emit('error', error)
-          })
-          return;
-        }
-
-        handler.call(this._socket, ...args);
-      }));
-    };
-
-    this._socket._on('encrypt', (publicKey: string) => {
-      this._authKey = publicKey
+    this._socket.on('encrypt', (publicKey: string) => {
+      _authKey = publicKey
     })
-    */
+
     const connect = feathers().configure(
       socket(this._socket, {
         timeout: 20000,
@@ -373,7 +295,7 @@ class Connect extends Base {
           (!this._lastConnect || diff(this._lastConnect) > connectionTimeout)
         ) {
           this._logTechnical(MESSAGES.technical.isAllowed)
-          this._useEventBus(EventTypes.CONNECT, true)
+          this._useEventBus(EventTypes.CONNECT, true, decrypt)
           this._runAuth()
         } else {
           this._logTechnical(MESSAGES.technical.notAllowed)
@@ -403,7 +325,7 @@ class Connect extends Base {
     try {
       this._connect.io.on('disconnect', (payload: string) => {
         this._logApiWarning(WARNINGS.connect.disconnect, capitalize(payload))
-        this._useEventBus(EventTypes.DISCONNECT, true)
+        this._useEventBus(EventTypes.DISCONNECT, true, decrypt)
       })
     } catch (err) {
       this._logApiError(ERRORS.connect.on.disconnect.direct, err)
@@ -423,34 +345,39 @@ class Connect extends Base {
 
     this._logTechnical(makeString(MESSAGES.technical.serviceIs, ['setting up event listeners...']))
 
-    // status update
+    // rates updated
+    this._rateBtcToUsd.on('updated', (data: unknown) => {
+      this._useEventBus(EventTypes.UPDATE_RATES, data, decrypt)
+    })
+
+    // status updated
     this._networks.on('patched', (data: NetworkTip) => {
-      this._useEventBus(EventTypes.UPDATE_STATUS, data)
+      this._useEventBus(EventTypes.UPDATE_STATUS, data, decrypt)
     })
 
     // transfer updated
     this._transfers.on('patched', (payload: Transfer) => {
-      this._useEventBus(EventTypes.UPDATED_RETRIEVABLE, payload)
+      this._useEventBus(EventTypes.UPDATED_RETRIEVABLE, payload, decrypt)
     })
 
     // transfer removed
     this._transfers.on('removed', (payload: Transfer) => {
-      this._useEventBus(EventTypes.REMOVED_RETRIEVABLE, payload)
+      this._useEventBus(EventTypes.REMOVED_RETRIEVABLE, payload, decrypt)
     })
 
     // new collectable has been created for the previously requested address
     this._inbox.on('created', (payload: Collectable) => {
-      this._useEventBus(EventTypes.CREATED_COLLECTABLE, payload)
+      this._useEventBus(EventTypes.CREATED_COLLECTABLE, payload, decrypt)
     })
 
     // collectable patched
     this._inbox.on('patched', (payload: Collectable) => {
-      this._useEventBus(EventTypes.UPDATED_COLLECTABLE, payload)
+      this._useEventBus(EventTypes.UPDATED_COLLECTABLE, payload, decrypt)
     })
 
     // collectable removed
     this._inbox.on('removed', (payload: Collectable) => {
-      this._useEventBus(EventTypes.REMOVED_COLLECTABLE, payload)
+      this._useEventBus(EventTypes.REMOVED_COLLECTABLE, payload, decrypt)
     })
 
     // set internet connection check
@@ -542,12 +469,12 @@ class Connect extends Base {
     try {
       this._logTechnical('Service (authSocket) is trying to re-authenticate...')
 
-      return this._connect.reAuthenticate().catch(() => {
+      return this._connect.reAuthenticate().catch(async () => {
         this._logTechnical(makeString(ERRORS.service.failedTo, ['authSocket', 're-authenticate', 'authentication']))
         this._connect
           .authenticate({
             strategy: 'local',
-            ...this._auth,
+            ...await authEncrypt({...this._auth}),
           })
           .catch((err) => {
             // if not
@@ -611,7 +538,7 @@ class Connect extends Base {
       /** return results */
 
       this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['refreshInbox', 'return']))
-      this._useEventBus(EventTypes.GET_COLLECTABLES, response)
+      this._useEventBus(EventTypes.GET_COLLECTABLES, response, decrypt)
     }
   }
 
@@ -623,15 +550,25 @@ class Connect extends Base {
 
     return this._connect.service(this._makeEndpointPath(endpoint)).hooks({
       before: {
-        all: [(context: HookContext) => console.warn('BEFORE', endpoint)
-        ]
+        all: [async (context: HookContext) => {
+          if (context.params.query) {
+            context.params.query = await encrypt(context.params.query)
+          }
+        }]
       },
       after: {
-        all: [(context: HookContext) => console.warn('AFTER', endpoint)
-        ]
+        all: [async (context: HookContext) => {
+          if (context.result) {
+            context.result = await decrypt(context.result)
+          }
+        }]
       },
       error: {
-        all: [(context: HookContext) => console.warn('ERROR', endpoint)
+        all: [async (context: HookContext) => {
+          if (context.params.error) {
+            context.error = await decrypt(context.error)
+          }
+        }
         ]
       },
     })
@@ -716,7 +653,7 @@ class Connect extends Base {
 
     this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getStatus']))
 
-    this._useEventBus(EventTypes.UPDATE_STATUS, response.data[0])
+    this._useEventBus(EventTypes.UPDATE_STATUS, response.data[0], decrypt)
   }
 
   public getConnectionStatus(options?: Omit<QueryOptions, 'limit' | 'skip' | 'watch'>): boolean | void {
@@ -761,7 +698,7 @@ class Connect extends Base {
 
     this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getConnectionStatus']))
 
-    this._useEventBus(EventTypes.GET_CONNECTION_STATUS, response)
+    this._useEventBus(EventTypes.GET_CONNECTION_STATUS, response, decrypt)
   }
 
   public disconnect(options?: Omit<QueryOptions, 'limit' | 'skip' | 'watch'>): boolean | void {
@@ -808,7 +745,7 @@ class Connect extends Base {
 
     this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['disconnect']))
 
-    this._useEventBus(EventTypes.DISCONNECT, response)
+    this._useEventBus(EventTypes.DISCONNECT, response, decrypt)
   }
 
   public connect(options?: Omit<QueryOptions, 'limit' | 'skip' | 'watch'>): boolean | void {
@@ -855,7 +792,7 @@ class Connect extends Base {
 
     this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['connect']))
 
-    this._useEventBus(EventTypes.CONNECT, response)
+    this._useEventBus(EventTypes.CONNECT, response, decrypt)
   }
 }
 

@@ -62,12 +62,17 @@ class Base {
     if (this._debug === 4) new LogInfo(`⌾ ${message}`, payload).make()
   }
 
-  protected _useEventBus(type: EventTypes, payload: unknown): void {
+  protected async _useEventBus(
+    type: EventTypes,
+    payload: unknown,
+    decrypt?: (payload: Record<string, unknown>) => Promise<unknown>
+    ) : Promise<void> {
+
     if (this._eventBus) {
       try {
         this._eventBus({
           type,
-          payload,
+          payload: decrypt && payload ? await decrypt(payload as Record<string, unknown>): payload,
         })
       } catch (err) {
         this._logError(`Service: eventBus caught error, when emitting event (${type}).`, err)
