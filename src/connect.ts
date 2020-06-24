@@ -54,7 +54,7 @@ function str2ab(str: string) {
 
 const generateKey = async () => {
   if (typeof window === 'undefined') {
-    throw Error('Only Browser Support Encryption')
+    return undefined
   }
 
   const key = await window.crypto.subtle.generateKey(
@@ -91,13 +91,17 @@ const authEncrypt = async (payload: Record<string, unknown>) => {
     return payload
   }
 
-  _payloadKey = await generateKey()
-   
-  const keyData = await window.crypto.subtle.exportKey('raw', _payloadKey.key)
+  const data = { ...payload }
 
-  const encrypt = { 
-    key: Buffer.from(keyData).toString('base64'),
-    iv: Buffer.from(_payloadKey.iv).toString('base64'),
+  _payloadKey = await generateKey()
+
+  if (_payloadKey) {
+    const keyData = await window.crypto.subtle.exportKey('raw', _payloadKey.key)
+
+    data.encrypt = { 
+      key: Buffer.from(keyData).toString('base64'),
+      iv: Buffer.from(_payloadKey.iv).toString('base64'),
+    }
   }
   
   const binaryDer = str2ab(window.atob(window.atob(_authKey )))
@@ -113,7 +117,7 @@ const authEncrypt = async (payload: Record<string, unknown>) => {
     ['encrypt'],
     )
       
-  const chunks = chunkSubstr(JSON.stringify({ ...payload, encrypt }), 60)
+  const chunks = chunkSubstr(JSON.stringify(data), 60)
   
   const encrypted : string[] = []
 
@@ -295,7 +299,7 @@ class Connect extends Base {
           (!this._lastConnect || diff(this._lastConnect) > connectionTimeout)
         ) {
           this._logTechnical(MESSAGES.technical.isAllowed)
-          this._useEventBus(EventTypes.CONNECT, true, decrypt)
+          this._useEventBus(EventTypes.CONNECT, true)
           this._runAuth()
         } else {
           this._logTechnical(MESSAGES.technical.notAllowed)
@@ -325,7 +329,7 @@ class Connect extends Base {
     try {
       this._connect.io.on('disconnect', (payload: string) => {
         this._logApiWarning(WARNINGS.connect.disconnect, capitalize(payload))
-        this._useEventBus(EventTypes.DISCONNECT, true, decrypt)
+        this._useEventBus(EventTypes.DISCONNECT, true)
       })
     } catch (err) {
       this._logApiError(ERRORS.connect.on.disconnect.direct, err)
@@ -538,7 +542,7 @@ class Connect extends Base {
       /** return results */
 
       this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['refreshInbox', 'return']))
-      this._useEventBus(EventTypes.GET_COLLECTABLES, response, decrypt)
+      this._useEventBus(EventTypes.GET_COLLECTABLES, response)
     }
   }
 
@@ -653,7 +657,7 @@ class Connect extends Base {
 
     this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getStatus']))
 
-    this._useEventBus(EventTypes.UPDATE_STATUS, response.data[0], decrypt)
+    this._useEventBus(EventTypes.UPDATE_STATUS, response.data[0])
   }
 
   public getConnectionStatus(options?: Omit<QueryOptions, 'limit' | 'skip' | 'watch'>): boolean | void {
@@ -698,7 +702,7 @@ class Connect extends Base {
 
     this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getConnectionStatus']))
 
-    this._useEventBus(EventTypes.GET_CONNECTION_STATUS, response, decrypt)
+    this._useEventBus(EventTypes.GET_CONNECTION_STATUS, response)
   }
 
   public disconnect(options?: Omit<QueryOptions, 'limit' | 'skip' | 'watch'>): boolean | void {
@@ -745,7 +749,7 @@ class Connect extends Base {
 
     this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['disconnect']))
 
-    this._useEventBus(EventTypes.DISCONNECT, response, decrypt)
+    this._useEventBus(EventTypes.DISCONNECT, response)
   }
 
   public connect(options?: Omit<QueryOptions, 'limit' | 'skip' | 'watch'>): boolean | void {
@@ -792,7 +796,7 @@ class Connect extends Base {
 
     this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['connect']))
 
-    this._useEventBus(EventTypes.CONNECT, response, decrypt)
+    this._useEventBus(EventTypes.CONNECT, response)
   }
 }
 
