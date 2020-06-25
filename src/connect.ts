@@ -255,8 +255,10 @@ class Connect extends Base {
 
       private key: string
 
-      constructor(key = 'd83du2') {
-        this.storage = getDefaultStorage()
+      constructor(key = Math.random().toString(36)
+        .substring(7) + Math.random().toString(36)
+        .substring(7)) {
+        this.storage = new MemoryStorage()
         this.key = key
       }
 
