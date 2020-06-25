@@ -42,13 +42,13 @@ import { StorageWrapper } from '@feathersjs/authentication-client/lib/storage'
 
 function str2ab(str: string) {
   const buf = new ArrayBuffer(str.length)
-  
+
   const bufView = new Uint8Array(buf)
 
   for (let i = 0, strLen = str.length; i < strLen; i++) {
     bufView[i] = str.charCodeAt(i)
   }
-  
+
   return buf
 }
 
@@ -65,9 +65,9 @@ const generateKey = async () => {
     true,
     ['encrypt', 'decrypt']
   )
-  
+
   const iv = window.crypto.getRandomValues(new Uint8Array(16))
-  
+
   return { key, iv }
 }
 
@@ -85,7 +85,7 @@ const chunkSubstr = (str: string, size: number) => {
 
 let _authKey: string | undefined = undefined
 let _payloadKey: { key: CryptoKey, iv: ArrayBuffer } | undefined = undefined
-  
+
 const authEncrypt = async (payload: Record<string, unknown>) => {
   if (typeof window === 'undefined' || typeof _authKey === 'undefined') {
     return payload
@@ -98,14 +98,14 @@ const authEncrypt = async (payload: Record<string, unknown>) => {
   if (_payloadKey) {
     const keyData = await window.crypto.subtle.exportKey('raw', _payloadKey.key)
 
-    data.encrypt = { 
+    data.encrypt = {
       key: Buffer.from(keyData).toString('base64'),
       iv: Buffer.from(_payloadKey.iv).toString('base64'),
     }
   }
-  
+
   const binaryDer = str2ab(window.atob(window.atob(_authKey )))
-  
+
   const publicKey = await window.crypto.subtle.importKey(
     'spki',
     binaryDer,
@@ -116,16 +116,16 @@ const authEncrypt = async (payload: Record<string, unknown>) => {
     true,
     ['encrypt'],
     )
-      
+
   const chunks = chunkSubstr(JSON.stringify(data), 60)
-  
+
   const encrypted : string[] = []
 
   for (const chunk of chunks) {
     const enc = new TextEncoder()
-    
+
     const encoded = enc.encode(chunk)
-  
+
     const ciphertext = await window.crypto.subtle.encrypt({ name: 'RSA-OAEP' }, publicKey, encoded)
 
     const buffer = ciphertext ? new Uint8Array(ciphertext) : new Uint8Array()
@@ -141,24 +141,24 @@ const encrypt = async (payload: Record<string, unknown>) => {
   if (typeof window === 'undefined' || typeof _payloadKey === 'undefined') {
     return payload
   }
-  
+
   const enc = new TextEncoder()
-  
+
   const encoded = enc.encode(JSON.stringify(payload))
-  
+
   const ciphertext = await window.crypto.subtle.encrypt({
     name: 'AES-CBC',
     iv:_payloadKey.iv
-    }, 
+    },
     _payloadKey.key,
     encoded
-  )    
-  
+  )
+
   const buffer = new Uint8Array(ciphertext)
-  
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const encrypted = btoa(String.fromCharCode.apply(null, buffer as any))
-  
+
   return { encrypted }
 }
 
@@ -166,17 +166,17 @@ const decrypt = async (payload: Record<string, unknown>) => {
   if (typeof window === 'undefined' || typeof _payloadKey === 'undefined' || typeof payload.encrypted !== 'string') {
     return payload
   }
-  
+
   const ciphertext = await window.crypto.subtle.decrypt({
     name: 'AES-CBC',
     iv: _payloadKey.iv
-    }, 
+    },
     _payloadKey.key,
     str2ab(window.atob(payload.encrypted))
-  )    
-  
+  )
+
   const buffer = new Uint8Array(ciphertext)
-  
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const decrypted = String.fromCharCode.apply(null, buffer as any)
 
@@ -187,7 +187,7 @@ class Connect extends Base {
   private _connect: Application<unknown>
 
   private _socket: SocketIOClient.Socket
-  
+
   protected _connectionCounter = 0
 
   protected _lastConnect: number | undefined = undefined
@@ -237,7 +237,7 @@ class Connect extends Base {
 
     // setup
     this._logTechnical('Service is configuring connection...')
-    
+
     this._socket = (io.connect(apiUrl) as never)
 
     this._socket.on('encrypt', (publicKey: string) => {
@@ -569,7 +569,7 @@ class Connect extends Base {
       },
       error: {
         all: [async (context: HookContext) => {
-          if (context.params.error) {
+          if (context.error) {
             context.error = await decrypt(context.error)
           }
         }
