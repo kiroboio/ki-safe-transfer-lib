@@ -84,27 +84,30 @@ const chunkSubstr = (str: string, size: number) => {
 }
 
 let _authKey: string | undefined = undefined
-let _payloadKey: { key: CryptoKey, iv: ArrayBuffer } | undefined = undefined
 
-const authEncrypt = async (payload: Record<string, unknown>) => {
-  if (typeof window === 'undefined' || typeof _authKey === 'undefined') {
+const _payloadKey: { key: CryptoKey, iv: ArrayBuffer }[] = []
+
+let _payloadCount = 0;
+
+const authEncrypt = async (payload: Record<string, unknown>, sessionId: number) => {
+  if (typeof window === 'undefined') {
     return payload
   }
 
   const data = { ...payload }
 
-  _payloadKey = await generateKey()
+  _payloadKey[sessionId] = await generateKey() as { key: CryptoKey, iv: ArrayBuffer }
 
-  if (_payloadKey) {
-    const keyData = await window.crypto.subtle.exportKey('raw', _payloadKey.key)
+  if (_payloadKey[sessionId]) {
+    const keyData = await window.crypto.subtle.exportKey('raw', _payloadKey[sessionId].key)
 
     data.encrypt = {
       key: Buffer.from(keyData).toString('base64'),
-      iv: Buffer.from(_payloadKey.iv).toString('base64'),
+      iv: Buffer.from(_payloadKey[sessionId].iv).toString('base64'),
     }
   }
 
-  const binaryDer = str2ab(window.atob(window.atob(_authKey )))
+  const binaryDer = str2ab(window.atob(window.atob(_authKey || '' )))
 
   const publicKey = await window.crypto.subtle.importKey(
     'spki',
@@ -137,8 +140,8 @@ const authEncrypt = async (payload: Record<string, unknown>) => {
   return { encrypted }
 }
 
-const encrypt = async (payload: Record<string, unknown>) => {
-  if (typeof window === 'undefined' || typeof _payloadKey === 'undefined') {
+const encrypt = async (payload: Record<string, unknown>, sessionId: number) => {
+  if (typeof window === 'undefined' || typeof _payloadKey[sessionId] === 'undefined') {
     return payload
   }
 
@@ -148,9 +151,9 @@ const encrypt = async (payload: Record<string, unknown>) => {
 
   const ciphertext = await window.crypto.subtle.encrypt({
     name: 'AES-CBC',
-    iv:_payloadKey.iv
+    iv:_payloadKey[sessionId].iv
     },
-    _payloadKey.key,
+    _payloadKey[sessionId].key,
     encoded
   )
 
@@ -162,16 +165,16 @@ const encrypt = async (payload: Record<string, unknown>) => {
   return { encrypted }
 }
 
-const decrypt = async (payload: Record<string, unknown>) => {
-  if (typeof window === 'undefined' || typeof _payloadKey === 'undefined' || typeof payload.encrypted !== 'string') {
+const decrypt = async (payload: Record<string, unknown>, sessionId: number) => {
+  if (typeof window === 'undefined' || typeof _payloadKey[sessionId] === 'undefined' || typeof payload.encrypted !== 'string') {
     return payload
   }
 
   const ciphertext = await window.crypto.subtle.decrypt({
     name: 'AES-CBC',
-    iv: _payloadKey.iv
+    iv: _payloadKey[sessionId].iv
     },
-    _payloadKey.key,
+    _payloadKey[sessionId].key,
     str2ab(window.atob(payload.encrypted))
   )
 
@@ -185,7 +188,7 @@ const decrypt = async (payload: Record<string, unknown>) => {
 
 class Connect extends Base {
   private _connect: Application<unknown>
-
+  
   private _socket: SocketIOClient.Socket
 
   protected _connectionCounter = 0
@@ -233,6 +236,8 @@ class Connect extends Base {
 
     this._auth = authDetails
 
+    this._sessionId = ++_payloadCount
+
     if (eventBus) this._eventBus = eventBus
 
     // setup
@@ -241,7 +246,9 @@ class Connect extends Base {
     this._socket = (io.connect(apiUrl) as never)
 
     this._socket.on('encrypt', (publicKey: string) => {
-      _authKey = publicKey
+      if (typeof window !== 'undefined') {
+        _authKey = publicKey
+      }
     })
 
     const connect = feathers().configure(
@@ -480,7 +487,7 @@ class Connect extends Base {
         this._connect
           .authenticate({
             strategy: 'local',
-            ...await authEncrypt({...this._auth}),
+            ...await authEncrypt({...this._auth}, this._sessionId),
           })
           .catch((err) => {
             // if not
@@ -558,21 +565,21 @@ class Connect extends Base {
       before: {
         all: [async (context: HookContext) => {
           if (context.params.query) {
-            context.params.query = await encrypt(context.params.query)
+            context.params.query = await encrypt(context.params.query, this._sessionId)
           }
         }]
       },
       after: {
         all: [async (context: HookContext) => {
           if (context.result) {
-            context.result = await decrypt(context.result)
+            context.result = await decrypt(context.result, this._sessionId)
           }
         }]
       },
       error: {
         all: [async (context: HookContext) => {
           if (context.error) {
-            context.error = await decrypt(context.error)
+            context.error = await decrypt(context.error, this._sessionId)
           }
         }
         ]
