@@ -22,7 +22,7 @@ describe('Getters', () => {
   beforeAll(async () => {
     try {
       service = Service.getInstance({ authDetails, eventBus, respondAs: Responses.Callback }, true)
-      await wait(5000)
+      await wait(10000)
     } catch (e) {
       return
     }

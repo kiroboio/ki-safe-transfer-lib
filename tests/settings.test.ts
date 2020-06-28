@@ -24,7 +24,7 @@ describe('Library configuration', () => {
   afterAll(async () => {
     if (service) {
       service.disconnect()
-      await wait(2000)
+      await wait(10000)
     }
   })
   describe('incorrect settings:', () => {

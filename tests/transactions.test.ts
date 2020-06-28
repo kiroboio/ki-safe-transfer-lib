@@ -21,7 +21,7 @@ describe('Transactions', () => {
   beforeAll(async () => {
     try {
       service = Service.getInstance({ authDetails }, true)
-      await wait(5000)
+      await wait(10000)
     } catch (e) {
       return
     }

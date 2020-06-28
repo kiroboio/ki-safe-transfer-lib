@@ -19,7 +19,7 @@ const service = Service.getInstance({ respondAs: Responses.Callback, eventBus, a
 describe('Validate options', () => {
   afterAll(async () => {
     service.disconnect()
-    await wait(2000)
+    await wait(10000)
   })
   describe(' throws on incorrect options:', () => {
     it('throws if options are of wrong type', async () => {

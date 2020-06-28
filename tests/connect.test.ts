@@ -19,7 +19,7 @@ describe('Connect', () => {
   beforeAll(async () => {
     try {
       service = Service.getInstance({ authDetails, respondAs: Responses.Direct }, true)
-      await wait(2000)
+      await wait(10000)
     } catch (e) {
       log(e)
       return

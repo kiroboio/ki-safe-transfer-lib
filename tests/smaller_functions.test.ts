@@ -33,7 +33,7 @@ async function setAsync(): Promise<Status | void> {
       },
       true,
     )
-    await wait(2000)
+    await wait(10000)
     return await service.getStatus()
   } catch (err) {
     log(err)

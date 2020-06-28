@@ -22,7 +22,7 @@ describe('Authentication', () => {
   beforeAll(async () => {
     try {
       incorrect = Service.getInstance({ authDetails: controlDetails, eventBus, respondAs: Responses.Direct }, true)
-      await wait(5000)
+      await wait(10000)
     } catch (e) {
       return
     }

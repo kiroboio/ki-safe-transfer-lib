@@ -2,16 +2,12 @@
 
 import { capitalize, makeString, compareBasicObjects, makeOptions } from '../src/tools'
 import { Watch } from '../src'
-import { wait } from './tools'
 
 process.on('unhandledRejection', () => {
   return
 })
 
 describe('Tools', () => {
-  afterAll(async () => {
-    await wait(2000)
-  })
   describe('- "capitalize"', () => {
     test('- doesn\'t crash at non-string, and returns empty string', () => {
       // @ts-expect-error

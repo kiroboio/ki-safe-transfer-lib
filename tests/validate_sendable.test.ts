@@ -3,7 +3,7 @@
 
 import dotenv from 'dotenv'
 
-import Service, { DebugLevels, AuthDetails } from '../src/.'
+import Service, { DebugLevels, AuthDetails, Responses } from '../src/.'
 import { wait } from './tools'
 import { validBitcoinAddresses } from './test_data'
 
@@ -20,14 +20,15 @@ describe('Send', () => {
   beforeAll(async () => {
     try {
       service = Service.getInstance({ debug: DebugLevels.MUTE, authDetails }, true)
-      await service.getStatus()
+      await wait(10000)
     } catch (e) {
       return
     }
   })
+
   afterAll(async () => {
     service.disconnect()
-    await wait(2000)
+    await wait(5000)
   })
   describe('empty/incorrect argument object validation:', () => {
     it('throws Error on missing argument', async () => {
@@ -101,7 +102,10 @@ describe('Send', () => {
       } catch (err) {
         expect(err).toBeInstanceOf(Object)
         expect(err).toHaveProperty('name', 'BadProps')
-        expect(err).toHaveProperty('message', 'Wrong types of keys: collect (should be string). Missing required keys: owner.')
+        expect(err).toHaveProperty(
+          'message',
+          'Wrong types of keys: collect (should be string). Missing required keys: owner.',
+        )
       }
     })
     it('throws if there is wrong key', async () => {
@@ -144,7 +148,7 @@ describe('Send', () => {
           from: 2,
           // @ts-expect-error
           hint: 3,
-          salt: 'qwerty'
+          salt: 'qwerty',
         })
       } catch (err) {
         expect(err).toBeInstanceOf(Object)
@@ -166,7 +170,7 @@ describe('Send', () => {
           deposit: 'qwerty',
           owner: '12345678',
           depositPath: 'qwerty',
-          salt: 'qwerty'
+          salt: 'qwerty',
         })
       } catch (err) {
         expect(err).toBeInstanceOf(Object)
@@ -184,10 +188,10 @@ describe('Send', () => {
           collect: 'qwerty',
           deposit: 'qwerty',
           owner: `01234567890123456789012345678901234567890123456789012
-      345678901234567890123456789012345678901234567890123456
-      7890123456789`,
+        345678901234567890123456789012345678901234567890123456
+        7890123456789`,
           depositPath: 'qwerty',
-          salt: 'qwerty'
+          salt: 'qwerty',
         })
       } catch (err) {
         expect(err).toBeInstanceOf(Object)
@@ -195,6 +199,7 @@ describe('Send', () => {
         expect(err).toHaveProperty('message', 'Wrong values: owner (should be between 20 and 120).')
       }
     })
+    //
     it('doesn\'t throw if values are valid', async () => {
       expect.assertions(3)
 
@@ -206,7 +211,7 @@ describe('Send', () => {
           deposit: 'qwerty',
           owner: '0123456789012345678901234567890',
           depositPath: 'qwerty',
-          salt: 'qwerty'
+          salt: 'qwerty',
         })
       } catch (err) {
         expect(err).toBeInstanceOf(Object)
