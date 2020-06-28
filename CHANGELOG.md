@@ -1,5 +1,12 @@
 # Changelog
 
+#### v2.19.1 2020-06-28
+
+    Fixed:
+
+    - smaller functions is fixed
+    - disconnect test is disabled
+
 #### v2.19.0 2020-06-28
 
   Tests:
