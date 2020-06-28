@@ -32,10 +32,6 @@ describe('Rates', () => {
   beforeEach(() => {
     events = []
   })
-  afterAll(async () => {
-    service.disconnect()
-    await wait(2000)
-  })
   it('throws on incorrect options', async () => {
     expect.assertions(3)
 

@@ -9,7 +9,6 @@
   - [_getLastAddresses()_](#getlastaddresses)
   - [_clearLastAddresses()_](#clearlastaddresses)
   - [_connect()_](#connect)
-  - [_disconnect()_](#disconnect)
   - [_getConnectionStatus()_](#getconnectionstatus)
   - [async _getCollectables()_](#async-getcollectables)
     - [Caching of get Collectables request](#caching-of-get-collectables-request)
@@ -153,19 +152,6 @@ Manual request for library to connect to server:
 
 service.connect()
 ```
-
-[⬑ _to top_](#library-api)
-
-## ___disconnect()___
-
-Manual request for library to disconnect from server:
-
-```TypeScript
-...
-
-service.disconnect()
-```
-> ☝ If library has been manually disconnected, it will __not__ reconnect itself.
 
 [⬑ _to top_](#library-api)
 

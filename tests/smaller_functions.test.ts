@@ -57,10 +57,7 @@ describe('Smaller functions', () => {
     storedEvent = {}
   })
 
-  afterAll(async () => {
-    service.disconnect()
-    await wait(2000)
-  })
+  
   describe(' getStatus:', () => {
     it('returns information in "Direct" mode', async () => {
       const result = await service.getStatus({ respondDirect: true })

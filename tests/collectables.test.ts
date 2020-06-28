@@ -32,10 +32,7 @@ describe('Collectables', () => {
       return
     }
   })
-  afterAll(async () => {
-    service.disconnect()
-    await wait(2000)
-  })
+  
   it('provides response as a result of proper request', async () => {
     try {
       expect.assertions(3)

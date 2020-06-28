@@ -713,56 +713,7 @@ class Connect extends Base {
 
     this._useEventBus(EventTypes.GET_CONNECTION_STATUS, response)
   }
-
-  public disconnect(options?: Omit<QueryOptions, 'limit' | 'skip' | 'watch'>): boolean | void {
-    this._logTechnical(makeString(MESSAGES.technical.running, ['disconnect']))
-
-    /** validate options, if present */
-    try {
-      if (options) {
-        this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['disconnect', 'options']))
-        validateOptions(options, 'disconnect')
-      }
-    } catch (err) {
-
-      /** log error */
-      this._logError(makeString(ERRORS.service.gotError, ['disconnect', 'validation']), err)
-
-      /** throw appropriate error */
-      throw makePropsResponseError(err)
-    }
-
-    let response: boolean
-
-    /** make request */
-    try {
-      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['disconnect']))
-
-      this._connect.io.destroy()
-
-      response = true
-      this._manuallyDisconnected = true
-      this._log(makeString(MESSAGES.technical.gotResponse, ['disconnect']), response)
-    } catch (err) {
-
-      /** log error */
-      this._logApiError(makeString(ERRORS.service.gotError, ['disconnect', 'request']), err)
-
-      /** throw appropriate error */
-      throw makeReturnError(err.message, err)
-    }
-
-    /** return results */
-
-    this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['disconnect', 'return']))
-
-    if (shouldReturnDirect(options, this._respondAs)) return response
-
-    this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['disconnect']))
-
-    this._useEventBus(EventTypes.DISCONNECT, response)
-  }
-
+ 
   public connect(options?: Omit<QueryOptions, 'limit' | 'skip' | 'watch'>): boolean | void {
     this._logTechnical(makeString(MESSAGES.technical.running, ['connect']))
 

@@ -21,12 +21,6 @@ process.on('unhandledRejection', () => {
 let service: Service
 
 describe('Library configuration', () => {
-  afterAll(async () => {
-    if (service) {
-      service.disconnect()
-      await wait(10000)
-    }
-  })
   describe('incorrect settings:', () => {
     it('doesn\'t take null as settings', async () => {
       expect.assertions(2)

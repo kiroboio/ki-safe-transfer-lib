@@ -25,10 +25,6 @@ describe('Send', () => {
       return
     }
   })
-   afterAll(async () => {
-     service.disconnect()
-     await wait(2000)
-   })
   describe('empty/incorrect argument validation:', () => {
     it('throws Error on missing argument', async () => {
       expect.assertions(3)

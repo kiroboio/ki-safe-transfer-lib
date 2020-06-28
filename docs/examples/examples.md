@@ -4,9 +4,9 @@
 
 ## Contents
 
-- [Get settings, connect & disconnect](#get-settings-connect-&-disconnect)
+- [Get settings & connect](#get-settings-connect)
   - [Settings](#settings)
-  - [Connect/disconnect](#connect/disconnect)
+  - [Connect](#connect)
 - [Update status](#update-status)
   - [Direct response](#direct-response)
 - [Get exchange rates](#get-exchange-rates)
@@ -22,7 +22,7 @@
 - [Retrieving transaction](retrieve.md)
 - [React app with Redux](react.md#react-app-with-redux)
 
-## Get settings, connect & disconnect
+## Get settings, connect
 
 
 ### Settings
@@ -87,9 +87,9 @@ _getSettings()_ responds only directly and provided the settings for current ins
 
 [⬑ _to top_](#contents)
 
-### Connect/disconnect
+### Connect
 
-_connect()_/_disconnect()_ methods are provided for additional flexibility in working with library. It works in auto-mode, but in case you want to perform manual connection operations you can easily do it:
+_connect()_ method is provided for additional flexibility in working with library. It works in auto-mode, but in case you want to perform manual connection operation you can easily do it:
 
 ```TypeScript
 // library to load environment variables from .env file
@@ -119,8 +119,8 @@ async function run(): Promise<void> {
   await wait(2000)
 
   try {
-  // call to disconnect
-  service.disconnect()
+  // call to connect
+  service.connect()
   } catch (err) {
     console.log(err)
   }
@@ -128,13 +128,6 @@ async function run(): Promise<void> {
 
 // run the main function
 run()
-```
-> ☝In case of manual disconnect, service will not re-connect automatically
-
-To connect/re-connect, simply:
-
-```TypeScript
-service.connect()
 ```
 
 [⬑ _to top_](#contents)

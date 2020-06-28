@@ -31,10 +31,6 @@ describe('Networks', () => {
   beforeEach(() => {
     events = []
   })
-  afterAll(async () => {
-    service.disconnect()
-    await wait(2000)
-  })
   it('get online networks with details', async () => {
     expect.assertions(2)
 

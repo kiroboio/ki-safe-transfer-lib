@@ -30,10 +30,7 @@ describe('Getters', () => {
   beforeEach(() => {
     events = []
   })
-  afterAll(async () => {
-    service.disconnect()
-    await wait(2000)
-  })
+    
 
   it('getByOwnerId: sends result through eventBus', async () => {
     expect.assertions(2)

@@ -3,7 +3,7 @@
 
 import dotenv from 'dotenv'
 
-import Service, { DebugLevels, AuthDetails, Responses } from '../src/.'
+import Service, { DebugLevels, AuthDetails } from '../src/.'
 import { wait } from './tools'
 import { validBitcoinAddresses } from './test_data'
 
@@ -24,11 +24,6 @@ describe('Send', () => {
     } catch (e) {
       return
     }
-  })
-
-  afterAll(async () => {
-    service.disconnect()
-    await wait(5000)
   })
   describe('empty/incorrect argument object validation:', () => {
     it('throws Error on missing argument', async () => {

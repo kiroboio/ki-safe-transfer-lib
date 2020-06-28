@@ -30,10 +30,6 @@ describe('Authentication', () => {
   beforeEach(() => {
     events = []
   })
-  afterAll(async () => {
-    incorrect.disconnect()
-    await wait(2000)
-  })
   it('throws error on incorrect auth details', async () => {
     expect.assertions(1)
 

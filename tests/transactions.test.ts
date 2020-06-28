@@ -27,11 +27,6 @@ describe('Transactions', () => {
     }
   })
 
-  afterAll(async () => {
-    service.disconnect()
-    await wait(2000)
-  })
-
   describe('getTransaction', () => {
     it('throws on missing argument', async () => {
       expect.assertions(3)

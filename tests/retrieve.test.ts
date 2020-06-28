@@ -24,10 +24,6 @@ describe('Retrieve', () => {
     }
   })
 
-  afterAll(async () => {
-    service.disconnect()
-    await wait(2000)
-  })
   it('throws on missing argument', async () => {
     expect.assertions(3)
 

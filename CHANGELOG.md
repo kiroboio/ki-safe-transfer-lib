@@ -1,5 +1,12 @@
 # Changelog
 
+#### v2.20.0 2020-06-28
+
+    Updated:
+
+    - removed _disconnect_ method
+    - updated docs & tests
+
 #### v2.19.1 2020-06-28
 
     Fixed:
