@@ -188,7 +188,7 @@ const decrypt = async (payload: Record<string, unknown>, sessionId: number) => {
 
 class Connect extends Base {
   private _connect: Application<unknown>
-  
+
   private _socket: SocketIOClient.Socket
 
   protected _connectionCounter = 0
@@ -737,7 +737,9 @@ class Connect extends Base {
     /** make request */
     try {
       this._logTechnical(makeString(MESSAGES.technical.requestingData, ['disconnect']))
+
       this._connect.io.destroy()
+
       response = true
       this._manuallyDisconnected = true
       this._log(makeString(MESSAGES.technical.gotResponse, ['disconnect']), response)

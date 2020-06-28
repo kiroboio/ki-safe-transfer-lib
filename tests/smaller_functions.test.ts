@@ -74,7 +74,7 @@ describe('Smaller functions', () => {
       }
 
       if (result) {
-        Object.keys(result).forEach((key) => {
+        Object.keys(result).forEach(key => {
           if (!listOfStatusKeys.includes(key)) keysValuesCheck = false
           else {
             const resValType = typeof changeType<Record<string, string | number | boolean>>(result)[key]
@@ -108,7 +108,7 @@ describe('Smaller functions', () => {
         keysValuesCheck = false
       }
 
-      Object.keys(result).forEach((key) => {
+      Object.keys(result).forEach(key => {
         if (!listOfStatusKeys.includes(key)) keysValuesCheck = false
 
         const resValType = typeof result[key]
