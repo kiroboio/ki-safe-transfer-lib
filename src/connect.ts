@@ -3,7 +3,7 @@ import io from 'socket.io-client'
 import crypto from 'crypto-js'
 import socket from '@feathersjs/socketio-client'
 import { AuthenticationResult } from '@feathersjs/authentication'
-import auth, { Storage, getDefaultStorage, MemoryStorage } from '@feathersjs/authentication-client'
+import auth, { Storage, MemoryStorage } from '@feathersjs/authentication-client'
 
 import { Base } from './base'
 import {
