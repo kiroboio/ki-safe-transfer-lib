@@ -1,5 +1,12 @@
 # Changelog
 
+#### v2.19.0 2020-06-28
+
+  Tests:
+
+  - _node_ mode for testing
+  - extended timing to wait after connection
+
 #### v2.17.2 2020-06-15
 
   Fix:
