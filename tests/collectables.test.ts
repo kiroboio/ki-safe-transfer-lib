@@ -27,15 +27,12 @@ describe('Collectables', () => {
   beforeAll(async () => {
     try {
       service = Service.getInstance({ authDetails, eventBus, respondAs: Responses.Callback }, true)
-      await wait(2000)
+      await wait(10000)
     } catch (e) {
       return
     }
   })
-  afterAll(async () => {
-    service.disconnect()
-    await wait(2000)
-  })
+  
   it('provides response as a result of proper request', async () => {
     try {
       expect.assertions(3)

@@ -5,7 +5,7 @@ import { is } from 'ramda'
 
 import Service, { DebugLevels, Currencies, Networks, Responses, AuthDetails } from '../src/.'
 import { TEXT, valuesForSettings } from '../src/data'
-import { makeString, compareBasicObjects, checkSettings } from '../src/tools'
+import { makeString, checkSettings } from '../src/tools'
 import { wait } from './tools'
 
 dotenv.config()
@@ -21,12 +21,6 @@ process.on('unhandledRejection', () => {
 let service: Service
 
 describe('Library configuration', () => {
-  afterAll(async () => {
-    if (service) {
-      service.disconnect()
-      await wait(2000)
-    }
-  })
   describe('incorrect settings:', () => {
     it('doesn\'t take null as settings', async () => {
       expect.assertions(2)
@@ -150,7 +144,7 @@ describe('Library configuration', () => {
         network: Networks.Testnet,
         respondAs: Responses.Direct,
         authDetails: {key:'',secret:''},
-        eventBus: () => { log() },
+        eventBus: () => { log },
       }
 
       try {

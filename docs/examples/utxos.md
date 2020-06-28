@@ -65,7 +65,7 @@ run()
 ```
 > ☝Request supports [query options](../query_options.md), except watch.
 
-Service will respond with [Results](response.md#results-object-with-data) object:
+Service will respond with [Results](results.md) object:
 
 ```TypeScript
 { type: 'service_get_utxos',

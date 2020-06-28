@@ -21,6 +21,8 @@ class Base {
 
   protected _eventBus: EventBus | undefined
 
+  protected _sessionId = 0
+
   protected _lastAddresses: LastAddresses = { addresses: [] } // caching last addresses request
 
   protected _respondAs: Responses = Responses.Direct
@@ -62,12 +64,17 @@ class Base {
     if (this._debug === 4) new LogInfo(`⌾ ${message}`, payload).make()
   }
 
-  protected _useEventBus(type: EventTypes, payload: unknown): void {
+  protected async _useEventBus(
+    type: EventTypes,
+    payload: unknown,
+    decrypt?: (payload: Record<string, unknown>, sessionId: number) => Promise<unknown>
+    ) : Promise<void> {
+
     if (this._eventBus) {
       try {
         this._eventBus({
           type,
-          payload,
+          payload: decrypt && payload ? await decrypt(payload as Record<string, unknown>, this._sessionId): payload,
         })
       } catch (err) {
         this._logError(`Service: eventBus caught error, when emitting event (${type}).`, err)

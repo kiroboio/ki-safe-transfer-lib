@@ -3,7 +3,6 @@
 import dotenv from 'dotenv'
 
 import { Service, Event, Responses } from '../src/.'
-import { wait } from './tools'
 
 dotenv.config()
 
@@ -17,10 +16,7 @@ function eventBus(_event: Event): void {
 const service = Service.getInstance({ respondAs: Responses.Callback, eventBus, authDetails }, true)
 
 describe('Validate options', () => {
-  afterAll(async () => {
-    service.disconnect()
-    await wait(2000)
-  })
+  
   describe(' throws on incorrect options:', () => {
     it('throws if options are of wrong type', async () => {
       expect.assertions(3)

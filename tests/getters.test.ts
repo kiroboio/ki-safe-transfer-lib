@@ -22,7 +22,7 @@ describe('Getters', () => {
   beforeAll(async () => {
     try {
       service = Service.getInstance({ authDetails, eventBus, respondAs: Responses.Callback }, true)
-      await wait(5000)
+      await wait(10000)
     } catch (e) {
       return
     }
@@ -30,10 +30,7 @@ describe('Getters', () => {
   beforeEach(() => {
     events = []
   })
-  afterAll(async () => {
-    service.disconnect()
-    await wait(2000)
-  })
+    
 
   it('getByOwnerId: sends result through eventBus', async () => {
     expect.assertions(2)

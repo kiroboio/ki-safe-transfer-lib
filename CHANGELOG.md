@@ -1,5 +1,57 @@
 # Changelog
 
+#### v2.20.1 2020-06-28
+
+  Fix: 
+
+  - minor bug fix
+
+#### v2.20.0 2020-06-28
+
+  Updated:
+
+  - removed _disconnect_ method
+  - updated docs & tests
+
+#### v2.19.1 2020-06-28
+
+  Fixed:
+
+  - smaller functions is fixed
+  - disconnect test is disabled
+
+#### v2.19.0 2020-06-28
+
+  Tests:
+
+  - _node_ mode for testing
+  - extended timing to wait after connection
+
+#### v2.17.2 2020-06-15
+
+  Fix:
+
+  - restore sending events connect/disconnect
+
+#### v2.17.1 2020-06-15
+
+  Fix:
+
+  - connection test
+
+#### v2.17.0 2020-06-15
+
+  New:
+
+  - change disconnect method > .destroy()
+
+#### v2.16.0 2020-06-14
+
+  New:
+
+  - send event on connect
+  - send event on disconnect
+
 #### v2.15.0 2020-06-10
 
   New:

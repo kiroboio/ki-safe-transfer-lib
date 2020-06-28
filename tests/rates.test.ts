@@ -24,17 +24,13 @@ describe('Rates', () => {
   beforeAll(async () => {
     try {
       service = Service.getInstance({ authDetails, eventBus, respondAs: Responses.Callback }, true)
-      await wait(5000)
+      await wait(10000)
     } catch (e) {
       return
     }
   })
   beforeEach(() => {
     events = []
-  })
-  afterAll(async () => {
-    service.disconnect()
-    await wait(2000)
   })
   it('throws on incorrect options', async () => {
     expect.assertions(3)

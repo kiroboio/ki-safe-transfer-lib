@@ -21,7 +21,6 @@
   - [_getLastAddresses()_](api.md#getlastaddresses)
   - [_clearLastAddresses()_](api.md#clearlastaddresses)
   - [_connect()_](api.md#connect)
-  - [_disconnect()_](api.md#disconnect)
   - [_getConnectionStatus()_](api.md#getconnectionstatus)
   - [async _getCollectables()_](api.md#async-getcollectables)
     - [Caching of get Collectables request](api.md#caching-of-get-collectables-request)

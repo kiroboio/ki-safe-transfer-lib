@@ -22,17 +22,13 @@ describe('Authentication', () => {
   beforeAll(async () => {
     try {
       incorrect = Service.getInstance({ authDetails: controlDetails, eventBus, respondAs: Responses.Direct }, true)
-      await wait(5000)
+      await wait(10000)
     } catch (e) {
       return
     }
   })
   beforeEach(() => {
     events = []
-  })
-  afterAll(async () => {
-    incorrect.disconnect()
-    await wait(2000)
   })
   it('throws error on incorrect auth details', async () => {
     expect.assertions(1)

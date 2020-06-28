@@ -33,7 +33,7 @@ async function setAsync(): Promise<Status | void> {
       },
       true,
     )
-    await wait(2000)
+    await wait(10000)
     return await service.getStatus()
   } catch (err) {
     log(err)
@@ -57,10 +57,7 @@ describe('Smaller functions', () => {
     storedEvent = {}
   })
 
-  afterAll(async () => {
-    service.disconnect()
-    await wait(2000)
-  })
+  
   describe(' getStatus:', () => {
     it('returns information in "Direct" mode', async () => {
       const result = await service.getStatus({ respondDirect: true })
@@ -74,7 +71,7 @@ describe('Smaller functions', () => {
       }
 
       if (result) {
-        Object.keys(result).forEach((key) => {
+        Object.keys(result).forEach(key => {
           if (!listOfStatusKeys.includes(key)) keysValuesCheck = false
           else {
             const resValType = typeof changeType<Record<string, string | number | boolean>>(result)[key]
@@ -108,7 +105,7 @@ describe('Smaller functions', () => {
         keysValuesCheck = false
       }
 
-      Object.keys(result).forEach((key) => {
+      Object.keys(result).forEach(key => {
         if (!listOfStatusKeys.includes(key)) keysValuesCheck = false
 
         const resValType = typeof result[key]

@@ -23,6 +23,7 @@
     "declaration": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
+     "sourceMap": true
   },
   "typedocOptions": {
     "mode": "modules",
@@ -34,6 +35,7 @@
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "client.ts"
   ]
 }

@@ -20,15 +20,11 @@ describe('Send', () => {
   beforeAll(async () => {
     try {
       service = Service.getInstance({ debug: DebugLevels.MUTE, authDetails })
-      await wait(2000)
+      await wait(10000)
     } catch (e) {
       return
     }
   })
-   afterAll(async () => {
-     service.disconnect()
-     await wait(2000)
-   })
   describe('empty/incorrect argument validation:', () => {
     it('throws Error on missing argument', async () => {
       expect.assertions(3)

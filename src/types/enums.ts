@@ -42,6 +42,7 @@ enum EventTypes {
   UPDATE_STATUS = 'service_update_status',
   UPDATED_COLLECTABLE = 'service_updated_collectable',
   UPDATED_RETRIEVABLE = 'service_updated_retrievable',
+  UPDATE_RATES = 'service_update_btc_to_usd_rates',
 }
 
 

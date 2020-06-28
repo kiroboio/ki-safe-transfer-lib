@@ -1,9 +1,9 @@
-import feathers, { Application } from '@feathersjs/feathers'
+import feathers, { Application, HookContext } from '@feathersjs/feathers'
 import io from 'socket.io-client'
 import crypto from 'crypto-js'
 import socket from '@feathersjs/socketio-client'
 import { AuthenticationResult } from '@feathersjs/authentication'
-import auth, { Storage, getDefaultStorage, MemoryStorage } from '@feathersjs/authentication-client'
+import auth, { Storage, MemoryStorage } from '@feathersjs/authentication-client'
 
 import { Base } from './base'
 import {
@@ -39,6 +39,152 @@ import {
 import { apiUrl, version, endpoints, connectionTriesMax, connectionTimeout } from './config'
 import { WARNINGS, ERRORS, MESSAGES } from './text'
 import { StorageWrapper } from '@feathersjs/authentication-client/lib/storage'
+
+function str2ab(str: string) {
+  const buf = new ArrayBuffer(str.length)
+
+  const bufView = new Uint8Array(buf)
+
+  for (let i = 0, strLen = str.length; i < strLen; i++) {
+    bufView[i] = str.charCodeAt(i)
+  }
+
+  return buf
+}
+
+const generateKey = async () => {
+  if (typeof window === 'undefined') {
+    return undefined
+  }
+
+  const key = await window.crypto.subtle.generateKey(
+    {
+        name: 'AES-CBC',
+        length: 128,
+    },
+    true,
+    ['encrypt', 'decrypt']
+  )
+
+  const iv = window.crypto.getRandomValues(new Uint8Array(16))
+
+  return { key, iv }
+}
+
+const chunkSubstr = (str: string, size: number) => {
+  const numChunks = Math.ceil(str.length / size)
+
+  const chunks = new Array(numChunks)
+
+  for (let i = 0, o = 0; i < numChunks; ++i, o += size) {
+    chunks[i] = str.substr(o, size)
+  }
+
+  return chunks
+}
+
+let _authKey: string | undefined = undefined
+
+const _payloadKey: { key: CryptoKey, iv: ArrayBuffer }[] = []
+
+let _payloadCount = 0;
+
+const authEncrypt = async (payload: Record<string, unknown>, sessionId: number) => {
+  if (typeof window === 'undefined') {
+    return payload
+  }
+
+  const data = { ...payload }
+
+  _payloadKey[sessionId] = await generateKey() as { key: CryptoKey, iv: ArrayBuffer }
+
+  if (_payloadKey[sessionId]) {
+    const keyData = await window.crypto.subtle.exportKey('raw', _payloadKey[sessionId].key)
+
+    data.encrypt = {
+      key: Buffer.from(keyData).toString('base64'),
+      iv: Buffer.from(_payloadKey[sessionId].iv).toString('base64'),
+    }
+  }
+
+  const binaryDer = str2ab(window.atob(window.atob(_authKey || '' )))
+
+  const publicKey = await window.crypto.subtle.importKey(
+    'spki',
+    binaryDer,
+    {
+      name: 'RSA-OAEP',
+      hash: 'SHA-256',
+    },
+    true,
+    ['encrypt'],
+    )
+
+  const chunks = chunkSubstr(JSON.stringify(data), 60)
+
+  const encrypted : string[] = []
+
+  for (const chunk of chunks) {
+    const enc = new TextEncoder()
+
+    const encoded = enc.encode(chunk)
+
+    const ciphertext = await window.crypto.subtle.encrypt({ name: 'RSA-OAEP' }, publicKey, encoded)
+
+    const buffer = ciphertext ? new Uint8Array(ciphertext) : new Uint8Array()
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    encrypted.push(btoa(String.fromCharCode.apply(null, buffer as any)))
+  }
+
+  return { encrypted }
+}
+
+const encrypt = async (payload: Record<string, unknown>, sessionId: number) => {
+  if (typeof window === 'undefined' || typeof _payloadKey[sessionId] === 'undefined') {
+    return payload
+  }
+
+  const enc = new TextEncoder()
+
+  const encoded = enc.encode(JSON.stringify(payload))
+
+  const ciphertext = await window.crypto.subtle.encrypt({
+    name: 'AES-CBC',
+    iv:_payloadKey[sessionId].iv
+    },
+    _payloadKey[sessionId].key,
+    encoded
+  )
+
+  const buffer = new Uint8Array(ciphertext)
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const encrypted = btoa(String.fromCharCode.apply(null, buffer as any))
+
+  return { encrypted }
+}
+
+const decrypt = async (payload: Record<string, unknown>, sessionId: number) => {
+  if (typeof window === 'undefined' || typeof _payloadKey[sessionId] === 'undefined' || typeof payload.encrypted !== 'string') {
+    return payload
+  }
+
+  const ciphertext = await window.crypto.subtle.decrypt({
+    name: 'AES-CBC',
+    iv: _payloadKey[sessionId].iv
+    },
+    _payloadKey[sessionId].key,
+    str2ab(window.atob(payload.encrypted))
+  )
+
+  const buffer = new Uint8Array(ciphertext)
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const decrypted = String.fromCharCode.apply(null, buffer as any)
+
+  return JSON.parse(decrypted)
+}
 
 class Connect extends Base {
   private _connect: Application<unknown>
@@ -90,12 +236,20 @@ class Connect extends Base {
 
     this._auth = authDetails
 
+    this._sessionId = ++_payloadCount
+
     if (eventBus) this._eventBus = eventBus
 
     // setup
-
     this._logTechnical('Service is configuring connection...')
-    this._socket = io.connect(apiUrl)
+
+    this._socket = (io.connect(apiUrl) as never)
+
+    this._socket.on('encrypt', (publicKey: string) => {
+      if (typeof window !== 'undefined') {
+        _authKey = publicKey
+      }
+    })
 
     const connect = feathers().configure(
       socket(this._socket, {
@@ -103,14 +257,15 @@ class Connect extends Base {
       }),
     )
 
-
     class safeStorage implements Storage {
       private storage: MemoryStorage | StorageWrapper
 
       private key: string
 
-      constructor (key = 'd83du2') {
-        this.storage = getDefaultStorage()
+      constructor(key = Math.random().toString(36)
+        .substring(7) + Math.random().toString(36)
+        .substring(7)) {
+        this.storage = new MemoryStorage()
         this.key = key
       }
 
@@ -153,6 +308,7 @@ class Connect extends Base {
           (!this._lastConnect || diff(this._lastConnect) > connectionTimeout)
         ) {
           this._logTechnical(MESSAGES.technical.isAllowed)
+          this._useEventBus(EventTypes.CONNECT, true)
           this._runAuth()
         } else {
           this._logTechnical(MESSAGES.technical.notAllowed)
@@ -180,9 +336,10 @@ class Connect extends Base {
     }
 
     try {
-      this._connect.io.on('disconnect', (payload: string) =>
-        this._logApiWarning(WARNINGS.connect.disconnect, capitalize(payload)),
-      )
+      this._connect.io.on('disconnect', (payload: string) => {
+        this._logApiWarning(WARNINGS.connect.disconnect, capitalize(payload))
+        this._useEventBus(EventTypes.DISCONNECT, true)
+      })
     } catch (err) {
       this._logApiError(ERRORS.connect.on.disconnect.direct, err)
     }
@@ -201,34 +358,39 @@ class Connect extends Base {
 
     this._logTechnical(makeString(MESSAGES.technical.serviceIs, ['setting up event listeners...']))
 
-    // status update
+    // rates updated
+    this._rateBtcToUsd.on('updated', (data: unknown) => {
+      this._useEventBus(EventTypes.UPDATE_RATES, data, decrypt)
+    })
+
+    // status updated
     this._networks.on('patched', (data: NetworkTip) => {
-      this._useEventBus(EventTypes.UPDATE_STATUS, data)
+      this._useEventBus(EventTypes.UPDATE_STATUS, data, decrypt)
     })
 
     // transfer updated
     this._transfers.on('patched', (payload: Transfer) => {
-      this._useEventBus(EventTypes.UPDATED_RETRIEVABLE, payload)
+      this._useEventBus(EventTypes.UPDATED_RETRIEVABLE, payload, decrypt)
     })
 
     // transfer removed
     this._transfers.on('removed', (payload: Transfer) => {
-      this._useEventBus(EventTypes.REMOVED_RETRIEVABLE, payload)
+      this._useEventBus(EventTypes.REMOVED_RETRIEVABLE, payload, decrypt)
     })
 
     // new collectable has been created for the previously requested address
     this._inbox.on('created', (payload: Collectable) => {
-      this._useEventBus(EventTypes.CREATED_COLLECTABLE, payload)
+      this._useEventBus(EventTypes.CREATED_COLLECTABLE, payload, decrypt)
     })
 
     // collectable patched
     this._inbox.on('patched', (payload: Collectable) => {
-      this._useEventBus(EventTypes.UPDATED_COLLECTABLE, payload)
+      this._useEventBus(EventTypes.UPDATED_COLLECTABLE, payload, decrypt)
     })
 
     // collectable removed
     this._inbox.on('removed', (payload: Collectable) => {
-      this._useEventBus(EventTypes.REMOVED_COLLECTABLE, payload)
+      this._useEventBus(EventTypes.REMOVED_COLLECTABLE, payload, decrypt)
     })
 
     // set internet connection check
@@ -320,12 +482,12 @@ class Connect extends Base {
     try {
       this._logTechnical('Service (authSocket) is trying to re-authenticate...')
 
-      return this._connect.reAuthenticate().catch(() => {
+      return this._connect.reAuthenticate().catch(async () => {
         this._logTechnical(makeString(ERRORS.service.failedTo, ['authSocket', 're-authenticate', 'authentication']))
         this._connect
           .authenticate({
             strategy: 'local',
-            ...this._auth,
+            ...await authEncrypt({...this._auth}, this._sessionId),
           })
           .catch((err) => {
             // if not
@@ -399,7 +561,30 @@ class Connect extends Base {
   private _getService(endpoint: Endpoints): ApiService {
     this._logTechnical(makeString(MESSAGES.technical.service, ['getService']), endpoint)
 
-    return this._connect.service(this._makeEndpointPath(endpoint))
+    return this._connect.service(this._makeEndpointPath(endpoint)).hooks({
+      before: {
+        all: [async (context: HookContext) => {
+          if (context.params.query) {
+            context.params.query = await encrypt(context.params.query, this._sessionId)
+          }
+        }]
+      },
+      after: {
+        all: [async (context: HookContext) => {
+          if (context.result) {
+            context.result = await decrypt(context.result, this._sessionId)
+          }
+        }]
+      },
+      error: {
+        all: [async (context: HookContext) => {
+          if (context.error) {
+            context.error = await decrypt(context.error, this._sessionId)
+          }
+        }
+        ]
+      },
+    })
   }
 
   /**
@@ -528,54 +713,7 @@ class Connect extends Base {
 
     this._useEventBus(EventTypes.GET_CONNECTION_STATUS, response)
   }
-
-  public disconnect(options?: Omit<QueryOptions, 'limit' | 'skip' | 'watch'>): boolean | void {
-    this._logTechnical(makeString(MESSAGES.technical.running, ['disconnect']))
-
-    /** validate options, if present */
-    try {
-      if (options) {
-        this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['disconnect', 'options']))
-        validateOptions(options, 'disconnect')
-      }
-    } catch (err) {
-
-      /** log error */
-      this._logError(makeString(ERRORS.service.gotError, ['disconnect', 'validation']), err)
-
-      /** throw appropriate error */
-      throw makePropsResponseError(err)
-    }
-
-    let response: boolean
-
-    /** make request */
-    try {
-      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['disconnect']))
-      this._socket.disconnect().close()
-      response = true
-      this._manuallyDisconnected = true
-      this._log(makeString(MESSAGES.technical.gotResponse, ['disconnect']), response)
-    } catch (err) {
-
-      /** log error */
-      this._logApiError(makeString(ERRORS.service.gotError, ['disconnect', 'request']), err)
-
-      /** throw appropriate error */
-      throw makeReturnError(err.message, err)
-    }
-
-    /** return results */
-
-    this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['disconnect', 'return']))
-
-    if (shouldReturnDirect(options, this._respondAs)) return response
-
-    this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['disconnect']))
-
-    this._useEventBus(EventTypes.DISCONNECT, response)
-  }
-
+ 
   public connect(options?: Omit<QueryOptions, 'limit' | 'skip' | 'watch'>): boolean | void {
     this._logTechnical(makeString(MESSAGES.technical.running, ['connect']))
 

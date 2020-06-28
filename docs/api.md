@@ -9,7 +9,6 @@
   - [_getLastAddresses()_](#getlastaddresses)
   - [_clearLastAddresses()_](#clearlastaddresses)
   - [_connect()_](#connect)
-  - [_disconnect()_](#disconnect)
   - [_getConnectionStatus()_](#getconnectionstatus)
   - [async _getCollectables()_](#async-getcollectables)
     - [Caching of get Collectables request](#caching-of-get-collectables-request)
@@ -156,19 +155,6 @@ service.connect()
 
 [⬑ _to top_](#library-api)
 
-## ___disconnect()___
-
-Manual request for library to disconnect from server:
-
-```TypeScript
-...
-
-service.disconnect()
-```
-> ☝ If library has been manually disconnected, it will __not__ reconnect itself.
-
-[⬑ _to top_](#library-api)
-
 ## ___getConnectionStatus()___
 
 Check connection status of library to the server:
@@ -201,7 +187,7 @@ The method has the following argument/return types:
 async function getCollectables(addresses: string[], options?: QueryOptions): Promise<Results<Collectable> | void>
 
 ```
-Full set of [QueryOptions](query_options.md) is avaialble for this method. Response will be a part of [Results](response.md#results-object-with-data) object.
+Full set of [QueryOptions](query_options.md) is avaialble for this method. Response will be a part of [Results](results.md) object.
 
 Data received directly or through event bus will of the following structure:
 ```TypeScript
@@ -475,7 +461,7 @@ service.getByOwnerId(
 }
 ```
 
-Event bus will get [Results](response.md#results-object-with-data) object with [paging](query_options.md#paging) details and with array of transactions or empty array if non has been found:
+Event bus will get [Results](results.md) object with [paging](query_options.md#paging) details and with array of transactions or empty array if non has been found:
 
 ```TypeScript
 { type: 'service_get_by_owner_id',
