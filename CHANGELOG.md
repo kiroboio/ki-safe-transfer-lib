@@ -1,5 +1,11 @@
 # Changelog
 
+#### v2.20.2 2020-06-29
+
+  Fixed:
+
+  - _main_ > _prod_ in address validation
+
 #### v2.20.1 2020-06-28
 
   Fix: 
