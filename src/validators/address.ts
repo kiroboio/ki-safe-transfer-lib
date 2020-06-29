@@ -33,4 +33,4 @@ interface Props {
  */
 export function validateAddress({ address, currency, networkType }: Props): boolean {
 
-  return is(String,address) ? validator.validate(address, currency, networkType) : false }
+  return is(String,address) ? validator.validate(address, currency, networkType==='main'?'prod':networkType) : false }
