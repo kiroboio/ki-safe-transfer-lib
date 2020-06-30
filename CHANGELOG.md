@@ -1,5 +1,15 @@
 # Changelog
 
+#### v2.21.0 2020-06-30
+
+  New:
+
+  - destroy() for instance
+
+  Updated:
+
+  - getConnectionStatus() is correct
+
 #### v2.20.2 2020-06-29
 
   Fixed:
@@ -8,7 +18,7 @@
 
 #### v2.20.1 2020-06-28
 
-  Fix: 
+  Fix:
 
   - minor bug fix
 

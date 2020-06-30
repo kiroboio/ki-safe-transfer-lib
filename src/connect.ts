@@ -243,7 +243,7 @@ class Connect extends Base {
     // setup
     this._logTechnical('Service is configuring connection...')
 
-    this._socket = (io.connect(apiUrl) as never)
+    this._socket = io.connect(apiUrl) as never
 
     this._socket.on('encrypt', (publicKey: string) => {
       if (typeof window !== 'undefined') {
@@ -263,8 +263,8 @@ class Connect extends Base {
       private key: string
 
       constructor(key = Math.random().toString(36)
-        .substring(7) + Math.random().toString(36)
-        .substring(7)) {
+.substring(7) + Math.random().toString(36)
+.substring(7)) {
         this.storage = new MemoryStorage()
         this.key = key
       }
@@ -436,6 +436,10 @@ class Connect extends Base {
     }
   }
 
+  protected _destroySocket():void {
+    if (this._connect) this._connect.io.destroy()
+  }
+
   private _validateProps(settings: unknown): void {
     try {
       this._logTechnical(makeString(MESSAGES.technical.serviceIs, ['validating settings provided']))
@@ -487,7 +491,7 @@ class Connect extends Base {
         this._connect
           .authenticate({
             strategy: 'local',
-            ...await authEncrypt({...this._auth}, this._sessionId),
+            ...(await authEncrypt({ ...this._auth }, this._sessionId)),
           })
           .catch((err) => {
             // if not
@@ -563,26 +567,31 @@ class Connect extends Base {
 
     return this._connect.service(this._makeEndpointPath(endpoint)).hooks({
       before: {
-        all: [async (context: HookContext) => {
-          if (context.params.query) {
-            context.params.query = await encrypt(context.params.query, this._sessionId)
-          }
-        }]
+        all: [
+          async (context: HookContext) => {
+            if (context.params.query) {
+              context.params.query = await encrypt(context.params.query, this._sessionId)
+            }
+          },
+        ],
       },
       after: {
-        all: [async (context: HookContext) => {
-          if (context.result) {
-            context.result = await decrypt(context.result, this._sessionId)
-          }
-        }]
+        all: [
+          async (context: HookContext) => {
+            if (context.result) {
+              context.result = await decrypt(context.result, this._sessionId)
+            }
+          },
+        ],
       },
       error: {
-        all: [async (context: HookContext) => {
-          if (context.error) {
-            context.error = await decrypt(context.error, this._sessionId)
-          }
-        }
-        ]
+        all: [
+          async (context: HookContext) => {
+            if (context.error) {
+              context.error = await decrypt(context.error, this._sessionId)
+            }
+          },
+        ],
       },
     })
   }
@@ -692,7 +701,7 @@ class Connect extends Base {
     /** make request */
     try {
       this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getConnectionStatus']))
-      response = this._socket.connected
+      response = this._connect.io.io.readyState === 'open'
       this._log(makeString(MESSAGES.technical.gotResponse, ['getConnectionStatus']), response)
     } catch (err) {
 
@@ -713,7 +722,7 @@ class Connect extends Base {
 
     this._useEventBus(EventTypes.GET_CONNECTION_STATUS, response)
   }
- 
+
   public connect(options?: Omit<QueryOptions, 'limit' | 'skip' | 'watch'>): boolean | void {
     this._logTechnical(makeString(MESSAGES.technical.running, ['connect']))
 

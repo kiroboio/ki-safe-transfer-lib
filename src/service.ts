@@ -53,7 +53,7 @@ class Service extends Connect {
 
   public static getInstance(props?: ConnectProps, replace = false): Service {
     if (replace) {
-      delete Service.instance
+      this.destroy()
     }
 
     if (!Service.instance) {
@@ -63,6 +63,12 @@ class Service extends Connect {
     }
 
     return Service.instance
+  }
+
+  public static destroy():void {
+    if (Service.instance) Service.instance._destroySocket()
+
+    delete Service.instance
   }
 
   private constructor(props: ConnectProps) {
@@ -277,7 +283,8 @@ class Service extends Connect {
 
     /** validate props */
     try {
-      if (isNil(txid)) throw new TypeError(makeString(ERRORS.validation.missingArgument, ['txid','', 'getRawTransaction']))
+      if (isNil(txid))
+        throw new TypeError(makeString(ERRORS.validation.missingArgument, ['txid', '', 'getRawTransaction']))
 
       if (typeof txid !== 'string')
         throw new TypeError(
