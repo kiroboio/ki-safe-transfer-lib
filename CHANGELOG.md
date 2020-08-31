@@ -1,5 +1,11 @@
 # Changelog
 
+#### v2.22.1 2020-08-31
+
+  Fix:
+
+  - minor correction
+
 #### v2.22.0 2020-08-31
 
 	New:
