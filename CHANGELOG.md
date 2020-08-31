@@ -1,5 +1,11 @@
 # Changelog
 
+#### v2.22.0 2020-08-31
+
+	New:
+
+	- support for Ethereum
+
 #### v2.21.0 2020-06-30
 
   New:

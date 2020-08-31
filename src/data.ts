@@ -56,8 +56,8 @@ export const typeOfSettingsKeys: Record<string, string> = {
 }
 
 export const valuesForSettings: Record<string, (string | number)[]> = {
-  currency: ['btc'],
-  network: ['testnet', 'regtest', 'main'],
+  currency: ['btc', 'eth'],
+  network: ['testnet', 'regtest', 'main', 'rinkeby'],
   debug: [0, 1, 2, 4],
   respondAs: ['callback', 'direct'],
 }

@@ -7,7 +7,7 @@ enum Endpoints {
   Exists = 'exists',
   RateToUsd = 'to/usd',
   Retrieve = 'retrieve',
-  Transactions = 'transactions'
+  Transactions = 'transactions',
 }
 
 // who the service should respond from methods:
@@ -45,15 +45,18 @@ enum EventTypes {
   UPDATE_RATES = 'service_update_btc_to_usd_rates',
 }
 
-
 enum Networks {
+  // BTC
   Testnet = 'testnet',
   Regnet = 'regtest',
   Mainnet = 'main',
+  // ETH
+  Rinkeby = 'rinkeby',
 }
 
 enum Currencies {
   Bitcoin = 'btc',
+  Ethereum = 'eth',
 }
 
 // debug:
@@ -75,7 +78,8 @@ enum DebugLevels {
 enum Connection {
   STATUS = 'status',
   ON = 'connect',
-  OFF = 'disconnect'
+  OFF = 'disconnect',
 }
 
 export { Endpoints, EventTypes, Responses, Networks, Currencies, DebugLevels, Connection }
+

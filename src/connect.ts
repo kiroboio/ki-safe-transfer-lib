@@ -59,11 +59,11 @@ const generateKey = async () => {
 
   const key = await window.crypto.subtle.generateKey(
     {
-        name: 'AES-CBC',
-        length: 128,
+      name: 'AES-CBC',
+      length: 128,
     },
     true,
-    ['encrypt', 'decrypt']
+    ['encrypt', 'decrypt'],
   )
 
   const iv = window.crypto.getRandomValues(new Uint8Array(16))
@@ -85,9 +85,9 @@ const chunkSubstr = (str: string, size: number) => {
 
 let _authKey: string | undefined = undefined
 
-const _payloadKey: { key: CryptoKey, iv: ArrayBuffer }[] = []
+const _payloadKey: { key: CryptoKey; iv: ArrayBuffer }[] = []
 
-let _payloadCount = 0;
+let _payloadCount = 0
 
 const authEncrypt = async (payload: Record<string, unknown>, sessionId: number) => {
   if (typeof window === 'undefined') {
@@ -96,7 +96,7 @@ const authEncrypt = async (payload: Record<string, unknown>, sessionId: number) 
 
   const data = { ...payload }
 
-  _payloadKey[sessionId] = await generateKey() as { key: CryptoKey, iv: ArrayBuffer }
+  _payloadKey[sessionId] = (await generateKey()) as { key: CryptoKey; iv: ArrayBuffer }
 
   if (_payloadKey[sessionId]) {
     const keyData = await window.crypto.subtle.exportKey('raw', _payloadKey[sessionId].key)
@@ -107,7 +107,7 @@ const authEncrypt = async (payload: Record<string, unknown>, sessionId: number) 
     }
   }
 
-  const binaryDer = str2ab(window.atob(window.atob(_authKey || '' )))
+  const binaryDer = str2ab(window.atob(window.atob(_authKey || '')))
 
   const publicKey = await window.crypto.subtle.importKey(
     'spki',
@@ -118,11 +118,11 @@ const authEncrypt = async (payload: Record<string, unknown>, sessionId: number) 
     },
     true,
     ['encrypt'],
-    )
+  )
 
   const chunks = chunkSubstr(JSON.stringify(data), 60)
 
-  const encrypted : string[] = []
+  const encrypted: string[] = []
 
   for (const chunk of chunks) {
     const enc = new TextEncoder()
@@ -149,12 +149,13 @@ const encrypt = async (payload: Record<string, unknown>, sessionId: number) => {
 
   const encoded = enc.encode(JSON.stringify(payload))
 
-  const ciphertext = await window.crypto.subtle.encrypt({
-    name: 'AES-CBC',
-    iv:_payloadKey[sessionId].iv
+  const ciphertext = await window.crypto.subtle.encrypt(
+    {
+      name: 'AES-CBC',
+      iv: _payloadKey[sessionId].iv,
     },
     _payloadKey[sessionId].key,
-    encoded
+    encoded,
   )
 
   const buffer = new Uint8Array(ciphertext)
@@ -166,16 +167,21 @@ const encrypt = async (payload: Record<string, unknown>, sessionId: number) => {
 }
 
 const decrypt = async (payload: Record<string, unknown>, sessionId: number) => {
-  if (typeof window === 'undefined' || typeof _payloadKey[sessionId] === 'undefined' || typeof payload.encrypted !== 'string') {
+  if (
+    typeof window === 'undefined' ||
+    typeof _payloadKey[sessionId] === 'undefined' ||
+    typeof payload.encrypted !== 'string'
+  ) {
     return payload
   }
 
-  const ciphertext = await window.crypto.subtle.decrypt({
-    name: 'AES-CBC',
-    iv: _payloadKey[sessionId].iv
+  const ciphertext = await window.crypto.subtle.decrypt(
+    {
+      name: 'AES-CBC',
+      iv: _payloadKey[sessionId].iv,
     },
     _payloadKey[sessionId].key,
-    str2ab(window.atob(payload.encrypted))
+    str2ab(window.atob(payload.encrypted)),
   )
 
   const buffer = new Uint8Array(ciphertext)
@@ -215,7 +221,7 @@ class Connect extends Base {
 
   protected _manuallyDisconnected = false
 
-  constructor(props: ConnectProps) {
+  constructor(props: ConnectProps, url?: string) {
     super(debugLevelSelector(props?.debug))
 
     this._logTechnical('Service (connect > constructor) sent \'debug\' setting to super, validating props')
@@ -243,7 +249,8 @@ class Connect extends Base {
     // setup
     this._logTechnical('Service is configuring connection...')
 
-    this._socket = io.connect(apiUrl) as never
+    // choose url to use
+    this._socket = io.connect(url || apiUrl) as never
 
     this._socket.on('encrypt', (publicKey: string) => {
       if (typeof window !== 'undefined') {
@@ -289,7 +296,8 @@ class Connect extends Base {
       }
     }
 
-    this._connect = connect.configure(auth({ storageKey: 'auth', storage: new safeStorage() }))
+    // configure if built-in url
+    this._connect = url ? connect : connect.configure(auth({ storageKey: 'auth', storage: new safeStorage() }))
 
     // connect/disconnect event processes
     this._logTechnical('Service is setting up connect/disconnect listeners...')
@@ -309,7 +317,9 @@ class Connect extends Base {
         ) {
           this._logTechnical(MESSAGES.technical.isAllowed)
           this._useEventBus(EventTypes.CONNECT, true)
-          this._runAuth()
+
+          // if  custom url is not provided
+          if (!url) this._runAuth()
         } else {
           this._logTechnical(MESSAGES.technical.notAllowed)
 
@@ -436,7 +446,7 @@ class Connect extends Base {
     }
   }
 
-  protected _destroySocket():void {
+  protected _destroySocket(): void {
     if (this._connect) this._connect.io.destroy()
   }
 

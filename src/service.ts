@@ -51,13 +51,13 @@ import { ERRORS, MESSAGES } from './text'
 class Service extends Connect {
   private static instance: Service
 
-  public static getInstance(props?: ConnectProps, replace = false): Service {
+  public static getInstance(props?: ConnectProps, replace = false, url?: string): Service {
     if (replace) {
       this.destroy()
     }
 
     if (!Service.instance) {
-      Service.instance = new Service(props as ConnectProps)
+      Service.instance = new Service(props as ConnectProps, url)
     } else if (props) {
       throw TypeError('Library already initiated: props should be null or undefined')
     }
@@ -65,14 +65,14 @@ class Service extends Connect {
     return Service.instance
   }
 
-  public static destroy():void {
+  public static destroy(): void {
     if (Service.instance) Service.instance._destroySocket()
 
     delete Service.instance
   }
 
-  private constructor(props: ConnectProps) {
-    super(props)
+  private constructor(props: ConnectProps, url?: string) {
+    super(props, url)
   }
 
   /**
