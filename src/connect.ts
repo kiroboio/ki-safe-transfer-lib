@@ -34,6 +34,7 @@ import {
   Transfer,
   RequestOptions,
   Results,
+  Currencies,
 } from './types'
 
 import { apiUrl, version, endpoints, connectionTriesMax, connectionTimeout } from './config'
@@ -370,7 +371,11 @@ class Connect extends Base {
 
     // rates updated
     this._rateBtcToUsd.on('updated', (data: unknown) => {
-      this._useEventBus(EventTypes.UPDATE_RATES, data, decrypt)
+      this._useEventBus(
+        this._currency === Currencies.Bitcoin ? EventTypes.UPDATE_RATES : EventTypes.UPDATE_RATES_ETH,
+        data,
+        decrypt,
+      )
     })
 
     // status updated

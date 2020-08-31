@@ -25,6 +25,8 @@ enum EventTypes {
   DISCONNECT = 'service_disconnect',
   GET_BTC_TO_USD_RATE = 'service_get_btc_to_usd_rate',
   GET_BTC_TO_USD_RATES = 'service_get_btc_to_usd_rates',
+  GET_ETH_TO_USD_RATE = 'service_get_eth_to_usd_rate',
+  GET_ETH_TO_USD_RATES = 'service_get_eth_to_usd_rates',
   GET_BY_OWNER_ID = 'service_get_by_owner_id',
   GET_COLLECTABLES = 'service_get_collectables',
   GET_CONNECTION_STATUS = 'service_get_connection_status',
@@ -43,6 +45,7 @@ enum EventTypes {
   UPDATED_COLLECTABLE = 'service_updated_collectable',
   UPDATED_RETRIEVABLE = 'service_updated_retrievable',
   UPDATE_RATES = 'service_update_btc_to_usd_rates',
+  UPDATE_RATES_ETH = 'service_update_eth_to_usd_rates',
 }
 
 enum Networks {
@@ -82,4 +85,3 @@ enum Connection {
 }
 
 export { Endpoints, EventTypes, Responses, Networks, Currencies, DebugLevels, Connection }
-

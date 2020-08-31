@@ -1,5 +1,11 @@
 # Changelog
 
+#### v2.22.2 2020-03-31
+
+  Fix:
+
+  - naming of the response for rate/rates doesn't include ETH option
+
 #### v2.22.1 2020-08-31
 
   Fix:

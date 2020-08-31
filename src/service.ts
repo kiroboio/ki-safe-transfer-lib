@@ -19,6 +19,7 @@ import {
   ConnectProps,
   RatesSources,
   RawTransaction,
+  Currencies,
 } from './types'
 import {
   validateOptions,
@@ -677,7 +678,10 @@ class Service extends Connect {
     if (shouldReturnDirect(options, this._respondAs)) return response
 
     this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getRates']))
-    this._useEventBus(EventTypes.GET_BTC_TO_USD_RATES, response)
+    this._useEventBus(
+      this._currency === Currencies.Bitcoin ? EventTypes.GET_BTC_TO_USD_RATES : EventTypes.GET_ETH_TO_USD_RATES,
+      response,
+    )
   }
 
   /**
@@ -755,7 +759,10 @@ class Service extends Connect {
     if (shouldReturnDirect(props?.options, this._respondAs)) return response.data[0]
 
     this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getRate']))
-    this._useEventBus(EventTypes.GET_BTC_TO_USD_RATE, response.data[0])
+    this._useEventBus(
+      this._currency === Currencies.Bitcoin ? EventTypes.GET_BTC_TO_USD_RATE : EventTypes.GET_ETH_TO_USD_RATE,
+      response.data[0],
+    )
   }
 
   /**
