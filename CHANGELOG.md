@@ -1,6 +1,16 @@
 # Changelog
 
-#### v2.22.2 2020-03-31
+#### v2.23.0 2020-10-12
+
+  Feat:
+
+  `206746d` - getBalance
+  `1dca393` - estimateFees
+  `bbaac3f` - getKiroPrice
+  `a5771da` - getKiroState
+  `8c22dd3` - license GPLv3
+
+#### v2.22.2 2020-09-31
 
   Fix:
 
