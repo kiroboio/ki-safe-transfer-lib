@@ -332,9 +332,6 @@ class Connect extends Base {
           this._logTechnical(MESSAGES.technical.isAllowed)
           this._useEventBus(EventTypes.CONNECT, true)
 
-          // eslint-disable-next-line no-console
-          console.log('>>>>>>', withAuth, url, !url || withAuth)
-
           // if  custom url is not provided
           if (!url || withAuth) this._runAuth()
         } else {
@@ -351,13 +348,11 @@ class Connect extends Base {
               this._socket.disconnect().close()
               this._manuallyDisconnected = true
               setTimeout(() => {
-                                 this._manuallyDisconnected = false
-                                 // eslint-disable-next-line no-console
-                                 console.log('2>>>>>>', withAuth)
+                this._manuallyDisconnected = false
 
-                                 // if  custom url is not provided
-                                 if (!url || withAuth) this._runAuth()
-                               }, connectionTimeout * 1000)
+                // if  custom url is not provided
+                if (!url || withAuth) this._runAuth()
+              }, connectionTimeout * 1000)
             }
           }
         }
