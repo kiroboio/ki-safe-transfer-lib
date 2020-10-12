@@ -8,7 +8,8 @@ enum Endpoints {
   RateToUsd = 'to/usd',
   Retrieve = 'retrieve',
   Transactions = 'transactions',
-  Kiros = 'kiros'
+  Kiros = 'kiros',
+  KiroPrice = 'kiroPrice',
 }
 
 // who the service should respond from methods:
@@ -47,6 +48,8 @@ enum EventTypes {
   UPDATED_RETRIEVABLE = 'service_updated_retrievable',
   UPDATE_RATES = 'service_update_btc_to_usd_rates',
   UPDATE_RATES_ETH = 'service_update_eth_to_usd_rates',
+  GET_KIRO_STATE = 'service_get_kiro_state',
+  GET_KIRO_PRICE = 'service_get_kiro_price',
 }
 
 enum Networks {

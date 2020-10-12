@@ -21,6 +21,7 @@ import {
   RawTransaction,
   Currencies,
   KiroState,
+  KiroPrice,
 } from './types'
 import {
   validateOptions,
@@ -858,7 +859,7 @@ class Service extends Connect {
    *
    *
    */
-  public async getKiroState(address: string, options?: RequestOptions): Promise<KiroState | undefined> {
+  public async getKiroState(address: string, options?: Omit<RequestOptions, 'watch'>): Promise<KiroState | undefined> {
     this._logTechnical(makeString(MESSAGES.technical.running, ['getKiroState']))
 
     /** validate props */
@@ -905,8 +906,84 @@ class Service extends Connect {
 
     if (shouldReturnDirect(options, this._respondAs)) return response
 
-    this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['retrieve']))
-    this._useEventBus(EventTypes.RETRIEVE, response)
+    this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getKiroState']))
+    this._useEventBus(EventTypes.GET_KIRO_STATE, response)
+  }
+
+  /**
+   * Function to provide KIRO price
+   *
+   * @function
+   * @name getKiroPrice
+   * @param [String] address - recipient's address
+   * @return [Object] KiroPrice
+   * ---
+   * Example:
+   * ```typescript
+   * await service.getKiroPrice('0x0xxxxxxxxx')
+   * ```
+   * will get the following result:
+   * ```
+   * {
+   *   eth: { address: string; min: string; max: string; price: string }
+   *   usd: { min: number; max: number; price: number }
+   *   availableAt: string
+   *   createdAt: string
+   *   expiresAt: string
+   *   recipient: string
+   *   }
+   * ```
+   */
+  public async getKiroPrice(address: string, options?: Omit<RequestOptions, 'watch'>): Promise<KiroPrice | undefined> {
+    this._logTechnical(makeString(MESSAGES.technical.running, ['getKiroPrice']))
+
+    /** validate props */
+    try {
+      this._logTechnical(makeString(MESSAGES.technical.checkingProps, ['getKiroPrice']))
+
+      if (isNil(address)) throw new Error(TEXT.errors.validation.missingArgument)
+
+      validateAddress({ address, currency: Currencies.Ethereum, networkType: this._network })
+
+      /** validate options, if present */
+      if (options) {
+        this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['getKiroPrice', 'options']))
+        validateOptions(options, 'getKiroPrice')
+      }
+    } catch (err) {
+
+      /** log error */
+      this._logError(makeString(ERRORS.service.gotError, ['getKiroPrice', 'validation']), err)
+
+      /** throw appropriate error */
+      throw makePropsResponseError(err)
+    }
+
+    let response: KiroPrice
+
+    /** make request */
+    try {
+      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getKiroPrice']))
+
+      response = await this._kiroPrice.get(address)
+      this._log(makeString(MESSAGES.technical.gotResponse, ['getKiroPrice']), response)
+    } catch (err) {
+
+      /** log error */
+      this._logApiError(makeString(ERRORS.service.gotError, ['getKiroPrice', 'request']), err)
+
+      /** throw appropriate error */
+      throw makeApiResponseError(err)
+    }
+
+    /** return the results */
+
+    this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getKiroPrice', 'return']))
+
+    if (shouldReturnDirect(options, this._respondAs)) return response
+
+    this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getKiroPrice']))
+    this._useEventBus(EventTypes.GET_KIRO_PRICE, response)
   }
 }
 

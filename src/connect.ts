@@ -220,6 +220,8 @@ class Connect extends Base {
 
   protected _kiroState: ApiService
 
+  protected _kiroPrice: ApiService
+
   protected _transactions: ApiService
 
   protected _manuallyDisconnected = false
@@ -369,6 +371,7 @@ class Connect extends Base {
     this._retrieve = this._getService(Endpoints.Retrieve)
     this._transactions = this._getService(Endpoints.Transactions)
     this._kiroState = this._getService(Endpoints.Kiros)
+    this._kiroPrice = this._getService(Endpoints.KiroPrice)
 
     this._logTechnical(makeString(MESSAGES.technical.serviceIs, ['setting up event listeners...']))
 
@@ -581,7 +584,10 @@ class Connect extends Base {
    * Function to assign endpoints to a service
    */
   private _getService(endpoint: Endpoints): ApiService {
-    this._logTechnical(makeString(MESSAGES.technical.service, ['getService']), endpoint)
+    this._logTechnical(
+      makeString(MESSAGES.technical.service, ['getService']),
+      endpoint + ' >> ' + this._makeEndpointPath(endpoint),
+    )
 
     return this._connect.service(this._makeEndpointPath(endpoint)).hooks({
       before: {

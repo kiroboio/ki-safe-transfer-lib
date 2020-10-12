@@ -16,7 +16,11 @@ const endpoints: Record<string, string> = {
   utxos: 'utxos',
   exists: 'exists',
   transactions: 'transactions',
-  kiros: 'kiros'
+  kiros: 'kiros',
+  kiroPrice: 'kiro/price',
+  kiroBuy: 'kiro/buy',
+  balance: 'balance',
+  transferFees:'transfer/fees'
 } as const
 
 export { version, apiUrl, endpoints, connectionTriesMax, connectionTimeout }
