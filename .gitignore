@@ -2,7 +2,7 @@
 node_modules
 *.log
 coverage
-client.ts
+# client.ts
 client2.ts
 *.swp
 .eslintcache
