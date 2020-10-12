@@ -224,6 +224,8 @@ class Connect extends Base {
 
   protected _transactions: ApiService
 
+  protected _balance: ApiService
+
   protected _manuallyDisconnected = false
 
   constructor(props: ConnectProps, url?: string) {
@@ -360,6 +362,7 @@ class Connect extends Base {
 
     // assign services
     this._logTechnical(makeString(MESSAGES.technical.serviceIs, ['setting up API services']))
+
     this._networks = this._getService(Endpoints.Networks)
     this._transfers = this._getService(Endpoints.Transfers)
     this._inbox = this._getService(Endpoints.Inbox)
@@ -372,6 +375,7 @@ class Connect extends Base {
     this._kiroState = this._getService(Endpoints.Kiros)
     this._kiroPrice = this._getService(Endpoints.KiroPrice)
     this._estimateFees = this._getService(Endpoints.EstimateFees)
+    this._balance = this._getService(Endpoints.Balance)
 
     this._logTechnical(makeString(MESSAGES.technical.serviceIs, ['setting up event listeners...']))
 

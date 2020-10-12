@@ -19,4 +19,10 @@ interface KiroPrice {
   recipient: string
 }
 
-export type { KiroState,KiroPrice }
+interface Balance {
+  address: string
+  balance: string
+  transactionCount: number
+}
+
+export type { KiroState, KiroPrice, Balance }

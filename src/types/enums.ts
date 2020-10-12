@@ -10,7 +10,8 @@ enum Endpoints {
   Transactions = 'transactions',
   Kiros = 'kiros',
   KiroPrice = 'kiroPrice',
-  EstimateFees = 'estimateFees'
+  EstimateFees = 'estimateFees',
+  Balance = 'balance'
 }
 
 // who the service should respond from methods:

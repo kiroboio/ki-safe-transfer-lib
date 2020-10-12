@@ -20,7 +20,7 @@ const endpoints: Record<string, string> = {
   kiroPrice: 'kiro/price',
   kiroBuy: 'kiro/buy',
   balance: 'balance',
-  estimateFees:'transfer/fees'
+  estimateFees: 'transfer/fees',
 } as const
 
 export { version, apiUrl, endpoints, connectionTriesMax, connectionTimeout }

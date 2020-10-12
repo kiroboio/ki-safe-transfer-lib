@@ -25,6 +25,7 @@ import {
   EstimateFeeRequest,
   AnyValue,
   Maybe,
+  Balance,
 } from './types'
 import {
   validateOptions,
@@ -1065,6 +1066,79 @@ class Service extends Connect {
     if (shouldReturnDirect(options, this._respondAs)) return response
 
     this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['estimateFees']))
+    this._useEventBus(EventTypes.GET_KIRO_PRICE, response)
+  }
+
+  /**
+   * Function to get balance for a provided address
+   *
+   * @function
+   * @name getBalance
+   * @param [String] address - valid address for current currency/network
+   * @param [Object] [options] - respond option
+   * @returns [Object] Balance
+   * ---
+   * Example:
+   * ```typescript
+   * await service.getBalance('0x0xxxx')
+   * ```
+   * will respond with:
+   * ```
+   * {
+   *    address: '0x0xxxx',
+   *    balance: '0000000000000000',
+   *    transactionCount: 0
+   * }
+   * ```
+   */
+  public async getBalance(address: string, options?: Omit<RequestOptions, 'watch'>): Promise<Maybe<Balance>> {
+    this._logTechnical(makeString(MESSAGES.technical.running, ['getBalance']))
+
+    /** validate props */
+    try {
+      this._logTechnical(makeString(MESSAGES.technical.checkingProps, ['getBalance']))
+
+      if (isNil(address)) throw new Error(TEXT.errors.validation.missingArgument)
+
+      validateAddress({ address, currency: Currencies.Ethereum, networkType: this._network })
+
+      /** validate options, if present */
+      if (options) {
+        this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['getBalance', 'options']))
+        validateOptions(options, 'getBalance')
+      }
+    } catch (err) {
+
+      /** log error */
+      this._logError(makeString(ERRORS.service.gotError, ['getBalance', 'validation']), err)
+
+      /** throw appropriate error */
+      throw makePropsResponseError(err)
+    }
+
+    let response: Balance
+
+    /** make request */
+    try {
+      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getBalance']))
+
+      response = await this._balance.get(address)
+      this._log(makeString(MESSAGES.technical.gotResponse, ['getBalance']), response)
+    } catch (err) {
+
+      /** log error */
+      this._logApiError(makeString(ERRORS.service.gotError, ['getBalance', 'request']), err)
+
+      /** throw appropriate error */
+      throw makeApiResponseError(err)
+    }
+
+    /** return the results */
+    this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getBalance', 'return']))
+
+    if (shouldReturnDirect(options, this._respondAs)) return response
+
+    this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getBalance']))
     this._useEventBus(EventTypes.GET_KIRO_PRICE, response)
   }
 }
