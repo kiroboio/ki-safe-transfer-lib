@@ -4,6 +4,7 @@ import { DataSpec, MinMax, RetrieveRequest } from '..'
 import { changeType, makeString } from '../tools'
 import { makeStringFromArray } from '../tools/string'
 import { ERRORS } from '../text'
+import { EstimateFeeRequest } from 'src/types'
 
 function isMin(value: number, min: number): boolean {
   return value >= min
@@ -176,4 +177,29 @@ function validateRetrieve(data: RetrieveRequest, argName: string, fnName: string
     throw new TypeError(makeString(ERRORS.validation.wrongTypeKey, ['raw', argName, fnName, 'string']))
 }
 
-export { validateRetrieve, validateSend }
+function validateEstimateFeesRequest(data: EstimateFeeRequest, argName: string, fnName: string): void {
+  const allowedKeys = ['ownerId', 'to', 'amount']
+
+  const checkFn = (key: string): void => {
+    if (!allowedKeys.includes(key)) throw new Error(makeString(ERRORS.validation.extraKey, [key, argName, fnName]))
+  }
+
+  forEach(checkFn, Object.keys(data))
+
+  if (!data.ownerId) throw new Error(makeString(ERRORS.validation.missingKey, ['ownerId', argName, fnName]))
+
+  if (!data.to) throw new Error(makeString(ERRORS.validation.missingKey, ['to', argName, fnName]))
+
+  if (!data.amount) throw new Error(makeString(ERRORS.validation.missingKey, ['amount', argName, fnName]))
+
+  if (not(is(String, data.ownerId)))
+    throw new TypeError(makeString(ERRORS.validation.wrongTypeKey, ['ownerId', argName, fnName, 'string']))
+
+  if (not(is(String, data.to)))
+    throw new TypeError(makeString(ERRORS.validation.wrongTypeKey, ['to', argName, fnName, 'string']))
+
+  if (not(is(Number, data.amount)))
+    throw new TypeError(makeString(ERRORS.validation.wrongTypeKey, ['amount', argName, fnName, 'number']))
+}
+
+export { validateRetrieve, validateSend, validateEstimateFeesRequest }

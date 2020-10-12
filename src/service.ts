@@ -22,6 +22,9 @@ import {
   Currencies,
   KiroState,
   KiroPrice,
+  EstimateFeeRequest,
+  AnyValue,
+  Maybe,
 } from './types'
 import {
   validateOptions,
@@ -33,6 +36,7 @@ import {
   validatePropsString,
   validateRetrieve,
   validateAddress,
+  validateEstimateFeesRequest,
 } from './validators'
 import {
   checkOwnerId,
@@ -45,8 +49,6 @@ import {
   shouldReturnDirect,
   changeType,
 } from './tools'
-// import { makePropsResponseError, makeReturnError, makeApiResponseError } from './tools/error'
-// import { shouldReturnDirect } from './tools/connect'
 import { isNil, join, assoc, filter, isEmpty } from 'ramda'
 import { TEXT, SEND_DATA_SPEC } from './data'
 import { ERRORS, MESSAGES } from './text'
@@ -71,7 +73,7 @@ class Service extends Connect {
   public static destroy(): void {
     if (Service.instance) Service.instance._destroySocket()
 
-    delete Service.instance
+    delete changeType<AnyValue>(Service)?.instance
   }
 
   private constructor(props: ConnectProps, url?: string) {
@@ -95,7 +97,7 @@ class Service extends Connect {
    * ```
    * -
    */
-  public async getOnlineNetworks(options?: QueryOptions): Promise<Results<NetworkItem[]> | void> {
+  public async getOnlineNetworks(options?: QueryOptions): Promise<Maybe<Results<NetworkItem[]>>> {
 
     /** validate options, if present */
     try {
@@ -137,7 +139,7 @@ class Service extends Connect {
   public async collect(
     request: CollectRequest,
     options?: Omit<QueryOptions, 'limit' | 'skip'>,
-  ): Promise<Results<Message> | void> {
+  ): Promise<Maybe<Results<Message>>> {
 
     /** validate props */
     try {
@@ -180,7 +182,7 @@ class Service extends Connect {
   }
 
   // TODO: add desc
-  public async send(transaction: SendRequest, options?: QueryOptions): Promise<Transfer | void> {
+  public async send(transaction: SendRequest, options?: QueryOptions): Promise<Maybe<Transfer>> {
 
     /** validate props */
     try {
@@ -228,7 +230,7 @@ class Service extends Connect {
   }
 
   // get all collectables by recipient address
-  public async getCollectables(addresses: string[], options?: QueryOptions): Promise<Results<Collectable> | void> {
+  public async getCollectables(addresses: string[], options?: QueryOptions): Promise<Maybe<Results<Collectable>>> {
 
     /** validate props */
     try {
@@ -282,7 +284,7 @@ class Service extends Connect {
   public async getRawTransaction(
     txid: string,
     options?: Omit<QueryOptions, 'limit' | 'skip' | 'watch'>,
-  ): Promise<Results<RawTransaction[]> | void> {
+  ): Promise<Maybe<Results<RawTransaction[]>>> {
 
     /** validate props */
     try {
@@ -340,7 +342,7 @@ class Service extends Connect {
   public async getRawTransactions(
     txids: string[],
     options?: Omit<QueryOptions, 'watch'>,
-  ): Promise<Results<RawTransaction[]> | void> {
+  ): Promise<Maybe<Results<RawTransaction[]>>> {
 
     /** validate props */
     try {
@@ -393,7 +395,7 @@ class Service extends Connect {
   }
 
   // TODO: add desc
-  public async getUtxos(addresses: string[], options?: Omit<QueryOptions, 'watch'>): Promise<Results<Utxo> | void> {
+  public async getUtxos(addresses: string[], options?: Omit<QueryOptions, 'watch'>): Promise<Maybe<Results<Utxo>>> {
 
     /** validate props */
     try {
@@ -439,7 +441,7 @@ class Service extends Connect {
     }
   }
 
-  public async getUsed(addresses: string[], options?: Omit<QueryOptions, 'watch'>): Promise<Results<string[]> | void> {
+  public async getUsed(addresses: string[], options?: Omit<QueryOptions, 'watch'>): Promise<Maybe<Results<string[]>>> {
 
     /** validate props */
     try {
@@ -511,7 +513,7 @@ class Service extends Connect {
    *
    * -
    */
-  public async getFresh(addresses: string[], options?: Omit<QueryOptions, 'watch'>): Promise<Results<string[]> | void> {
+  public async getFresh(addresses: string[], options?: Omit<QueryOptions, 'watch'>): Promise<Maybe<Results<string[]>>> {
 
     /** validate props */
     try {
@@ -575,7 +577,7 @@ class Service extends Connect {
    *
    *
    */
-  public async getByOwnerId(ownerId: string, options?: QueryOptions): Promise<Results<Retrievable> | void> {
+  public async getByOwnerId(ownerId: string, options?: QueryOptions): Promise<Maybe<Results<Retrievable>>> {
 
     /** validate props */
     try {
@@ -641,7 +643,7 @@ class Service extends Connect {
    * ```
    * -
    */
-  public async getRates(options?: QueryOptions): Promise<Results<ExchangeRate[]> | void> {
+  public async getRates(options?: QueryOptions): Promise<Maybe<Results<ExchangeRate[]>>> {
     this._logTechnical(makeString(MESSAGES.technical.running, ['getRates']))
 
     /** validate options, if present */
@@ -706,7 +708,7 @@ class Service extends Connect {
    * ```
    * -
    */
-  public async getRate(props?: GetRatesProps): Promise<ExchangeRate | void> {
+  public async getRate(props?: GetRatesProps): Promise<Maybe<ExchangeRate>> {
     this._logTechnical(makeString(MESSAGES.technical.running, ['getRate']))
 
     if (props) {
@@ -779,7 +781,7 @@ class Service extends Connect {
   public async retrieve(
     data: RetrieveRequest,
     options?: Omit<RequestOptions, 'watch'>,
-  ): Promise<Results<unknown> | void> {
+  ): Promise<Maybe<Results<unknown>>> {
     this._logTechnical(makeString(MESSAGES.technical.running, ['retrieve']))
 
     /** validate props */
@@ -859,7 +861,7 @@ class Service extends Connect {
    *
    *
    */
-  public async getKiroState(address: string, options?: Omit<RequestOptions, 'watch'>): Promise<KiroState | undefined> {
+  public async getKiroState(address: string, options?: Omit<RequestOptions, 'watch'>): Promise<Maybe<KiroState>> {
     this._logTechnical(makeString(MESSAGES.technical.running, ['getKiroState']))
 
     /** validate props */
@@ -901,7 +903,6 @@ class Service extends Connect {
     }
 
     /** return the results */
-
     this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getKiroState', 'return']))
 
     if (shouldReturnDirect(options, this._respondAs)) return response
@@ -934,7 +935,7 @@ class Service extends Connect {
    *   }
    * ```
    */
-  public async getKiroPrice(address: string, options?: Omit<RequestOptions, 'watch'>): Promise<KiroPrice | undefined> {
+  public async getKiroPrice(address: string, options?: Omit<RequestOptions, 'watch'>): Promise<Maybe<KiroPrice>> {
     this._logTechnical(makeString(MESSAGES.technical.running, ['getKiroPrice']))
 
     /** validate props */
@@ -977,12 +978,93 @@ class Service extends Connect {
     }
 
     /** return the results */
-
     this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getKiroPrice', 'return']))
 
     if (shouldReturnDirect(options, this._respondAs)) return response
 
     this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getKiroPrice']))
+    this._useEventBus(EventTypes.GET_KIRO_PRICE, response)
+  }
+
+  /**
+   * Function to estimate fees for potential transaction
+   *
+   * @function
+   * @name estimateFees
+   * @param [Object] request - request object width data for estimation, containing owner ID as owner (string),
+   * @param [Object] [options] - respond options
+   * to  (string), amount (number)}
+   * @returns [Object]
+   * ---
+   * Example:
+   * ```typescript
+   * await service.estimateFees({ ownerId: 'xxxx', to: '0x0xxxxx', amount: 100000})
+   * ```
+   * will get the following result:
+   * ```
+   *
+   * ```
+   */
+  public async estimateFees(
+    request: EstimateFeeRequest,
+    options?: Omit<RequestOptions, 'watch'>,
+  ): Promise<Maybe<KiroPrice>> {
+    this._logTechnical(makeString(MESSAGES.technical.running, ['estimateFees']))
+
+    /** validate props */
+    try {
+      this._logTechnical(makeString(MESSAGES.technical.checkingProps, ['estimateFees']))
+
+      if (isNil(request)) throw new Error(TEXT.errors.validation.missingArgument)
+
+      validateObject(request, 'request')
+      validateEstimateFeesRequest(request, 'request', 'estimateFees')
+
+      /** validate options, if present */
+      if (options) {
+        this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['estimateFees', 'options']))
+        validateOptions(options, 'estimateFees')
+      }
+    } catch (err) {
+
+      /** log error */
+      this._logError(makeString(ERRORS.service.gotError, ['estimateFees', 'validation']), err)
+
+      /** throw appropriate error */
+      throw makePropsResponseError(err)
+    }
+
+    let response: KiroPrice
+
+    /** make request */
+    try {
+      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['estimateFees']))
+
+      response = await this._estimateFees.find({
+        query: {
+          owner: request.ownerId,
+          to: request.to,
+          amount: request.amount,
+          ...makeOptions(options, this._watch),
+        },
+      })
+
+      this._log(makeString(MESSAGES.technical.gotResponse, ['estimateFees']), response)
+    } catch (err) {
+
+      /** log error */
+      this._logApiError(makeString(ERRORS.service.gotError, ['estimateFees', 'request']), err)
+
+      /** throw appropriate error */
+      throw makeApiResponseError(err)
+    }
+
+    /** return the results */
+    this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['estimateFees', 'return']))
+
+    if (shouldReturnDirect(options, this._respondAs)) return response
+
+    this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['estimateFees']))
     this._useEventBus(EventTypes.GET_KIRO_PRICE, response)
   }
 }

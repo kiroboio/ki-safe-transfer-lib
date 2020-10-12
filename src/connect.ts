@@ -35,6 +35,7 @@ import {
   RequestOptions,
   Results,
   Currencies,
+  AnyValue,
 } from './types'
 
 import { apiUrl, version, endpoints, connectionTriesMax, connectionTimeout } from './config'
@@ -134,8 +135,7 @@ const authEncrypt = async (payload: Record<string, unknown>, sessionId: number) 
 
     const buffer = ciphertext ? new Uint8Array(ciphertext) : new Uint8Array()
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    encrypted.push(btoa(String.fromCharCode.apply(null, buffer as any)))
+    encrypted.push(btoa(String.fromCharCode.apply(null, buffer as AnyValue)))
   }
 
   return { encrypted }
@@ -161,8 +161,7 @@ const encrypt = async (payload: Record<string, unknown>, sessionId: number) => {
 
   const buffer = new Uint8Array(ciphertext)
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const encrypted = btoa(String.fromCharCode.apply(null, buffer as any))
+  const encrypted = btoa(String.fromCharCode.apply(null, buffer as AnyValue))
 
   return { encrypted }
 }
@@ -187,8 +186,7 @@ const decrypt = async (payload: Record<string, unknown>, sessionId: number) => {
 
   const buffer = new Uint8Array(ciphertext)
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const decrypted = String.fromCharCode.apply(null, buffer as any)
+  const decrypted = String.fromCharCode.apply(null, buffer as AnyValue)
 
   return JSON.parse(decrypted)
 }
@@ -221,6 +219,8 @@ class Connect extends Base {
   protected _kiroState: ApiService
 
   protected _kiroPrice: ApiService
+
+  protected _estimateFees: ApiService
 
   protected _transactions: ApiService
 
@@ -289,8 +289,7 @@ class Connect extends Base {
         return JSON.parse(bytes.toString(crypto.enc.Utf8))
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      async setItem(key: string, value: any) {
+      async setItem(key: string, value: AnyValue) {
         const cipherText = crypto.AES.encrypt(JSON.stringify(value), this.key)
 
         return await this.storage.setItem(key, cipherText.toString())
@@ -372,6 +371,7 @@ class Connect extends Base {
     this._transactions = this._getService(Endpoints.Transactions)
     this._kiroState = this._getService(Endpoints.Kiros)
     this._kiroPrice = this._getService(Endpoints.KiroPrice)
+    this._estimateFees = this._getService(Endpoints.EstimateFees)
 
     this._logTechnical(makeString(MESSAGES.technical.serviceIs, ['setting up event listeners...']))
 

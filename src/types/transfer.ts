@@ -26,4 +26,10 @@ interface Transfer {
   updatedAt: string | Date // update date-time,
 }
 
-export { Transfer }
+interface EstimateFeeRequest {
+  ownerId: string
+  to: string
+  amount: number
+}
+
+export type { Transfer, EstimateFeeRequest }

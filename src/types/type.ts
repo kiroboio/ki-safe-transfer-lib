@@ -3,6 +3,13 @@ import { RetrieveRequest } from './retrieve'
 import { SendRequest } from './send'
 import { CollectRequest } from './collect'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyValue = any
+
+type Either<T, K> = T | K
+
+type Maybe<T> = T | undefined | null
+
 interface AuthDetails {
   key: string
   secret: string
@@ -31,14 +38,10 @@ interface NetworkTip {
 }
 
 interface ApiService {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  find: (arg0?: unknown) => any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get: (arg0: unknown) => any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  create: (arg0: Record<string, unknown> | RetrieveRequest | SendRequest | CollectRequest) => any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  on: (arg0: string, arg1: (arg2: any) => any) => any
+  find: (arg0?: unknown) => AnyValue
+  get: (arg0: unknown) => AnyValue
+  create: (arg0: Record<string, unknown> | RetrieveRequest | SendRequest | CollectRequest) => AnyValue
+  on: (arg0: string, arg1: (arg2: AnyValue) => AnyValue) => AnyValue
 }
 
 type Event = {
@@ -107,8 +110,11 @@ interface RawTransaction {
   hex: string
 }
 
-// eslint-disable-next-line max-len
+
 export {
+  AnyValue,
+  Either,
+  Maybe,
   LastAddresses,
   ApiService,
   AuthDetails,

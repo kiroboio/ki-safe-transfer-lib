@@ -1,6 +1,6 @@
 import dotenv from 'dotenv'
 
-import Service, { DebugLevels, Responses, Event, Status, AuthDetails } from '../src/.'
+import Service, { DebugLevels, Responses, Event, Status, AuthDetails, AnyValue } from '../src/.'
 import { listOfStatusKeys, typeOfStatusValues } from '../src/data'
 
 import { changeType } from '../src/tools/other'
@@ -57,7 +57,7 @@ describe('Smaller functions', () => {
     storedEvent = {}
   })
 
-  
+
   describe(' getStatus:', () => {
     it('returns information in "Direct" mode', async () => {
       const result = await service.getStatus({ respondDirect: true })
@@ -94,8 +94,7 @@ describe('Smaller functions', () => {
 
       expect(eventReceived.type).toBe('service_update_status')
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = changeType<Record<string, any>>(eventReceived.payload)
+      const result = changeType<Record<string, AnyValue>>(eventReceived.payload)
 
       let keysValuesCheck = true
 
