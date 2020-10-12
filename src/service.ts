@@ -20,6 +20,7 @@ import {
   RatesSources,
   RawTransaction,
   Currencies,
+  KiroState,
 } from './types'
 import {
   validateOptions,
@@ -822,6 +823,85 @@ class Service extends Connect {
     /** return the results */
 
     this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['retrieve', 'return']))
+
+    if (shouldReturnDirect(options, this._respondAs)) return response
+
+    this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['retrieve']))
+    this._useEventBus(EventTypes.RETRIEVE, response)
+  }
+
+  /**
+   * Function to request state of KIRO for a certain address
+   *
+   * @function
+   * @name getKiroState
+   * @param [String] address - correct address for current network
+   * @returns [Promise] KiroState
+   * ---
+   * Example:
+   *
+   * ```typescript
+   * await service.getKiroState('0x0xxxxxxxxxxxxx')
+   * ```
+   * will get the following result:
+   * ```
+   * address: '0x0xxxxxxxxxxxxx',
+     balance: '0',
+     debt: '0',
+     externalBalance: '0',
+     nonce: '0x0000000000000000000000000000000000000000000000000000000000000000',
+     pending: '0',
+     releaseBlock: '0',
+     secretHash: '0x0000000000000000000000000000000000000000000000000000000000000000',
+     withdrawal: '0'
+   * ```
+   *
+   *
+   */
+  public async getKiroState(address: string, options?: RequestOptions): Promise<KiroState | undefined> {
+    this._logTechnical(makeString(MESSAGES.technical.running, ['getKiroState']))
+
+    /** validate props */
+    try {
+      this._logTechnical(makeString(MESSAGES.technical.checkingProps, ['getKiroState']))
+
+      if (isNil(address)) throw new Error(TEXT.errors.validation.missingArgument)
+
+      validateAddress({ address, currency: Currencies.Ethereum, networkType: this._network })
+
+      /** validate options, if present */
+      if (options) {
+        this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['getKiroState', 'options']))
+        validateOptions(options, 'getKiroState')
+      }
+    } catch (err) {
+
+      /** log error */
+      this._logError(makeString(ERRORS.service.gotError, ['getKiroState', 'validation']), err)
+
+      /** throw appropriate error */
+      throw makePropsResponseError(err)
+    }
+
+    let response: KiroState
+
+    /** make request */
+    try {
+      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getKiroState']))
+      response = await this._kiroState.get(address)
+      this._log(makeString(MESSAGES.technical.gotResponse, ['getKiroState']), response)
+    } catch (err) {
+
+      /** log error */
+      this._logApiError(makeString(ERRORS.service.gotError, ['getKiroState', 'request']), err)
+
+      /** throw appropriate error */
+      throw makeApiResponseError(err)
+    }
+
+    /** return the results */
+
+    this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getKiroState', 'return']))
 
     if (shouldReturnDirect(options, this._respondAs)) return response
 

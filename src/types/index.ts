@@ -18,3 +18,5 @@ export * from './rates'
 export * from './error'
 
 export * from './transfer'
+
+export * from './eth'

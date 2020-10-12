@@ -8,6 +8,7 @@ enum Endpoints {
   RateToUsd = 'to/usd',
   Retrieve = 'retrieve',
   Transactions = 'transactions',
+  Kiros = 'kiros'
 }
 
 // who the service should respond from methods:

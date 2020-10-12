@@ -218,6 +218,8 @@ class Connect extends Base {
 
   protected _retrieve: ApiService
 
+  protected _kiroState: ApiService
+
   protected _transactions: ApiService
 
   protected _manuallyDisconnected = false
@@ -366,6 +368,7 @@ class Connect extends Base {
     this._rateBtcToUsd = this._getService(Endpoints.RateToUsd)
     this._retrieve = this._getService(Endpoints.Retrieve)
     this._transactions = this._getService(Endpoints.Transactions)
+    this._kiroState = this._getService(Endpoints.Kiros)
 
     this._logTechnical(makeString(MESSAGES.technical.serviceIs, ['setting up event listeners...']))
 
