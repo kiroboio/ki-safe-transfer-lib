@@ -25,4 +25,10 @@ interface Balance {
   transactionCount: number
 }
 
-export type { KiroState, KiroPrice, Balance }
+type RawTransaction = { raw: string }
+
+interface BuyKiroWithEthRequest {
+  eth: RawTransaction
+}
+
+export type { KiroState, KiroPrice, Balance, BuyKiroWithEthRequest }

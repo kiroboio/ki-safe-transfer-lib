@@ -38,9 +38,11 @@ import {
   AnyValue,
 } from './types'
 
-import { apiUrl, version, endpoints, connectionTriesMax, connectionTimeout } from './config'
+import { apiUrl as apiUrlFromConfig, version, endpoints, connectionTriesMax, connectionTimeout } from './config'
 import { WARNINGS, ERRORS, MESSAGES } from './text'
 import { StorageWrapper } from '@feathersjs/authentication-client/lib/storage'
+
+let apiUrl = apiUrlFromConfig
 
 function str2ab(str: string) {
   const buf = new ArrayBuffer(str.length)
@@ -226,9 +228,11 @@ class Connect extends Base {
 
   protected _balance: ApiService
 
+  protected _kiroBuy: ApiService
+
   protected _manuallyDisconnected = false
 
-  constructor(props: ConnectProps, url?: string) {
+  constructor(props: ConnectProps, url?: string, withAuth?: boolean) {
     super(debugLevelSelector(props?.debug))
 
     this._logTechnical('Service (connect > constructor) sent \'debug\' setting to super, validating props')
@@ -255,6 +259,9 @@ class Connect extends Base {
 
     // setup
     this._logTechnical('Service is configuring connection...')
+
+    // if authentication process is required for external url, set it globally
+    if (withAuth && url) apiUrl = url
 
     // choose url to use
     this._socket = io.connect(url || apiUrl) as never
@@ -303,7 +310,8 @@ class Connect extends Base {
     }
 
     // configure if built-in url
-    this._connect = url ? connect : connect.configure(auth({ storageKey: 'auth', storage: new safeStorage() }))
+    if (url && !withAuth) this._connect = connect
+    else this._connect = connect.configure(auth({ storageKey: 'auth', storage: new safeStorage() }))
 
     // connect/disconnect event processes
     this._logTechnical('Service is setting up connect/disconnect listeners...')
@@ -324,8 +332,11 @@ class Connect extends Base {
           this._logTechnical(MESSAGES.technical.isAllowed)
           this._useEventBus(EventTypes.CONNECT, true)
 
+          // eslint-disable-next-line no-console
+          console.log('>>>>>>', withAuth, url, !url || withAuth)
+
           // if  custom url is not provided
-          if (!url) this._runAuth()
+          if (!url || withAuth) this._runAuth()
         } else {
           this._logTechnical(MESSAGES.technical.notAllowed)
 
@@ -340,9 +351,13 @@ class Connect extends Base {
               this._socket.disconnect().close()
               this._manuallyDisconnected = true
               setTimeout(() => {
-                this._manuallyDisconnected = false
-                this._runAuth()
-              }, connectionTimeout * 1000)
+                                 this._manuallyDisconnected = false
+                                 // eslint-disable-next-line no-console
+                                 console.log('2>>>>>>', withAuth)
+
+                                 // if  custom url is not provided
+                                 if (!url || withAuth) this._runAuth()
+                               }, connectionTimeout * 1000)
             }
           }
         }
@@ -376,6 +391,7 @@ class Connect extends Base {
     this._kiroPrice = this._getService(Endpoints.KiroPrice)
     this._estimateFees = this._getService(Endpoints.EstimateFees)
     this._balance = this._getService(Endpoints.Balance)
+    this._kiroBuy = this._getService(Endpoints.KiroBuy)
 
     this._logTechnical(makeString(MESSAGES.technical.serviceIs, ['setting up event listeners...']))
 

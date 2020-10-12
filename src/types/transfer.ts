@@ -32,4 +32,15 @@ interface EstimateFeeRequest {
   amount: number
 }
 
-export type { Transfer, EstimateFeeRequest }
+interface EstimatedFee {
+  _id: string
+  owner: string
+  to: string
+  amount: number
+  createdAt: string
+  expiresAt: string
+  id: string
+  fees: { satoshi: number; address: string; tokens: string }
+}
+
+export type { Transfer, EstimateFeeRequest, EstimatedFee }

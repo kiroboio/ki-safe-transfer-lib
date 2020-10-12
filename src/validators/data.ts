@@ -4,7 +4,7 @@ import { DataSpec, MinMax, RetrieveRequest } from '..'
 import { changeType, makeString } from '../tools'
 import { makeStringFromArray } from '../tools/string'
 import { ERRORS } from '../text'
-import { EstimateFeeRequest } from 'src/types'
+import { BuyKiroWithEthRequest, EstimateFeeRequest } from 'src/types'
 
 function isMin(value: number, min: number): boolean {
   return value >= min
@@ -177,7 +177,7 @@ function validateRetrieve(data: RetrieveRequest, argName: string, fnName: string
     throw new TypeError(makeString(ERRORS.validation.wrongTypeKey, ['raw', argName, fnName, 'string']))
 }
 
-function validateEstimateFeesRequest(data: EstimateFeeRequest, argName: string, fnName: string): void {
+function validateEstimateFeesRequest(data: Partial<EstimateFeeRequest>, argName: string, fnName: string): void {
   const allowedKeys = ['ownerId', 'to', 'amount']
 
   const checkFn = (key: string): void => {
@@ -202,4 +202,21 @@ function validateEstimateFeesRequest(data: EstimateFeeRequest, argName: string, 
     throw new TypeError(makeString(ERRORS.validation.wrongTypeKey, ['amount', argName, fnName, 'number']))
 }
 
-export { validateRetrieve, validateSend, validateEstimateFeesRequest }
+function validateBuyKiroRequest(data: Partial<BuyKiroWithEthRequest>, argName: string, fnName: string): void {
+  const allowedKeys = ['eth']
+
+  const checkFn = (key: string): void => {
+    if (!allowedKeys.includes(key)) throw new Error(makeString(ERRORS.validation.extraKey, [key, argName, fnName]))
+  }
+
+  forEach(checkFn, Object.keys(data))
+
+  if (!data.eth) throw new Error(makeString(ERRORS.validation.missingKey, ['eth', argName, fnName]))
+
+  if (!data.eth?.raw) throw new Error(makeString(ERRORS.validation.missingKey, ['eth.raw', argName, fnName]))
+
+  if (not(is(String, data.eth?.raw)))
+    throw new TypeError(makeString(ERRORS.validation.wrongTypeKey, ['eth.raw', argName, fnName, 'string']))
+}
+
+export { validateRetrieve, validateSend, validateEstimateFeesRequest, validateBuyKiroRequest }

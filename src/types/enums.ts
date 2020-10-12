@@ -11,7 +11,8 @@ enum Endpoints {
   Kiros = 'kiros',
   KiroPrice = 'kiroPrice',
   EstimateFees = 'estimateFees',
-  Balance = 'balance'
+  Balance = 'balance',
+  KiroBuy = 'kiroBuy'
 }
 
 // who the service should respond from methods:
@@ -52,6 +53,9 @@ enum EventTypes {
   UPDATE_RATES_ETH = 'service_update_eth_to_usd_rates',
   GET_KIRO_STATE = 'service_get_kiro_state',
   GET_KIRO_PRICE = 'service_get_kiro_price',
+  ESTIMATE_FEES = 'service_estimate_fees',
+  GET_BALANCE = 'service_get_balance',
+  BUY_KIRO = 'service_buy_kiro'
 }
 
 enum Networks {

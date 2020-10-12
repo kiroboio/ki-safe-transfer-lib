@@ -26,6 +26,8 @@ import {
   AnyValue,
   Maybe,
   Balance,
+  EstimatedFee,
+  BuyKiroWithEthRequest,
 } from './types'
 import {
   validateOptions,
@@ -38,6 +40,7 @@ import {
   validateRetrieve,
   validateAddress,
   validateEstimateFeesRequest,
+  validateBuyKiroRequest,
 } from './validators'
 import {
   checkOwnerId,
@@ -57,13 +60,13 @@ import { ERRORS, MESSAGES } from './text'
 class Service extends Connect {
   private static instance: Service
 
-  public static getInstance(props?: ConnectProps, replace = false, url?: string): Service {
+  public static getInstance(props?: ConnectProps, replace = false, url?: string, withAuth = false): Service {
     if (replace) {
       this.destroy()
     }
 
     if (!Service.instance) {
-      Service.instance = new Service(props as ConnectProps, url)
+      Service.instance = new Service(props as ConnectProps, url, withAuth)
     } else if (props) {
       throw TypeError('Library already initiated: props should be null or undefined')
     }
@@ -77,8 +80,8 @@ class Service extends Connect {
     delete changeType<AnyValue>(Service)?.instance
   }
 
-  private constructor(props: ConnectProps, url?: string) {
-    super(props, url)
+  private constructor(props: ConnectProps, url?: string, withAuth?: boolean) {
+    super(props, url, withAuth)
   }
 
   /**
@@ -988,49 +991,46 @@ class Service extends Connect {
   }
 
   /**
-   * Function to provide KIRO price
+   * Function to buy KIRO tokens
    *
    * @function
-   * @name getKiroPrice
-   * @param [String] address - recipient's address
-   * @return [Object] KiroPrice
+   * @name buyKiro
+   * @param [String] request - request with raw transaction;
+   * @param [Object] [options] - response option
+   * @return [Object]
    * ---
    * Example:
    * ```typescript
-   * await service.getKiroPrice('0x0xxxxxxxxx')
+   * await service.buyKiro()
    * ```
    * will get the following result:
    * ```
-   * {
-   *   eth: { address: string; min: string; max: string; price: string }
-   *   usd: { min: number; max: number; price: number }
-   *   availableAt: string
-   *   createdAt: string
-   *   expiresAt: string
-   *   recipient: string
-   *   }
+   *
    * ```
    */
-  public async buyKiro(address: string, options?: Omit<RequestOptions, 'watch'>): Promise<Maybe<KiroPrice>> {
-    this._logTechnical(makeString(MESSAGES.technical.running, ['getKiroPrice']))
+  public async buyKiro(
+    request: BuyKiroWithEthRequest,
+    options?: Omit<RequestOptions, 'watch'>,
+  ): Promise<Maybe<KiroPrice>> {
+    this._logTechnical(makeString(MESSAGES.technical.running, ['buyKiro']))
 
     /** validate props */
     try {
-      this._logTechnical(makeString(MESSAGES.technical.checkingProps, ['getKiroPrice']))
+      this._logTechnical(makeString(MESSAGES.technical.checkingProps, ['buyKiro']))
 
-      if (isNil(address)) throw new Error(TEXT.errors.validation.missingArgument)
+      if (isNil(request)) throw new Error(TEXT.errors.validation.missingArgument)
 
-      validateAddress({ address, currency: Currencies.Ethereum, networkType: this._network })
+      validateBuyKiroRequest(request, 'request', 'buyKiro')
 
       /** validate options, if present */
       if (options) {
-        this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['getKiroPrice', 'options']))
-        validateOptions(options, 'getKiroPrice')
+        this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['buyKiro', 'options']))
+        validateOptions(options, 'buyKiro')
       }
     } catch (err) {
 
       /** log error */
-      this._logError(makeString(ERRORS.service.gotError, ['getKiroPrice', 'validation']), err)
+      this._logError(makeString(ERRORS.service.gotError, ['buyKiro', 'validation']), err)
 
       /** throw appropriate error */
       throw makePropsResponseError(err)
@@ -1040,26 +1040,26 @@ class Service extends Connect {
 
     /** make request */
     try {
-      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getKiroPrice']))
+      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['buyKiro']))
 
-      response = await this._kiroPrice.get(address)
-      this._log(makeString(MESSAGES.technical.gotResponse, ['getKiroPrice']), response)
+      response = await this._kiroBuy.create(request)
+      this._log(makeString(MESSAGES.technical.gotResponse, ['buyKiro']), response)
     } catch (err) {
 
       /** log error */
-      this._logApiError(makeString(ERRORS.service.gotError, ['getKiroPrice', 'request']), err)
+      this._logApiError(makeString(ERRORS.service.gotError, ['buyKiro', 'request']), err)
 
       /** throw appropriate error */
       throw makeApiResponseError(err)
     }
 
     /** return the results */
-    this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getKiroPrice', 'return']))
+    this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['buyKiro', 'return']))
 
     if (shouldReturnDirect(options, this._respondAs)) return response
 
-    this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getKiroPrice']))
-    this._useEventBus(EventTypes.GET_KIRO_PRICE, response)
+    this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['buyKiro']))
+    this._useEventBus(EventTypes.BUY_KIRO, response)
   }
 
   /**
@@ -1074,17 +1074,27 @@ class Service extends Connect {
    * ---
    * Example:
    * ```typescript
-   * await service.estimateFees({ ownerId: 'xxxx', to: '0x0xxxxx', amount: 100000})
+   * await service.estimateFees({ ownerId: 'xxxx', to: 'xxxxx', amount: 100000})
    * ```
    * will get the following result:
    * ```
-   *
+   * {  _id: 'xxxxx',
+   *    owner: 'xxxxx',
+   *    to: 'xxxxx',
+   *    amount: 0,
+   *    createdAt: '2020-10-12T09:49:25.905Z',
+   *    expiresAt: '2020-10-12T10:49:25.905Z',
+   *    id: 'xxxxx',
+   *    fees:
+   *    {   satoshi: 0,
+   *        address: 'xxxxx',
+   *        tokens: '0' } }
    * ```
    */
   public async estimateFees(
     request: EstimateFeeRequest,
     options?: Omit<RequestOptions, 'watch'>,
-  ): Promise<Maybe<KiroPrice>> {
+  ): Promise<Maybe<Results<EstimatedFee>>> {
     this._logTechnical(makeString(MESSAGES.technical.running, ['estimateFees']))
 
     /** validate props */
@@ -1110,7 +1120,7 @@ class Service extends Connect {
       throw makePropsResponseError(err)
     }
 
-    let response: KiroPrice
+    let response: Results<EstimatedFee>
 
     /** make request */
     try {
@@ -1141,7 +1151,7 @@ class Service extends Connect {
     if (shouldReturnDirect(options, this._respondAs)) return response
 
     this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['estimateFees']))
-    this._useEventBus(EventTypes.GET_KIRO_PRICE, response)
+    this._useEventBus(EventTypes.ESTIMATE_FEES, response)
   }
 
   /**
@@ -1214,7 +1224,7 @@ class Service extends Connect {
     if (shouldReturnDirect(options, this._respondAs)) return response
 
     this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getBalance']))
-    this._useEventBus(EventTypes.GET_KIRO_PRICE, response)
+    this._useEventBus(EventTypes.GET_BALANCE, response)
   }
 }
 

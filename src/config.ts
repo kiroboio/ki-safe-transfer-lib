@@ -6,7 +6,7 @@ const connectionTimeout = modeIs('test') ? 1 : 10
 
 const version = 'v1' as const
 
-const apiUrl = 'https://api.kirobo.me' as const
+const apiUrl:string = 'https://api.kirobo.me' as const
 
 const endpoints: Record<string, string> = {
   collect: 'action/collect',
