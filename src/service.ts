@@ -32,7 +32,7 @@ import {
 import {
   validateOptions,
   validateObjectWithStrings,
-  validateSend,
+  // validateSend,
   validateObject,
   validatePropsAddresses,
   validatePropsArray,
@@ -54,7 +54,7 @@ import {
   changeType,
 } from './tools'
 import { isNil, join, assoc, filter, isEmpty } from 'ramda'
-import { TEXT, SEND_DATA_SPEC } from './data'
+import { TEXT, } from './data'
 import { ERRORS, MESSAGES } from './text'
 
 class Service extends Connect {

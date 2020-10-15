@@ -1,5 +1,11 @@
 # Changelog
 
+#### v2.23.1 2020-10-15
+
+  Chore:
+
+  `1314d7f` - temp disable send verification
+
 #### v2.23.0 2020-10-12
 
   Feat:
