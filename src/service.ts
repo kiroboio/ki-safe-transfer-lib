@@ -198,7 +198,7 @@ class Service extends Connect {
       if (!validateAddress({ address: transaction.to, currency: this._currency, networkType: this._network }))
         throw new TypeError('Invalid address in "to".')
 
-      validateSend(transaction, SEND_DATA_SPEC, 'send')
+      // validateSend(transaction, SEND_DATA_SPEC, 'send')
 
       /** validate options, if present */
       if (options) {

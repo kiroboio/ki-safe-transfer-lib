@@ -58,24 +58,24 @@ describe('Send', () => {
          expect(err).toHaveProperty('message', 'Data is missing')
       }
     })
-    it('throws TypeError for argument with unknown keys', async () => {
-      try {
-        await service.send({
-        // @ts-expect-error
-          id: 'string',
-          to: validBitcoinAddresses[2],
-          amount: 123,
-          collect: 'qwerty',
-          deposit: 'qwerty',
-          owner: '0123456789012345678901234567890',
-          depositPath: 'qwerty',
-          salt: 'qwerty'
-        })
-      } catch (err) {
-         expect(err).toBeInstanceOf(Object)
-         expect(err).toHaveProperty('name', 'BadProps')
-         expect(err).toHaveProperty('message', 'Wrong keys present: id.')
-      }
-    })
+    // it('throws TypeError for argument with unknown keys', async () => {
+    //   try {
+    //     await service.send({
+    //     // @ts-expect-error
+    //       id: 'string',
+    //       to: validBitcoinAddresses[2],
+    //       amount: 123,
+    //       collect: 'qwerty',
+    //       deposit: 'qwerty',
+    //       owner: '0123456789012345678901234567890',
+    //       depositPath: 'qwerty',
+    //       salt: 'qwerty'
+    //     })
+    //   } catch (err) {
+    //      expect(err).toBeInstanceOf(Object)
+    //      expect(err).toHaveProperty('name', 'BadProps')
+    //      expect(err).toHaveProperty('message', 'Wrong keys present: id.')
+    //   }
+    // })
   })
 })
