@@ -2,6 +2,7 @@ interface KiroState {
   address: string
   poolBalance: string
   ethBalance: string
+  transactionCount: number
   debt: string
   externalBalance: string
   nonce: string
