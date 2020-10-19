@@ -1084,7 +1084,7 @@ class Service extends Connect {
     try {
       this._logTechnical(makeString(MESSAGES.technical.requestingData, ['estimateFees']))
 
-      response = await this._estimateFees.get(request)
+      response = await this._estimateFees.create(request)
 
       this._log(makeString(MESSAGES.technical.gotResponse, ['estimateFees']), response)
     } catch (err) {

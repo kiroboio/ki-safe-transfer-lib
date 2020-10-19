@@ -3,6 +3,7 @@ import { RetrieveRequest } from './retrieve'
 import { SendRequest } from './send'
 import { CollectRequest } from './collect'
 import { BuyKiroWithEthRequest } from './eth'
+import { EstimateFeeRequest } from './transfer'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyValue = any
@@ -42,7 +43,7 @@ interface ApiService {
   find: (arg0?: unknown) => AnyValue
   get: (arg0: unknown) => AnyValue
   create: (
-    arg0: Record<string, unknown> | RetrieveRequest | SendRequest | CollectRequest | BuyKiroWithEthRequest,
+    arg0: Record<string, unknown> | RetrieveRequest | SendRequest | CollectRequest | BuyKiroWithEthRequest | EstimateFeeRequest,
   ) => AnyValue
   on: (arg0: string, arg1: (arg2: AnyValue) => AnyValue) => AnyValue
 }
