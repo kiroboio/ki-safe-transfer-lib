@@ -1,3 +1,4 @@
+/* eslint-disable lines-around-comment*/
 import { Connect } from './connect'
 import {
   Results,
@@ -54,7 +55,7 @@ import {
   changeType,
 } from './tools'
 import { isNil, join, assoc, filter, isEmpty } from 'ramda'
-import { TEXT, } from './data'
+import { TEXT } from './data'
 import { ERRORS, MESSAGES } from './text'
 
 class Service extends Connect {
@@ -102,14 +103,12 @@ class Service extends Connect {
    * -
    */
   public async getOnlineNetworks(options?: QueryOptions): Promise<Maybe<Results<NetworkItem[]>>> {
-
     /** validate options, if present */
     try {
       if (options) {
         validateOptions(options, 'getOnlineNetworks')
       }
     } catch (err) {
-
       /** log error */
       this._logError('Service (getOnlineNetworks) caught [validation] error.', err)
 
@@ -144,7 +143,6 @@ class Service extends Connect {
     request: CollectRequest,
     options?: Omit<QueryOptions, 'limit' | 'skip'>,
   ): Promise<Maybe<Results<Message>>> {
-
     /** validate props */
     try {
       validateObjectWithStrings(changeType<Record<string, unknown>>(request), 'request', 'collect')
@@ -154,7 +152,6 @@ class Service extends Connect {
         validateOptions(options, 'collect')
       }
     } catch (err) {
-
       /** log error */
       this._logError('Service (collect) caught [validation] error.', err)
 
@@ -168,7 +165,6 @@ class Service extends Connect {
     try {
       response = await this._collect.create({ ...request })
     } catch (err) {
-
       /** log error */
       this._logApiError('Service (collect) caught [request] error.', err)
 
@@ -187,7 +183,6 @@ class Service extends Connect {
 
   // TODO: add desc
   public async send(transaction: SendRequest, options?: QueryOptions): Promise<Maybe<Transfer>> {
-
     /** validate props */
     try {
       if (isNil(transaction) || isEmpty(transaction)) throw new Error(TEXT.errors.validation.missingArgument)
@@ -205,7 +200,6 @@ class Service extends Connect {
         validateOptions(options, 'send')
       }
     } catch (err) {
-
       /** log error */
       this._logError('Service (collect) caught [validation] error.', err)
 
@@ -219,7 +213,6 @@ class Service extends Connect {
     try {
       response = await this._transfers.create(checkOwnerId(transaction))
     } catch (err) {
-
       /** log error */
       this._logApiError('Service (collect) caught [request] error.', err)
 
@@ -235,7 +228,6 @@ class Service extends Connect {
 
   // get all collectables by recipient address
   public async getCollectables(addresses: string[], options?: QueryOptions): Promise<Maybe<Results<Collectable>>> {
-
     /** validate props */
     try {
       validatePropsAddresses(addresses, 'addresses', 'getCollectables', this.getSettings())
@@ -245,7 +237,6 @@ class Service extends Connect {
         validateOptions(options, 'getCollectables')
       }
     } catch (err) {
-
       /** log error */
       this._logError('Service (getCollectables) caught [validation] error.', err)
 
@@ -261,7 +252,6 @@ class Service extends Connect {
         query: { to: addresses.join(';'), ...makeOptions(options, this._watch) },
       })
     } catch (err) {
-
       /** log error */
       this._logApiError('Service (getCollectables) caught [request] error.', err)
 
@@ -273,7 +263,6 @@ class Service extends Connect {
     this._lastAddresses = { addresses, options }
 
     try {
-
       /** return the results */
       if (shouldReturnDirect(options, this._respondAs)) return response
 
@@ -289,7 +278,6 @@ class Service extends Connect {
     txid: string,
     options?: Omit<QueryOptions, 'limit' | 'skip' | 'watch'>,
   ): Promise<Maybe<Results<RawTransaction[]>>> {
-
     /** validate props */
     try {
       if (isNil(txid))
@@ -305,7 +293,6 @@ class Service extends Connect {
         validateOptions(options, 'getRawTransaction')
       }
     } catch (err) {
-
       /** log error */
       this._logError(makeString(ERRORS.service.gotError, ['getRawTransaction', 'validation']), err)
 
@@ -347,7 +334,6 @@ class Service extends Connect {
     txids: string[],
     options?: Omit<QueryOptions, 'watch'>,
   ): Promise<Maybe<Results<RawTransaction[]>>> {
-
     /** validate props */
     try {
       validatePropsArray(txids, 'string', 'txids', 'getRawTransactions')
@@ -357,7 +343,6 @@ class Service extends Connect {
         validateOptions(options, 'getRawTransactions')
       }
     } catch (err) {
-
       /** log error */
       this._logError(makeString(ERRORS.service.gotError, ['getRawTransactions', 'validation']), err)
 
@@ -400,7 +385,6 @@ class Service extends Connect {
 
   // TODO: add desc
   public async getUtxos(addresses: string[], options?: Omit<QueryOptions, 'watch'>): Promise<Maybe<Results<Utxo>>> {
-
     /** validate props */
     try {
       validatePropsArray(addresses, 'string', 'addresses', 'getUtxos')
@@ -410,7 +394,6 @@ class Service extends Connect {
         validateOptions(options, 'getUtxos')
       }
     } catch (err) {
-
       /** log error */
       this._logError('Service (getUtxos) caught [validation] error.', err.message)
 
@@ -426,7 +409,6 @@ class Service extends Connect {
         query: { address: join(';', addresses), ...makeOptions(options, this._watch) },
       })
     } catch (err) {
-
       /** log error */
       this._logApiError('Service (getUtxos) caught [request] error.', err.message)
 
@@ -435,7 +417,6 @@ class Service extends Connect {
     }
 
     try {
-
       /** return the results */
       if (shouldReturnDirect(options, this._respondAs)) return response
 
@@ -446,7 +427,6 @@ class Service extends Connect {
   }
 
   public async getUsed(addresses: string[], options?: Omit<QueryOptions, 'watch'>): Promise<Maybe<Results<string[]>>> {
-
     /** validate props */
     try {
       validatePropsArray(addresses, 'string', 'addresses', 'getUsed')
@@ -456,7 +436,6 @@ class Service extends Connect {
         validateOptions(options, 'getUsed')
       }
     } catch (err) {
-
       /** log error */
       this._logError('Service (getUsed) caught [validation] error.', err.message)
 
@@ -475,7 +454,6 @@ class Service extends Connect {
         },
       })
     } catch (err) {
-
       /** log error */
       this._logApiError('Service (getUsed) caught [request] error.', err.message)
 
@@ -484,7 +462,6 @@ class Service extends Connect {
     }
 
     try {
-
       /** return the results */
       const usedAddresses = flattenAddresses(response.data as Address[])
 
@@ -518,7 +495,6 @@ class Service extends Connect {
    * -
    */
   public async getFresh(addresses: string[], options?: Omit<QueryOptions, 'watch'>): Promise<Maybe<Results<string[]>>> {
-
     /** validate props */
     try {
       validatePropsArray(addresses, 'string', 'addresses', 'getFresh')
@@ -528,7 +504,6 @@ class Service extends Connect {
         validateOptions(options, 'getFresh')
       }
     } catch (err) {
-
       /** log error */
       this._logError('Service (getFresh) caught [validation] error.', err.message)
 
@@ -544,7 +519,6 @@ class Service extends Connect {
         query: { address: join(';', addresses), ...makeOptions(options, this._watch) },
       })
     } catch (err) {
-
       /** log error */
       this._logApiError('Service (getFresh) caught [request] error.', err.message)
 
@@ -553,7 +527,6 @@ class Service extends Connect {
     }
 
     try {
-
       /** flatten the results */
       const usedAddresses = flattenAddresses(response.data as Address[])
 
@@ -582,7 +555,6 @@ class Service extends Connect {
    *
    */
   public async getByOwnerId(ownerId: string, options?: QueryOptions): Promise<Maybe<Results<Retrievable>>> {
-
     /** validate props */
     try {
       validatePropsString(ownerId, 'ownerId', 'getOwnerById')
@@ -592,7 +564,6 @@ class Service extends Connect {
         validateOptions(options, 'getOwnerById')
       }
     } catch (err) {
-
       /** log error */
       this._logError('Service (getOwnerById) caught [validation] error.', err.message)
 
@@ -611,7 +582,6 @@ class Service extends Connect {
         },
       })
     } catch (err) {
-
       /** log error */
       this._logApiError('Service (getOwnerById) caught [request] error.', err.message)
 
@@ -620,7 +590,6 @@ class Service extends Connect {
     }
 
     try {
-
       /** return the results */
       if (shouldReturnDirect(options, this._respondAs)) return response
 
@@ -657,7 +626,6 @@ class Service extends Connect {
         validateOptions(options, 'getRates')
       }
     } catch (err) {
-
       /** log error */
       this._logError(makeString(ERRORS.service.gotError, ['getRates', 'validation']), err)
 
@@ -730,7 +698,6 @@ class Service extends Connect {
           validateOptions(options, 'getRate', true)
         }
       } catch (err) {
-
         /** log error */
         this._logError(makeString(ERRORS.service.gotError, ['getRate', 'validation']), err)
 
@@ -803,7 +770,6 @@ class Service extends Connect {
         validateOptions(options, 'retrieve')
       }
     } catch (err) {
-
       /** log error */
       this._logError(makeString(ERRORS.service.gotError, ['retrieve', 'validation']), err)
 
@@ -819,7 +785,6 @@ class Service extends Connect {
       response = await this._retrieve.create(data)
       this._log(makeString(MESSAGES.technical.gotResponse, ['retrieve']), response)
     } catch (err) {
-
       /** log error */
       this._logApiError(makeString(ERRORS.service.gotError, ['retrieve', 'request']), err)
 
@@ -882,7 +847,6 @@ class Service extends Connect {
         validateOptions(options, 'getKiroState')
       }
     } catch (err) {
-
       /** log error */
       this._logError(makeString(ERRORS.service.gotError, ['getKiroState', 'validation']), err)
 
@@ -898,7 +862,6 @@ class Service extends Connect {
       response = await this._kiroState.get(address)
       this._log(makeString(MESSAGES.technical.gotResponse, ['getKiroState']), response)
     } catch (err) {
-
       /** log error */
       this._logApiError(makeString(ERRORS.service.gotError, ['getKiroState', 'request']), err)
 
@@ -956,7 +919,6 @@ class Service extends Connect {
         validateOptions(options, 'getKiroPrice')
       }
     } catch (err) {
-
       /** log error */
       this._logError(makeString(ERRORS.service.gotError, ['getKiroPrice', 'validation']), err)
 
@@ -973,7 +935,6 @@ class Service extends Connect {
       response = await this._kiroPrice.get(address)
       this._log(makeString(MESSAGES.technical.gotResponse, ['getKiroPrice']), response)
     } catch (err) {
-
       /** log error */
       this._logApiError(makeString(ERRORS.service.gotError, ['getKiroPrice', 'request']), err)
 
@@ -1028,7 +989,6 @@ class Service extends Connect {
         validateOptions(options, 'buyKiro')
       }
     } catch (err) {
-
       /** log error */
       this._logError(makeString(ERRORS.service.gotError, ['buyKiro', 'validation']), err)
 
@@ -1045,7 +1005,6 @@ class Service extends Connect {
       response = await this._kiroBuy.create(request)
       this._log(makeString(MESSAGES.technical.gotResponse, ['buyKiro']), response)
     } catch (err) {
-
       /** log error */
       this._logApiError(makeString(ERRORS.service.gotError, ['buyKiro', 'request']), err)
 
@@ -1094,7 +1053,7 @@ class Service extends Connect {
   public async estimateFees(
     request: EstimateFeeRequest,
     options?: Omit<RequestOptions, 'watch'>,
-  ): Promise<Maybe<Results<EstimatedFee>>> {
+  ): Promise<Maybe<EstimatedFee>> {
     this._logTechnical(makeString(MESSAGES.technical.running, ['estimateFees']))
 
     /** validate props */
@@ -1112,7 +1071,6 @@ class Service extends Connect {
         validateOptions(options, 'estimateFees')
       }
     } catch (err) {
-
       /** log error */
       this._logError(makeString(ERRORS.service.gotError, ['estimateFees', 'validation']), err)
 
@@ -1120,24 +1078,16 @@ class Service extends Connect {
       throw makePropsResponseError(err)
     }
 
-    let response: Results<EstimatedFee>
+    let response: EstimatedFee
 
     /** make request */
     try {
       this._logTechnical(makeString(MESSAGES.technical.requestingData, ['estimateFees']))
 
-      response = await this._estimateFees.find({
-        query: {
-          owner: request.ownerId,
-          to: request.to,
-          amount: request.amount,
-          ...makeOptions(options, this._watch),
-        },
-      })
+      response = await this._estimateFees.get(request)
 
       this._log(makeString(MESSAGES.technical.gotResponse, ['estimateFees']), response)
     } catch (err) {
-
       /** log error */
       this._logApiError(makeString(ERRORS.service.gotError, ['estimateFees', 'request']), err)
 
@@ -1193,7 +1143,6 @@ class Service extends Connect {
         validateOptions(options, 'getBalance')
       }
     } catch (err) {
-
       /** log error */
       this._logError(makeString(ERRORS.service.gotError, ['getBalance', 'validation']), err)
 
@@ -1210,7 +1159,6 @@ class Service extends Connect {
       response = await this._balance.get(address)
       this._log(makeString(MESSAGES.technical.gotResponse, ['getBalance']), response)
     } catch (err) {
-
       /** log error */
       this._logApiError(makeString(ERRORS.service.gotError, ['getBalance', 'request']), err)
 
