@@ -1126,14 +1126,7 @@ class Service extends Connect {
     try {
       this._logTechnical(makeString(MESSAGES.technical.requestingData, ['estimateFees']))
 
-      response = await this._estimateFees.find({
-        query: {
-          owner: request.ownerId,
-          to: request.to,
-          amount: request.amount,
-          ...makeOptions(options, this._watch),
-        },
-      })
+      response = await this._estimateFees.get(request)
 
       this._log(makeString(MESSAGES.technical.gotResponse, ['estimateFees']), response)
     } catch (err) {
