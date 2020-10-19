@@ -1,3 +1,5 @@
+import { TransferFees } from './type'
+
 /**
  * Describe request for sending a transaction
  *
@@ -14,6 +16,8 @@ interface SendRequest {
   owner: string // owner ID for this transaction, maxLength: 120, minLength: 20
   salt: string // salt use to encrypt collect transaction and passcode when collecting it
   to: string // the destination address
+
+  transferFees?: TransferFees // fees for this transfer
 }
 
 export { SendRequest }

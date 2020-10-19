@@ -41,7 +41,9 @@ interface NetworkTip {
 interface ApiService {
   find: (arg0?: unknown) => AnyValue
   get: (arg0: unknown) => AnyValue
-  create: (arg0: Record<string, unknown> | RetrieveRequest | SendRequest | CollectRequest|BuyKiroWithEthRequest) => AnyValue
+  create: (
+    arg0: Record<string, unknown> | RetrieveRequest | SendRequest | CollectRequest | BuyKiroWithEthRequest,
+  ) => AnyValue
   on: (arg0: string, arg1: (arg2: AnyValue) => AnyValue) => AnyValue
 }
 
@@ -111,6 +113,19 @@ interface RawTransaction {
   hex: string
 }
 
+interface TransferFees {
+  kiro?: {
+    from: string
+    value: string
+    v: string
+    r: string
+    s: string
+  }
+  btc?: {
+    to: string
+    value: number
+  }
+}
 
 export {
   AnyValue,
@@ -130,4 +145,5 @@ export {
   MinMax,
   DataSpec,
   RawTransaction,
+  TransferFees,
 }

@@ -1,3 +1,5 @@
+import { TransferFees } from './type'
+
 interface Transfer {
   amount: number // the transfer amount in satoshi,minimum: 0
   collect: {
@@ -24,6 +26,7 @@ interface Transfer {
   state: 'waiting-for-deposit' | 'retrieved' | 'ready' | 'collecting' | 'collected' | 'rejected' | 'invalid' | 'new'
   to: string // the destination address,
   updatedAt: string | Date // update date-time,
+  transferFees?: TransferFees // fees for this transfer
 }
 
 interface EstimateFeeRequest {
