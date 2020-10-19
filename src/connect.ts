@@ -36,6 +36,7 @@ import {
   Results,
   Currencies,
   AnyValue,
+  Networks,
 } from './types'
 
 import { apiUrl as apiUrlFromConfig, version, endpoints, connectionTriesMax, connectionTimeout } from './config'
@@ -283,9 +284,8 @@ class Connect extends Base {
 
       private key: string
 
-      constructor(key = Math.random().toString(36)
-.substring(7) + Math.random().toString(36)
-.substring(7)) {
+      // eslint-disable-next-line newline-per-chained-call
+      constructor(key = Math.random().toString(36).substring(7) + Math.random().toString(36).substring(7)) {
         this.storage = new MemoryStorage()
         this.key = key
       }
@@ -645,11 +645,19 @@ class Connect extends Base {
   private _makeEndpointPath = (endpoint: Endpoints): string => {
     this._logTechnical(makeString(MESSAGES.technical.endpoint, ['makeEndpointPath']), endpoint)
 
-    const path = `/${version}/${this._currency}/`
+    const currency = endpoint.startsWith('kiro') ? 'eth' : this._currency
+
+    const network = endpoint.startsWith('kiro')
+      ? this._network === Networks.Testnet
+        ? 'rinkeby'
+        : 'mainnet'
+      : this._network
+
+    const path = `/${version}/${currency}/`
 
     if (isDirect(endpoint)) return path + endpoint
 
-    return path + `${this._network}/${endpoints[endpoint]}`
+    return path + `${network}/${endpoints[endpoint]}`
   }
 
   /**
