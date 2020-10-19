@@ -40,5 +40,8 @@
     "typescript.referencesCodeLens.enabled": true,
     "typescript.referencesCodeLens.showOnAllFunctions": true,
     "files.autoSave": "off",
-    "peacock.color": "#6be667"
+    "peacock.color": "#6be667",
+    "prettier.disableLanguages": [
+      "typescript"
+    ]
 }

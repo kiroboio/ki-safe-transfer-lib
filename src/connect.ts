@@ -36,6 +36,7 @@ import {
   Results,
   Currencies,
   AnyValue,
+  Networks,
 } from './types'
 
 import { apiUrl as apiUrlFromConfig, version, endpoints, connectionTriesMax, connectionTimeout } from './config'
@@ -274,7 +275,7 @@ class Connect extends Base {
 
     const connect = feathers().configure(
       socket(this._socket, {
-        timeout: 20000,
+        timeout: 200000,
       }),
     )
 
@@ -643,13 +644,22 @@ class Connect extends Base {
    * @returns string
    */
   private _makeEndpointPath = (endpoint: Endpoints): string => {
+
     this._logTechnical(makeString(MESSAGES.technical.endpoint, ['makeEndpointPath']), endpoint)
 
-    const path = `/${version}/${this._currency}/`
+    const currency = endpoint.startsWith('kiro') ? 'eth' : this._currency
+
+    const network = endpoint.startsWith('kiro')
+      ? this._network === Networks.Testnet
+        ? 'rinkeby'
+        : 'mainnet'
+      : this._network
+
+    const path = `/${version}/${currency}/`
 
     if (isDirect(endpoint)) return path + endpoint
 
-    return path + `${this._network}/${endpoints[endpoint]}`
+    return path + `${network}/${endpoints[endpoint]}`
   }
 
   /**
