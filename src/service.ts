@@ -1094,7 +1094,7 @@ class Service extends Connect {
   public async estimateFees(
     request: EstimateFeeRequest,
     options?: Omit<RequestOptions, 'watch'>,
-  ): Promise<Maybe<Results<EstimatedFee>>> {
+  ): Promise<Maybe<EstimatedFee>> {
     this._logTechnical(makeString(MESSAGES.technical.running, ['estimateFees']))
 
     /** validate props */
@@ -1120,7 +1120,7 @@ class Service extends Connect {
       throw makePropsResponseError(err)
     }
 
-    let response: Results<EstimatedFee>
+    let response: EstimatedFee
 
     /** make request */
     try {
