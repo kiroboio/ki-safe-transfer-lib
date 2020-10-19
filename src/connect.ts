@@ -275,7 +275,7 @@ class Connect extends Base {
 
     const connect = feathers().configure(
       socket(this._socket, {
-        timeout: 200000,
+        timeout: 20000,
       }),
     )
 
