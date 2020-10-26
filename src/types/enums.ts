@@ -13,7 +13,7 @@ enum Endpoints {
   EstimateFees = 'estimateFees',
   Balance = 'balance',
   KiroBuy = 'kiroBuy',
-  EthTransferRequest = 'transfer/request',
+  EthTransferRequest = 'ethTransferRequest',
 }
 
 // who the service should respond from methods:
