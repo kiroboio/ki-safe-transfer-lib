@@ -32,6 +32,7 @@ import {
   EthNetworkItem,
   EthTransferRequest,
   EthTransferResponse,
+  TxHash,
 } from './types'
 import {
   validateOptions,
@@ -1347,9 +1348,8 @@ class Service extends Connect {
   public async collectEth(
     request: CollectRequest,
     options?: Omit<QueryOptions, 'limit' | 'skip'>,
-  ): Promise<Maybe<Results<Message>>> {
+  ): Promise<Maybe<TxHash>> {
     this._logTechnical(makeString(MESSAGES.technical.running, ['collectEth']))
-
 
     /** validate props */
     try {

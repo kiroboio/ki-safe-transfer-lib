@@ -64,4 +64,8 @@ interface Address {
 
 type OnlineNetworkResults = Results<BtcNetworkItem | EthNetworkItem>
 
-export type { Address, QueryOptions, Results, Paging, OnlineNetworkResults }
+interface TxHash {
+  txHash: string
+}
+
+export type { Address, TxHash, QueryOptions, Results, Paging, OnlineNetworkResults }
