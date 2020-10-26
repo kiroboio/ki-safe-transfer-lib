@@ -32,7 +32,6 @@ import {
   EthNetworkItem,
   EthTransferRequest,
   EthTransferResponse,
-
 } from './types'
 import {
   validateOptions,
@@ -57,7 +56,7 @@ import {
   makeReturnError,
   makeApiResponseError,
   shouldReturnDirect,
-  changeType,
+  Type,
 } from './tools'
 import { isNil, join, assoc, filter, isEmpty } from 'ramda'
 import { TEXT } from './data'
@@ -87,7 +86,7 @@ class Service extends Connect {
   public static destroy(): void {
     if (Service.instance) Service.instance._destroySocket()
 
-    delete changeType<AnyValue>(Service)?.instance
+    delete Type<AnyValue>(Service)?.instance
   }
 
   private constructor(props: ConnectProps, options: Maybe<CreateInstanceOptions>) {
@@ -151,8 +150,7 @@ class Service extends Connect {
     this._useEventBus(EventTypes.GET_ONLINE_NETWORKS, response)
   }
 
-  // TODO:  add description
-  // TODO: check the return object
+  // TODO: merge with collectEth
   public async collect(
     request: CollectRequest,
     options?: Omit<QueryOptions, 'limit' | 'skip'>,
@@ -160,7 +158,7 @@ class Service extends Connect {
 
     /** validate props */
     try {
-      validateObjectWithStrings(changeType<Record<string, unknown>>(request), 'request', 'collect')
+      validateObjectWithStrings(Type<Record<string, unknown>>(request), 'request', 'collect')
 
       /** validate options, if present */
       if (options) {
@@ -1233,9 +1231,10 @@ class Service extends Connect {
     this._useEventBus(EventTypes.GET_BALANCE, response)
   }
 
-
-  public async ethTransferRequest(request: EthTransferRequest, options?: Omit<RequestOptions, 'watch'>): Promise<Maybe<EthTransferResponse>>
-  {
+  public async ethTransferRequest(
+    request: EthTransferRequest,
+    options?: Omit<RequestOptions, 'watch'>,
+  ): Promise<Maybe<EthTransferResponse>> {
     this._logTechnical(makeString(MESSAGES.technical.running, ['ethTrasferRequest']))
 
     /** validate props */
@@ -1256,7 +1255,6 @@ class Service extends Connect {
 
       /** log error */
       this._logError(makeString(ERRORS.service.gotError, ['ethTransferRequest', 'validation']), err)
-
 
       /** throw appropriate error */
       throw makePropsResponseError(err)
@@ -1344,6 +1342,61 @@ class Service extends Connect {
 
     this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getTransfers']))
     this._useEventBus(EventTypes.GET_TRANSFERS, response)
+  }
+
+  public async collectEth(
+    request: CollectRequest,
+    options?: Omit<QueryOptions, 'limit' | 'skip'>,
+  ): Promise<Maybe<Results<Message>>> {
+    this._logTechnical(makeString(MESSAGES.technical.running, ['collectEth']))
+
+
+    /** validate props */
+    try {
+      this._logTechnical(makeString(MESSAGES.technical.checkingProps, ['collectEth']))
+      validateObjectWithStrings(Type<Record<string, unknown>>(request), 'request', 'collectEth')
+
+      /** validate options, if present */
+      if (options) {
+        validateOptions(options, 'collectEth')
+      }
+    } catch (err) {
+
+      /** log error */
+      this._logError(makeString(ERRORS.service.gotError, ['collectEth', 'validation']), err)
+
+      /** throw appropriate error */
+      throw makePropsResponseError(err)
+    }
+
+    let response
+
+    /** make request */
+    try {
+      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['collectEth']))
+      response = await this._collect.create({ ...request })
+      this._log(makeString(MESSAGES.technical.gotResponse, ['collectEth']), response)
+    } catch (err) {
+
+      /** log error */
+      this._logApiError(makeString(ERRORS.service.gotError, ['collectEth', 'request']), err)
+
+      /** throw appropriate error */
+      throw makeApiResponseError(err)
+    }
+
+    try {
+
+      /** return the results */
+      this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['collectEth', 'return']))
+
+      if (shouldReturnDirect(options, this._respondAs)) return response
+
+      this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['collectEth']))
+      this._useEventBus(EventTypes.COLLECT_TRANSACTION, response)
+    } catch (err) {
+      throw makeReturnError(err.message, err)
+    }
   }
 }
 

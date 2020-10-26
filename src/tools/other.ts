@@ -2,7 +2,7 @@ import { assoc, isNil, not, map, keys, includes, forEach } from 'ramda'
 import { v4 as generateId } from 'uuid'
 
 import { validateArray, validateObject } from '../validators'
-import { SendRequest, QueryOptions, Watch, Address } from '..'
+import { SendRequest, QueryOptions, Watch, Address, AnyValue } from '..'
 
 const splitText = (text: string): string[] => text.split('')
 
@@ -44,7 +44,7 @@ export function checkSettings(settings: Record<string, unknown>): boolean {
     network: 'testnet',
     respondAs: 'direct',
     version: 'v1',
-    isAuthed: true
+    isAuthed: true,
   }
 
   // check if object
@@ -108,9 +108,7 @@ export const compareBasicObjects = (objOne: Record<string, unknown>, objTwo: Rec
   return result
 }
 
-export function changeType<T>(object: unknown): T {
-  return (object as unknown) as T
-}
+const Type = <T = AnyValue>(object: unknown): T => (object as unknown) as T
 
 // TODO: add test
 /**
@@ -176,3 +174,5 @@ export function flattenAddresses(data: Address[]): string[] {
 export function makeLocation(fn: string, block: string): string {
   return `${fn ? '\'' + fn + '\' function\'s ' : ''}${block ? block : ''}`
 }
+
+export { Type }

@@ -2,7 +2,7 @@
 import dotenv from 'dotenv'
 
 import Service, { Responses, Event, AuthDetails, Results } from '../src'
-import { changeType } from '../src/tools'
+import { Type } from '../src/tools'
 import { wait } from './tools'
 import { validBitcoinAddresses } from './test_data'
 
@@ -39,7 +39,7 @@ describe('Collectables', () => {
 
       const response = await service.getCollectables([validBitcoinAddresses[2]], { respondDirect: true })
 
-      const data = changeType<Results<unknown>>(response)
+      const data = Type<Results<unknown>>(response)
 
       expect(response).toBeInstanceOf(Object)
       expect(data.total).toEqual(0)
@@ -57,7 +57,7 @@ describe('Collectables', () => {
 
     const event = storedEvent.filter(el => el.type === 'service_get_collectables')
 
-    const data = changeType<Results<unknown>>(event[0].payload)
+    const data = Type<Results<unknown>>(event[0].payload)
 
     expect(data).toBeInstanceOf(Object)
     expect(data.total).toEqual(0)

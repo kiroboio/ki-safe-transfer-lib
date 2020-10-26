@@ -3,7 +3,7 @@ import dotenv from 'dotenv'
 import Service, { DebugLevels, Responses, Event, Status, AuthDetails, AnyValue } from '../src/.'
 import { listOfStatusKeys, typeOfStatusValues } from '../src/data'
 
-import { changeType } from '../src/tools/other'
+import { Type } from '../src/tools/other'
 import { validateObject } from '../src/validators'
 import { wait } from './tools'
 import { validBitcoinAddresses } from './test_data'
@@ -73,7 +73,7 @@ describe('Smaller functions', () => {
         Object.keys(result).forEach(key => {
           if (!listOfStatusKeys.includes(key)) keysValuesCheck = false
           else {
-            const resValType = typeof changeType<Record<string, string | number | boolean>>(result)[key]
+            const resValType = typeof Type<Record<string, string | number | boolean>>(result)[key]
 
             const reqValType = typeOfStatusValues[key]
 
@@ -93,7 +93,7 @@ describe('Smaller functions', () => {
 
       expect(eventReceived.type).toBe('service_update_status')
 
-      const result = changeType<Record<string, AnyValue>>(eventReceived.payload)
+      const result = Type<Record<string, AnyValue>>(eventReceived.payload)
 
       let keysValuesCheck = true
 

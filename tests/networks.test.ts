@@ -2,7 +2,7 @@ import dotenv from 'dotenv'
 
 import Service, { Event, AuthDetails, Responses } from '../src/.'
 import { wait, getEventByType } from './tools'
-import { changeType } from '../src/tools'
+import { Type } from '../src/tools'
 
 dotenv.config()
 
@@ -40,7 +40,7 @@ describe('Networks', () => {
 
     const payload = event?.payload
 
-    const data = changeType<{ data: unknown[] }>(payload).data
+    const data = Type<{ data: unknown[] }>(payload).data
 
     expect(payload).toHaveProperty('total')
     expect(data.length).not.toEqual(0)

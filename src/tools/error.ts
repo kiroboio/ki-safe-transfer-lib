@@ -1,7 +1,7 @@
 import { assoc, forEach, isNil, isEmpty } from 'ramda'
 
 import { ResponseError } from '..'
-import { changeType } from '.'
+import { Type } from '.'
 
 /**
  * Function to make errors from caught API error objects. Will check argument
@@ -29,7 +29,7 @@ function makeApiResponseError(error: unknown): ResponseError {
     if (isEmpty(data)) return false
 
     /** not if the same */
-    if (data === changeType<Record<string, unknown>>(response)[key]) return false
+    if (data === Type<Record<string, unknown>>(response)[key]) return false
 
     return true
   }
@@ -40,7 +40,7 @@ function makeApiResponseError(error: unknown): ResponseError {
   }
 
   /** run for each of default fields */
-  forEach(assignerFn(changeType<Record<string, unknown>>(error)), ['name', 'message', 'code', 'data', 'errors'])
+  forEach(assignerFn(Type<Record<string, unknown>>(error)), ['name', 'message', 'code', 'data', 'errors'])
 
   /** try to parse message, in case it has some object inside */
   try {
@@ -59,13 +59,13 @@ function makePropsResponseError(error: unknown): ResponseError {
 
   if (!error) return response
 
-  const data = changeType<Record<string, unknown>>(error)
+  const data = Type<Record<string, unknown>>(error)
 
   const fn = (key: string): void => {
     if (key === 'name') {
       if (data.type) response = assoc('name', data.type, response)
     } else {
-      if (data[key] && data[key] !== changeType<Record<string, unknown>>(response)[key])
+      if (data[key] && data[key] !== Type<Record<string, unknown>>(response)[key])
         response = assoc(key, data[key], response)
     }
   }

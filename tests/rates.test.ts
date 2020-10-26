@@ -2,7 +2,7 @@
 import dotenv from 'dotenv'
 
 import { wait, getEventByType } from './tools'
-import { changeType } from '../src/tools'
+import { Type } from '../src/tools'
 import Service, { AuthDetails, Responses, RatesSources, Event } from '../src/.'
 
 dotenv.config()
@@ -53,7 +53,7 @@ describe('Rates', () => {
 
     const payload = event?.payload
 
-    const data = changeType<{ data: unknown[] }>(payload).data
+    const data = Type<{ data: unknown[] }>(payload).data
 
     expect(payload).toHaveProperty('total', 3)
 

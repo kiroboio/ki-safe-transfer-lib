@@ -1,7 +1,7 @@
 import { not, is, forEach, keys, isNil, append, filter } from 'ramda'
 
 import { DataSpec, MinMax, RetrieveRequest } from '..'
-import { changeType, makeString } from '../tools'
+import { Type, makeString } from '../tools'
 import { makeStringFromArray } from '../tools/string'
 import { ERRORS } from '../text'
 import { BuyKiroWithEthRequest, EstimateFeeRequest, EthTransferRequest } from 'src/types'
@@ -24,7 +24,7 @@ function validateSend(data: unknown, spec: DataSpec, dataSetName: string): void 
   if (not(Object(spec) === spec) || isNil(spec)) throw new TypeError('spec is not an obj or empty')
 
   // assign variables
-  const dataObject = changeType<Record<string, string | number>>(data)
+  const dataObject = Type<Record<string, string | number>>(data)
 
   const dataKeys = keys(data) as string[]
 
@@ -245,15 +245,15 @@ function validateEthTransferRequest(data: EthTransferRequest, argName: string, f
     if (not(is(String, data[key]))) throw new TypeError(makeString(ERRORS.validation.wrongTypeKey, [key, argName, fnName, 'string']))
   })
 
-  if (!isHex(data.secretHash) || data.secretHash.length !== 66) 
+  if (!isHex(data.secretHash) || data.secretHash.length !== 66)
     throw new Error(makeString(ERRORS.validation.wrongTypeArgument, ['secretHash', argName, fnName, 'not a valid 66 char hex']))
-  
+
   if (data.publicSalt.length < 20)
     throw new Error(makeString(ERRORS.validation.wrongTypeArgument, ['publicSalt', argName, fnName, 'public salt too short']))
-  
+
   if (data.privateSalt.length < 20)
     throw new Error(makeString(ERRORS.validation.wrongTypeArgument, ['privateSalt', argName, fnName, 'private salt too short']))
- 
+
 }
 
 export { validateRetrieve, validateSend, validateEstimateFeesRequest, validateBuyKiroRequest, validateEthTransferRequest }

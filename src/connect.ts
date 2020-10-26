@@ -12,7 +12,7 @@ import {
   makeString,
   diff,
   getTime,
-  changeType,
+  Type,
   makeOptions,
   makeApiResponseError,
   makeReturnError,
@@ -495,7 +495,7 @@ class Connect extends Base {
 
   private _runAuth(): void {
     this._logTechnical(makeString(MESSAGES.technical.running, ['runAuth']))
-    changeType<Promise<AuthDetails>>(this._authSocket())
+    Type<Promise<AuthDetails>>(this._authSocket())
       .then(async () => {
         this._logTechnical('Service is authed, resetting connectionCounter.')
         this._connectionCounter = 0
