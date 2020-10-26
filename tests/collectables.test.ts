@@ -26,13 +26,13 @@ describe('Collectables', () => {
   let service: Service
   beforeAll(async () => {
     try {
-      service = Service.getInstance({ authDetails, eventBus, respondAs: Responses.Callback }, true)
+      service = Service.createInstance({ authDetails, eventBus, respondAs: Responses.Callback })
       await wait(10000)
     } catch (e) {
       return
     }
   })
-  
+
   it('provides response as a result of proper request', async () => {
     try {
       expect.assertions(3)

@@ -13,10 +13,10 @@ function eventBus(_event: Event): void {
   return
 }
 
-const service = Service.getInstance({ respondAs: Responses.Callback, eventBus, authDetails }, true)
+const service = Service.createInstance({ respondAs: Responses.Callback, eventBus, authDetails })
 
 describe('Validate options', () => {
-  
+
   describe(' throws on incorrect options:', () => {
     it('throws if options are of wrong type', async () => {
       expect.assertions(3)

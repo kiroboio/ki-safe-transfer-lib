@@ -19,7 +19,7 @@ describe('Send', () => {
   let service: Service
   beforeAll(async () => {
     try {
-      service = Service.getInstance({ debug: DebugLevels.MUTE, authDetails }, true)
+      service = Service.createInstance({ debug: DebugLevels.MUTE, authDetails })
       await wait(10000)
     } catch (e) {
       return

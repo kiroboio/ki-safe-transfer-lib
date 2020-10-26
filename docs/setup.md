@@ -28,7 +28,7 @@ const authDetails = {key: process.env.AUTH_KEY, secret: process.env.AUTH_SECRET}
 
 try {
 
-  const service = Service.getInstance({ authDetails }, true))
+  const service = Service.createInstance({ authDetails }))
 
 } catch (e) {
   console.log('error: ', e.message)

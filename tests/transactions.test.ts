@@ -20,7 +20,7 @@ describe('Transactions', () => {
   let service: Service
   beforeAll(async () => {
     try {
-      service = Service.getInstance({ authDetails }, true)
+      service = Service.createInstance({ authDetails })
       await wait(10000)
     } catch (e) {
       return

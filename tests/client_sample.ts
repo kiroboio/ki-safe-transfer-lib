@@ -20,7 +20,7 @@ function eventBus(event: Event): void {
 }
 
 // configure Kirobo API service library
-const service = Service.getInstance(
+const service = Service.createInstance(
   {
     debug: DebugLevels.QUIET, // minimize the console logging
     respondAs: Responses.Callback, // send feedback and events through callback function, i.e. eventBus

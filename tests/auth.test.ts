@@ -21,7 +21,7 @@ describe('Authentication', () => {
   let incorrect: Service
   beforeAll(async () => {
     try {
-      incorrect = Service.getInstance({ authDetails: controlDetails, eventBus, respondAs: Responses.Direct }, true)
+      incorrect = Service.createInstance({ authDetails: controlDetails, eventBus, respondAs: Responses.Direct })
       await wait(10000)
     } catch (e) {
       return

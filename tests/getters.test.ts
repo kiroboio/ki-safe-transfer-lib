@@ -21,7 +21,7 @@ describe('Getters', () => {
   let service: Service
   beforeAll(async () => {
     try {
-      service = Service.getInstance({ authDetails, eventBus, respondAs: Responses.Callback }, true)
+      service = Service.createInstance({ authDetails, eventBus, respondAs: Responses.Callback })
       await wait(10000)
     } catch (e) {
       return
@@ -30,7 +30,7 @@ describe('Getters', () => {
   beforeEach(() => {
     events = []
   })
-    
+
 
   it('getByOwnerId: sends result through eventBus', async () => {
     expect.assertions(2)

@@ -27,7 +27,7 @@ describe('Library configuration', () => {
 
       try {
         // @ts-expect-error
-        service = Service.getInstance(null, true)
+        service = Service.createInstance(null)
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', 'Data is missing: authDetails.')
@@ -38,7 +38,7 @@ describe('Library configuration', () => {
 
       try {
         // @ts-expect-error
-        service = Service.getInstance('string', true)
+        service = Service.createInstance('string')
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', TEXT.errors.validation.typeOfObject)
@@ -49,7 +49,7 @@ describe('Library configuration', () => {
 
       try {
         // @ts-expect-error
-        Service.getInstance('string', 'string')
+        Service.createInstance('string', 'string')
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', TEXT.errors.validation.typeOfObject)
@@ -61,7 +61,7 @@ describe('Library configuration', () => {
 
       try {
         // @ts-expect-error
-        service = Service.getInstance({})
+        service = Service.createInstance({})
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', TEXT.errors.validation.emptyObject)
@@ -71,7 +71,7 @@ describe('Library configuration', () => {
       expect.assertions(2)
 
       try {
-        Service.getInstance({
+        Service.createInstance({
           // @ts-expect-error
           key1: '1',
           key2: '1',
@@ -91,7 +91,7 @@ describe('Library configuration', () => {
 
       try {
         // @ts-expect-error
-        Service.getInstance({ key1: '1' }, true)
+        Service.createInstance({ key1: '1' })
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', `${TEXT.errors.validation.unknownKeys}key1.`)
@@ -102,7 +102,7 @@ describe('Library configuration', () => {
 
       try {
         // @ts-expect-error
-        Service.getInstance({ debug: '1' })
+        Service.createInstance({ debug: '1' })
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
         expect(error).toHaveProperty('message', makeString(TEXT.errors.validation.wrongValueType, ['debug', 'number']))
@@ -113,7 +113,7 @@ describe('Library configuration', () => {
 
       try {
         // @ts-expect-error
-        Service.getInstance({ debug: 5 })
+        Service.createInstance({ debug: 5 })
       } catch (error) {
         expect(error).toBeInstanceOf(TypeError)
 
@@ -129,7 +129,7 @@ describe('Library configuration', () => {
   describe('correct settings:', () => {
     it('runs without settings (auth is always required)', async () => {
       try {
-        service = Service.getInstance({ authDetails })
+        service = Service.createInstance({ authDetails })
         expect(is(Object, service)).toBe(true)
       } catch (err) {
         log(err)
@@ -148,7 +148,7 @@ describe('Library configuration', () => {
       }
 
       try {
-        service = Service.getInstance({ ...settings, authDetails }, true)
+        service = Service.createInstance({ ...settings, authDetails })
 
         const compare = checkSettings(service.getSettings())
 
