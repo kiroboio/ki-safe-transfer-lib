@@ -28,7 +28,8 @@ import {
   EstimatedFee,
   BuyKiroWithEthRequest,
   CreateInstanceOptions,
-  OnlineNetworkResults,
+  BtcNetworkItem,
+  EthNetworkItem,
 } from './types'
 import {
   validateOptions,
@@ -58,6 +59,8 @@ import { isNil, join, assoc, filter, isEmpty } from 'ramda'
 import { TEXT } from './data'
 import { ERRORS, MESSAGES } from './text'
 
+let currency: Currencies
+
 class Service extends Connect {
   private static instance: Service
 
@@ -71,6 +74,8 @@ class Service extends Connect {
   // create new
   public static createInstance(props: ConnectProps, options?: CreateInstanceOptions): Service {
     Service.instance = new Service(props as ConnectProps, options)
+
+    currency = props.currency ?? Currencies.Bitcoin
 
     return Service.instance
   }
@@ -103,7 +108,9 @@ class Service extends Connect {
    * ```
    * -
    */
-  public async getOnlineNetworks(options?: QueryOptions): Promise<Maybe<OnlineNetworkResults>> {
+  public async getOnlineNetworks(
+    options?: QueryOptions,
+  ): Promise<Maybe<Results<(typeof currency extends Currencies.Bitcoin ? BtcNetworkItem : EthNetworkItem)[]>>> {
 
     /** validate options, if present */
     try {
@@ -119,7 +126,7 @@ class Service extends Connect {
       throw makePropsResponseError(err)
     }
 
-    let response: OnlineNetworkResults
+    let response: Results<(typeof currency extends Currencies.Bitcoin ? BtcNetworkItem : EthNetworkItem)[]>
 
     /** make request */
     try {
