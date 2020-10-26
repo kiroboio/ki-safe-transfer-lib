@@ -1,4 +1,5 @@
-import { DebugLevels, Currencies, Networks, Responses, Watch, EventTypes, QueryOptions, BuyKiroWithEthRequest } from '.'
+import { DebugLevels, Currencies, Networks, Responses, Watch, EventTypes, 
+  QueryOptions, BuyKiroWithEthRequest, EthTransferRequest } from '.'
 import { RetrieveRequest } from './retrieve'
 import { SendRequest } from './send'
 import { CollectRequest } from './collect'
@@ -41,7 +42,7 @@ interface ApiService {
   find: (arg0?: unknown) => AnyValue
   get: (arg0: unknown) => AnyValue
   create: (
-    arg0: Record<string, unknown> | RetrieveRequest | SendRequest | CollectRequest | BuyKiroWithEthRequest,
+    arg0: Record<string, unknown> | RetrieveRequest | SendRequest | CollectRequest | BuyKiroWithEthRequest | EthTransferRequest,
   ) => AnyValue
   on: (arg0: string, arg1: (arg2: AnyValue) => AnyValue) => AnyValue
 }
