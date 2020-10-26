@@ -12,7 +12,7 @@ enum Endpoints {
   KiroPrice = 'kiroPrice',
   EstimateFees = 'estimateFees',
   Balance = 'balance',
-  KiroBuy = 'kiroBuy'
+  KiroBuy = 'kiroBuy',
 }
 
 // who the service should respond from methods:
@@ -55,7 +55,8 @@ enum EventTypes {
   GET_KIRO_PRICE = 'service_get_kiro_price',
   ESTIMATE_FEES = 'service_estimate_fees',
   GET_BALANCE = 'service_get_balance',
-  BUY_KIRO = 'service_buy_kiro'
+  BUY_KIRO = 'service_buy_kiro',
+  GET_TRANSFERS = 'service_get_transfers',
 }
 
 enum Networks {

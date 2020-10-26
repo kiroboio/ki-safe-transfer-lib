@@ -1228,6 +1228,63 @@ class Service extends Connect {
     this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getBalance']))
     this._useEventBus(EventTypes.GET_BALANCE, response)
   }
+
+  public async getTransfers(address: string, options?: QueryOptions): Promise<Maybe<Transfer>> {
+    this._logTechnical(makeString(MESSAGES.technical.running, ['getTransfers']))
+
+    /** validate props */
+    try {
+      this._logTechnical(makeString(MESSAGES.technical.checkingProps, ['getTransfers']))
+
+      if (isNil(address) || isEmpty(address)) throw new Error(TEXT.errors.validation.missingArgument)
+
+      // validate address
+      if (!validateAddress({ address, currency: this._currency, networkType: this._network }))
+        throw new TypeError('Invalid address in "to".')
+
+      /** validate options, if present */
+      if (options) {
+        this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['getTransfers', 'options']))
+        validateOptions(options, 'getTransfers')
+      }
+    } catch (err) {
+
+      /** log error */
+      this._logError(makeString(ERRORS.service.gotError, ['getTransfers', 'validation']), err)
+
+      /** throw appropriate error */
+      throw makePropsResponseError(err)
+    }
+
+    let response: Transfer
+
+    /** make request */
+    try {
+      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getTransfers']))
+      response = await this._transfers.find({
+        query: {
+          address,
+          ...makeOptions(options, this._watch),
+        },
+      })
+      this._log(makeString(MESSAGES.technical.gotResponse, ['getTransfers']), response)
+    } catch (err) {
+
+      /** log error */
+      this._logApiError(makeString(ERRORS.service.gotError, ['getTransfers', 'request']), err)
+
+      /** throw appropriate error */
+      throw makeApiResponseError(err)
+    }
+
+    /** return the results */
+    this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getTransfers', 'return']))
+
+    if (shouldReturnDirect(options, this._respondAs)) return response
+
+    this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getTransfers']))
+    this._useEventBus(EventTypes.GET_TRANSFERS, response)
+  }
 }
 
 export { Service }
