@@ -58,6 +58,7 @@ enum EventTypes {
   GET_BALANCE = 'service_get_balance',
   BUY_KIRO = 'service_buy_kiro',
   ETH_TRANSFER_REQUEST = 'eth_transfer_request',
+  GET_TRANSFERS = 'service_get_transfers',
 }
 
 enum Networks {
