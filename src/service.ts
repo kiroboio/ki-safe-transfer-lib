@@ -1267,7 +1267,7 @@ class Service extends Connect {
     try {
       this._logTechnical(makeString(MESSAGES.technical.requestingData, ['ethTransferRequest']))
 
-      response = await this._ethTransferRequest.get(request)
+      response = await this._ethTransferRequest.create(request)
 
       this._log(makeString(MESSAGES.technical.gotResponse, ['ethTransferRequest']), response)
     } catch (err) {
