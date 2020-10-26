@@ -1,7 +1,6 @@
 import { Connect } from './connect'
 import {
   Results,
-  NetworkItem,
   EventTypes,
   QueryOptions,
   CollectRequest,
@@ -28,6 +27,8 @@ import {
   Balance,
   EstimatedFee,
   BuyKiroWithEthRequest,
+  CreateInstanceOptions,
+  OnlineNetworkResults,
 } from './types'
 import {
   validateOptions,
@@ -54,19 +55,23 @@ import {
   changeType,
 } from './tools'
 import { isNil, join, assoc, filter, isEmpty } from 'ramda'
-import { TEXT, } from './data'
+import { TEXT } from './data'
 import { ERRORS, MESSAGES } from './text'
 
 class Service extends Connect {
   private static instance: Service
 
-  public static getInstance(props?: ConnectProps, replace = false, url?: string, withAuth = false): Service {
-    if (replace) {
-      this.destroy()
-    }
+  // get copy of the instance
+  public static getInstance(replace = false): Maybe<Service> {
+    if (replace) this.destroy()
 
+    return Service.instance
+  }
+
+  // create new
+  public static createInstance(props: ConnectProps, options?: CreateInstanceOptions): Service {
     if (!Service.instance) {
-      Service.instance = new Service(props as ConnectProps, url, withAuth)
+      Service.instance = new Service(props as ConnectProps, options)
     } else if (props) {
       throw TypeError('Library already initiated: props should be null or undefined')
     }
@@ -80,11 +85,12 @@ class Service extends Connect {
     delete changeType<AnyValue>(Service)?.instance
   }
 
-  private constructor(props: ConnectProps, url?: string, withAuth?: boolean) {
-    super(props, url, withAuth)
+  private constructor(props: ConnectProps, options: Maybe<CreateInstanceOptions>) {
+    super(props, options)
   }
 
   /**
+   *
    * Function to get the list of networks with online status for the API
    *
    * @param [QueryOptions] [options] - optional paging options to modify
@@ -101,7 +107,7 @@ class Service extends Connect {
    * ```
    * -
    */
-  public async getOnlineNetworks(options?: QueryOptions): Promise<Maybe<Results<NetworkItem[]>>> {
+  public async getOnlineNetworks(options?: QueryOptions): Promise<Maybe<OnlineNetworkResults>> {
 
     /** validate options, if present */
     try {
@@ -117,7 +123,7 @@ class Service extends Connect {
       throw makePropsResponseError(err)
     }
 
-    let response: Results<NetworkItem[]>
+    let response: OnlineNetworkResults
 
     /** make request */
     try {

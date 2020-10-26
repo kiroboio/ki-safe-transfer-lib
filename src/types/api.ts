@@ -1,3 +1,5 @@
+import { BtcNetworkItem, EthNetworkItem } from '.'
+
 /**
  * Base interface for Results, providing the pagination details
  *
@@ -56,23 +58,10 @@ interface QueryOptions extends RequestOptions {
   skip?: number
 }
 
-/**
- * Describes the network details
- *
- * @interface
- * @name NetworkItem
- */
-interface NetworkItem {
-  height: number
-  online: boolean
-  netId: string
-  timestamp: number
-  fee: number
-  updatedAt: string
-}
-
 interface Address {
   address: string
 }
 
-export { Address, NetworkItem, QueryOptions, Results, Paging }
+type OnlineNetworkResults = Results<BtcNetworkItem | EthNetworkItem>
+
+export type { Address, QueryOptions, Results, Paging, OnlineNetworkResults }

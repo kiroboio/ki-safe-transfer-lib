@@ -1,8 +1,7 @@
-import { DebugLevels, Currencies, Networks, Responses, Watch, EventTypes, QueryOptions } from '.'
+import { DebugLevels, Currencies, Networks, Responses, Watch, EventTypes, QueryOptions, BuyKiroWithEthRequest } from '.'
 import { RetrieveRequest } from './retrieve'
 import { SendRequest } from './send'
 import { CollectRequest } from './collect'
-import { BuyKiroWithEthRequest } from './eth'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyValue = any
@@ -127,7 +126,13 @@ interface TransferFees {
   }
 }
 
+interface CreateInstanceOptions {
+  url?: string
+  withAuth?: boolean
+}
+
 export {
+  CreateInstanceOptions,
   AnyValue,
   Either,
   Maybe,

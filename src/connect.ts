@@ -37,6 +37,8 @@ import {
   Currencies,
   AnyValue,
   Networks,
+  CreateInstanceOptions,
+  Maybe,
 } from './types'
 
 import { apiUrl as apiUrlFromConfig, version, endpoints, connectionTriesMax, connectionTimeout } from './config'
@@ -233,7 +235,7 @@ class Connect extends Base {
 
   protected _manuallyDisconnected = false
 
-  constructor(props: ConnectProps, url?: string, withAuth?: boolean) {
+  constructor(props: ConnectProps, options: Maybe<CreateInstanceOptions>) {
     super(debugLevelSelector(props?.debug))
 
     this._logTechnical('Service (connect > constructor) sent \'debug\' setting to super, validating props')
@@ -262,10 +264,10 @@ class Connect extends Base {
     this._logTechnical('Service is configuring connection...')
 
     // if authentication process is required for external url, set it globally
-    if (withAuth && url) apiUrl = url
+    if (options?.withAuth && options?.url) apiUrl = options?.url
 
     // choose url to use
-    this._socket = io.connect(url || apiUrl) as never
+    this._socket = io.connect(options?.url || apiUrl) as never
 
     this._socket.on('encrypt', (publicKey: string) => {
       if (typeof window !== 'undefined') {
@@ -311,7 +313,7 @@ class Connect extends Base {
     }
 
     // configure if built-in url
-    if (url && !withAuth) this._connect = connect
+    if (options?.url && !options?.withAuth) this._connect = connect
     else this._connect = connect.configure(auth({ storageKey: 'auth', storage: new safeStorage() }))
 
     // connect/disconnect event processes
@@ -334,7 +336,7 @@ class Connect extends Base {
           this._useEventBus(EventTypes.CONNECT, true)
 
           // if  custom url is not provided
-          if (!url || withAuth) this._runAuth()
+          if (!options?.url || options?.withAuth) this._runAuth()
         } else {
           this._logTechnical(MESSAGES.technical.notAllowed)
 
@@ -352,7 +354,7 @@ class Connect extends Base {
                 this._manuallyDisconnected = false
 
                 // if  custom url is not provided
-                if (!url || withAuth) this._runAuth()
+                if (!options?.url || options?.withAuth) this._runAuth()
               }, connectionTimeout * 1000)
             }
           }
@@ -644,7 +646,6 @@ class Connect extends Base {
    * @returns string
    */
   private _makeEndpointPath = (endpoint: Endpoints): string => {
-
     this._logTechnical(makeString(MESSAGES.technical.endpoint, ['makeEndpointPath']), endpoint)
 
     const currency = endpoint.startsWith('kiro') ? 'eth' : this._currency

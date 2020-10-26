@@ -19,4 +19,9 @@ export * from './error'
 
 export * from './transfer'
 
+export * from './tokens'
+
+export * from './btc'
+
 export * from './eth'
+
