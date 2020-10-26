@@ -24,4 +24,27 @@ interface EthNetworkItem {
   contracts: Record<string, Contract>
 }
 
-export type { EthNetworkItem, Contract }
+interface BroadcastConfirmation {
+  broadcasted: number
+  confirmed: number
+  txid: string
+}
+interface EthTransfer {
+  collect: BroadcastConfirmation
+  createdAt: string
+  expires: {
+    at: string
+  }
+  fees: string
+  from: string
+  id: string
+  retrieve: BroadcastConfirmation
+  salt: string
+  secretHash: string
+  state: string
+  to: string
+  updatedAt: string
+  value: string
+}
+
+export type { EthNetworkItem, Contract, BroadcastConfirmation, EthTransfer }

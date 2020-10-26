@@ -33,6 +33,7 @@ import {
   EthTransferRequest,
   EthTransferResponse,
   TxHash,
+  EthTransfer,
 } from './types'
 import {
   validateOptions,
@@ -1288,7 +1289,7 @@ class Service extends Connect {
     this._useEventBus(EventTypes.ETH_TRANSFER_REQUEST, response)
   }
 
-  public async getTransfers(address: string, options?: QueryOptions): Promise<Maybe<Transfer>> {
+  public async getTransfers(address: string, options?: QueryOptions): Promise<Maybe<EthTransfer>> {
     this._logTechnical(makeString(MESSAGES.technical.running, ['getTransfers']))
 
     /** validate props */
@@ -1315,7 +1316,7 @@ class Service extends Connect {
       throw makePropsResponseError(err)
     }
 
-    let response: Transfer
+    let response: EthTransfer
 
     /** make request */
     try {
