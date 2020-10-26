@@ -46,4 +46,36 @@ interface EstimatedFee {
   fees: { satoshi: number; address: string; tokens: string }
 }
 
-export type { Transfer, EstimateFeeRequest, EstimatedFee }
+interface EthTransferRequest {
+  from: string;
+  to: string;
+  value: string;
+  secretHash: string;
+  publicSalt: string;
+  privateSalt: string;
+}
+
+// {
+//   "from": "(string: address)",
+//   "to": "(string: address)",
+//   "value": "(string: number)",
+//   "secretHash": "(string: hex)",
+//   "publicSalt": "(string)",
+//   "createdAt": "(string: date)",
+//   "expiresAt": "(string: date)",
+//   "id": "(string: hex)",
+//   "fees": "(string: number)"
+// }
+interface EthTransferResponse {
+  from: string;
+  to: string;
+  value: string;
+  secretHash: string;
+  publicSalt: string;
+  createdAt: string;
+  expiresAt: string;
+  id: string;
+  fees: string;
+}
+
+export type { Transfer, EstimateFeeRequest, EstimatedFee, EthTransferRequest, EthTransferResponse }

@@ -30,6 +30,9 @@ import {
   CreateInstanceOptions,
   BtcNetworkItem,
   EthNetworkItem,
+  EthTransferRequest,
+  EthTransferResponse,
+
 } from './types'
 import {
   validateOptions,
@@ -43,6 +46,7 @@ import {
   validateAddress,
   validateEstimateFeesRequest,
   validateBuyKiroRequest,
+  validateEthTransferRequest,
 } from './validators'
 import {
   checkOwnerId,
@@ -1228,6 +1232,62 @@ class Service extends Connect {
     this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getBalance']))
     this._useEventBus(EventTypes.GET_BALANCE, response)
   }
+
+
+  public async ethTransferRequest(request: EthTransferRequest, options?: Omit<RequestOptions, 'watch'>): Promise<Maybe<EthTransferResponse>>
+  {
+    this._logTechnical(makeString(MESSAGES.technical.running, ['ethTrasferRequest']))
+
+    /** validate props */
+    try {
+      this._logTechnical(makeString(MESSAGES.technical.checkingProps, ['ethTransferRequest']))
+
+      if (isNil(request)) throw new Error(TEXT.errors.validation.missingArgument)
+
+      validateObject(request, 'request')
+      validateEthTransferRequest(request, 'request', 'ethTransferRequest')
+
+      /** validate options, if present */
+      if (options) {
+        this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['ethTransferRequest', 'options']))
+        validateOptions(options, 'ethTransferRequest')
+      }
+    } catch (err) {
+
+      /** log error */
+      this._logError(makeString(ERRORS.service.gotError, ['ethTransferRequest', 'validation']), err)
+
+      /** throw appropriate error */
+      throw makePropsResponseError(err)
+    }
+
+    let response: EthTransferResponse
+
+    /** make request */
+    try {
+      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['ethTransferRequest']))
+
+      response = await this._estimateFees.get(request)
+
+      this._log(makeString(MESSAGES.technical.gotResponse, ['ethTransferRequest']), response)
+    } catch (err) {
+
+      /** log error */
+      this._logApiError(makeString(ERRORS.service.gotError, ['ethTransferRequest', 'request']), err)
+
+      /** throw appropriate error */
+      throw makeApiResponseError(err)
+    }
+
+    /** return the results */
+    this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['ethTransferRequest', 'return']))
+
+    if (shouldReturnDirect(options, this._respondAs)) return response
+
+    this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['ethTransferRequest']))
+    this._useEventBus(EventTypes.ETH_TRANSFER_REQUEST, response)
+  }
+
 }
 
 export { Service }

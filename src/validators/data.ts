@@ -4,7 +4,8 @@ import { DataSpec, MinMax, RetrieveRequest } from '..'
 import { changeType, makeString } from '../tools'
 import { makeStringFromArray } from '../tools/string'
 import { ERRORS } from '../text'
-import { BuyKiroWithEthRequest, EstimateFeeRequest } from 'src/types'
+import { BuyKiroWithEthRequest, EstimateFeeRequest, EthTransferRequest } from 'src/types'
+import { isHex } from 'web3-utils'
 
 function isMin(value: number, min: number): boolean {
   return value >= min
@@ -219,4 +220,40 @@ function validateBuyKiroRequest(data: Partial<BuyKiroWithEthRequest>, argName: s
     throw new TypeError(makeString(ERRORS.validation.wrongTypeKey, ['eth.raw', argName, fnName, 'string']))
 }
 
-export { validateRetrieve, validateSend, validateEstimateFeesRequest, validateBuyKiroRequest }
+// {
+//   "from": "(string: address)",
+//   "to": "(string: address)",
+//   "value":"(string: whole number)",
+//   "secretHash": "(string: 64 char hex starting with 0x - total length 66)",
+//   "publicSalt":"(string: min length 20)",
+//   "privateSalt":"(string: min length 20)"
+//   }
+function validateEthTransferRequest(data: EthTransferRequest, argName: string, fnName: string): void {
+  const allowedKeys = ['from', 'to', 'value', 'secretHash', 'publicSalt', 'privateSalt']
+
+  const checkFn = (key: string): void => {
+    if (!allowedKeys.includes(key)) throw new Error(makeString(ERRORS.validation.extraKey, [key, argName, fnName]))
+  }
+
+  forEach(checkFn, Object.keys(data))
+
+  ;(allowedKeys as (keyof EthTransferRequest)[]).forEach(key => {
+    if (!data[key]) throw new Error(makeString(ERRORS.validation.missingKey, [key, argName, fnName]))
+  })
+
+  ;(Object.keys(data) as (keyof EthTransferRequest)[]).forEach(key => {
+    if (not(is(String, data[key]))) throw new TypeError(makeString(ERRORS.validation.wrongTypeKey, [key, argName, fnName, 'string']))
+  })
+
+  if (!isHex(data.secretHash) || data.secretHash.length !== 66) 
+    throw new Error(makeString(ERRORS.validation.wrongTypeArgument, ['secretHash', argName, fnName, 'not a valid 66 char hex']))
+  
+  if (data.publicSalt.length < 20)
+    throw new Error(makeString(ERRORS.validation.wrongTypeArgument, ['publicSalt', argName, fnName, 'public salt too short']))
+  
+  if (data.privateSalt.length < 20)
+    throw new Error(makeString(ERRORS.validation.wrongTypeArgument, ['privateSalt', argName, fnName, 'private salt too short']))
+ 
+}
+
+export { validateRetrieve, validateSend, validateEstimateFeesRequest, validateBuyKiroRequest, validateEthTransferRequest }

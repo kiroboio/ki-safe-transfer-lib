@@ -233,6 +233,8 @@ class Connect extends Base {
 
   protected _kiroBuy: ApiService
 
+  protected _ethTransferRequest: ApiService
+
   protected _manuallyDisconnected = false
 
   constructor(props: ConnectProps, options: Maybe<CreateInstanceOptions>) {
@@ -390,6 +392,7 @@ class Connect extends Base {
     this._estimateFees = this._getService(Endpoints.EstimateFees)
     this._balance = this._getService(Endpoints.Balance)
     this._kiroBuy = this._getService(Endpoints.KiroBuy)
+    this._ethTransferRequest = this._getService(Endpoints.EthTransferRequest)
 
     this._logTechnical(makeString(MESSAGES.technical.serviceIs, ['setting up event listeners...']))
 
