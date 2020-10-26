@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * This is a sample file for the 'client' runner. Make adjustments, rename to 'client.ts' and
  * run it with 'npm run dev'
@@ -20,15 +21,12 @@ function eventBus(event: Event): void {
 }
 
 // configure Kirobo API service library
-const service = Service.createInstance(
-  {
-    debug: DebugLevels.QUIET, // minimize the console logging
-    respondAs: Responses.Callback, // send feedback and events through callback function, i.e. eventBus
-    eventBus, // providing the function for eventBus
-    authDetails, // authentication details
-  },
-  true, //  replace previous instances
-)
+const service = Service.createInstance({
+  debug: DebugLevels.QUIET, // minimize the console logging
+  respondAs: Responses.Callback, // send feedback and events through callback function, i.e. eventBus
+  eventBus, // providing the function for eventBus
+  authDetails, // authentication details
+})
 
 // main function
 async function run(): Promise<void> {
