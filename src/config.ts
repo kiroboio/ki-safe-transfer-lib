@@ -21,6 +21,7 @@ const endpoints: Record<string, string> = {
   kiroBuy: 'kiro/buy',
   balance: 'balance',
   estimateFees: 'transfer/fees',
+  ethTransferRequest: 'transfer/request',
 } as const
 
 export { version, apiUrl, endpoints, connectionTriesMax, connectionTimeout }
