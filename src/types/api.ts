@@ -68,4 +68,8 @@ interface TxHash {
   txHash: string
 }
 
-export type { Address, TxHash, QueryOptions, Results, Paging, OnlineNetworkResults }
+interface Txid {
+  txid: string
+}
+
+export type { Txid, Address, TxHash, QueryOptions, Results, Paging, OnlineNetworkResults }

@@ -34,6 +34,7 @@ import {
   EthTransferResponse,
   TxHash,
   EthTransfer,
+  Txid,
 } from './types'
 import {
   validateOptions,
@@ -1401,7 +1402,7 @@ class Service extends Connect {
     }
   }
 
-  public async follow(txid: string, options?: Omit<QueryOptions, 'limit' | 'skip'>): Promise<Maybe<TxHash>> {
+  public async follow(txid: string, options?: Omit<QueryOptions, 'limit' | 'skip'>): Promise<Maybe<Txid>> {
     this._logTechnical(makeString(MESSAGES.technical.running, ['follow']))
 
     /** validate props */
@@ -1422,7 +1423,7 @@ class Service extends Connect {
       throw makePropsResponseError(err)
     }
 
-    let response
+    let response: Txid
 
     /** make request */
     try {

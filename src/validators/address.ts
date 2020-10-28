@@ -1,7 +1,6 @@
 import validator from 'multicoin-address-validator'
 import { is } from 'ramda'
 
-
 interface Props {
   address: string
   currency: string
@@ -32,5 +31,7 @@ interface Props {
  * -
  */
 export function validateAddress({ address, currency, networkType }: Props): boolean {
-
-  return is(String,address) ? validator.validate(address, currency, networkType==='main'?'prod':networkType) : false }
+  return is(String, address)
+    ? (validator.validate(address, currency, networkType === 'main' ? 'prod' : networkType) as boolean)
+    : false
+}

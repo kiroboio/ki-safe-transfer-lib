@@ -22,7 +22,7 @@ const endpoints: Record<string, string> = {
   balance: 'balance',
   estimateFees: 'transfer/fees',
   ethTransferRequest: 'transfer/request',
-  follow: 'follow',
+  follow: 'action/follow',
 } as const
 
 export { version, apiUrl, endpoints, connectionTriesMax, connectionTimeout }
