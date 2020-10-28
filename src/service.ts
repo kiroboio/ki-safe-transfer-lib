@@ -48,6 +48,7 @@ import {
   validateEstimateFeesRequest,
   validateBuyKiroRequest,
   validateEthTransferRequest,
+  validateHex,
 } from './validators'
 import {
   checkOwnerId,
@@ -1395,6 +1396,57 @@ class Service extends Connect {
 
       this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['collectEth']))
       this._useEventBus(EventTypes.COLLECT_TRANSACTION, response)
+    } catch (err) {
+      throw makeReturnError(err.message, err)
+    }
+  }
+
+  public async follow(txid: string, options?: Omit<QueryOptions, 'limit' | 'skip'>): Promise<Maybe<TxHash>> {
+    this._logTechnical(makeString(MESSAGES.technical.running, ['follow']))
+
+    /** validate props */
+    try {
+      this._logTechnical(makeString(MESSAGES.technical.checkingProps, ['follow']))
+      validateHex(txid, 'txid', 'follow')
+
+      /** validate options, if present */
+      if (options) {
+        validateOptions(options, 'follow')
+      }
+    } catch (err) {
+
+      /** log error */
+      this._logError(makeString(ERRORS.service.gotError, ['follow', 'validation']), err)
+
+      /** throw appropriate error */
+      throw makePropsResponseError(err)
+    }
+
+    let response
+
+    /** make request */
+    try {
+      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['follow']))
+      response = await this._follow.create({ txid })
+      this._log(makeString(MESSAGES.technical.gotResponse, ['follow']), response)
+    } catch (err) {
+
+      /** log error */
+      this._logApiError(makeString(ERRORS.service.gotError, ['follow', 'request']), err)
+
+      /** throw appropriate error */
+      throw makeApiResponseError(err)
+    }
+
+    try {
+
+      /** return the results */
+      this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['follow', 'return']))
+
+      if (shouldReturnDirect(options, this._respondAs)) return response
+
+      this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['follow']))
+      this._useEventBus(EventTypes.FOLLOW, response)
     } catch (err) {
       throw makeReturnError(err.message, err)
     }

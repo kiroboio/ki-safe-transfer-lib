@@ -235,6 +235,8 @@ class Connect extends Base {
 
   protected _ethTransferRequest: ApiService
 
+  protected _follow: ApiService
+
   protected _manuallyDisconnected = false
 
   constructor(props: ConnectProps, options: Maybe<CreateInstanceOptions>) {
@@ -300,7 +302,7 @@ class Connect extends Base {
 
         const bytes = crypto.AES.encrypt(cipherText, this.key)
 
-        return JSON.parse(bytes.toString(crypto.enc.Utf8))
+        return JSON.parse(bytes.toString(Type(crypto.enc.Utf8)))
       }
 
       async setItem(key: string, value: AnyValue) {
@@ -393,6 +395,7 @@ class Connect extends Base {
     this._balance = this._getService(Endpoints.Balance)
     this._kiroBuy = this._getService(Endpoints.KiroBuy)
     this._ethTransferRequest = this._getService(Endpoints.EthTransferRequest)
+    this._follow = this._getService(Endpoints.Follow)
 
     this._logTechnical(makeString(MESSAGES.technical.serviceIs, ['setting up event listeners...']))
 

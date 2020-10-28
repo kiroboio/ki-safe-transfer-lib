@@ -1,8 +1,8 @@
-import { isNil, keys, forEach } from 'ramda'
+import { isNil, keys, forEach, not } from 'ramda'
+import { isHex } from 'web3-utils'
 
 import { TEXT } from '../data'
 import { makeString, capitalize, Type } from '../tools'
-
 
 function validateObject(data: unknown, argName?: string): void {
   if (isNil(data)) throw new TypeError(TEXT.errors.validation.missingArgument)
@@ -17,7 +17,7 @@ function validateObject(data: unknown, argName?: string): void {
   if (typeof data === 'function') throw new TypeError(TEXT.errors.validation.noFunction)
 }
 
-function validateObjectWithStrings(params: Record<string,unknown>, paramName: string, method: string): void {
+function validateObjectWithStrings(params: Record<string, unknown>, paramName: string, method: string): void {
   if (!paramName || !method)
     throw new TypeError(
       makeString(TEXT.validation.cantBe, [
@@ -69,4 +69,23 @@ function validateObjectWithStrings(params: Record<string,unknown>, paramName: st
   forEach(fn, keys(data) as string[])
 }
 
-export { validateObjectWithStrings, validateObject }
+function validateHex(hex: string, paramName: string, method: string): void {
+  if (!paramName || !method)
+    throw new TypeError(
+      makeString(TEXT.validation.cantBe, [
+        paramName || 'paramName or method',
+        'empty for "validateHex" method',
+        'paramName: string, method: string',
+      ]),
+    )
+
+  if (isNil(hex))
+    throw new TypeError(
+      makeString(TEXT.validation.params, [paramName, method, 'missing or undefined/null', 'string (hex)']),
+    )
+
+  if (not(isHex(hex)))
+    throw new TypeError(makeString(TEXT.validation.params, [paramName, method, 'is not of hex format', 'string (hex)']))
+}
+
+export { validateObjectWithStrings, validateObject, validateHex }
