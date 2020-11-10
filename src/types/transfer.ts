@@ -47,12 +47,13 @@ interface EstimatedFee {
 }
 
 interface EthTransferRequest {
-  from: string;
-  to: string;
-  value: string;
-  secretHash: string;
-  publicSalt: string;
-  privateSalt: string;
+  from: string
+  to: string
+  value: string
+  secretHash: string
+  publicSalt: string
+  privateSalt: string
+  message?: string
 }
 
 // {
@@ -67,15 +68,15 @@ interface EthTransferRequest {
 //   "fees": "(string: number)"
 // }
 interface EthTransferResponse {
-  from: string;
-  to: string;
-  value: string;
-  secretHash: string;
-  publicSalt: string;
-  createdAt: string;
-  expiresAt: string;
-  id: string;
-  fees: string;
+  from: string
+  to: string
+  value: string
+  secretHash: string
+  publicSalt: string
+  createdAt: string
+  expiresAt: string
+  id: string
+  fees: string
 }
 
 export type { Transfer, EstimateFeeRequest, EstimatedFee, EthTransferRequest, EthTransferResponse }

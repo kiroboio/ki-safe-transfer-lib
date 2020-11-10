@@ -29,6 +29,7 @@ interface BroadcastConfirmation {
   confirmed: number
   txid: string
 }
+
 interface EthTransfer {
   collect: BroadcastConfirmation
   createdAt: string
@@ -38,6 +39,7 @@ interface EthTransfer {
   fees: string
   from: string
   id: string
+  message: string
   retrieve: BroadcastConfirmation
   salt: string
   secretHash: string
