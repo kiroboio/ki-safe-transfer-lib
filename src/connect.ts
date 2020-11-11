@@ -418,10 +418,15 @@ class Connect extends Base {
       this._useEventBus(EventTypes.UPDATED_RETRIEVABLE, payload, decrypt)
     })
 
+    this._transfers.on('created', (payload: Transfer) => {
+      this._useEventBus(EventTypes.UPDATED_RETRIEVABLE, payload, decrypt)
+    })
+
     // transfer removed
     this._transfers.on('removed', (payload: Transfer) => {
       this._useEventBus(EventTypes.REMOVED_RETRIEVABLE, payload, decrypt)
     })
+
 
     // new collectable has been created for the previously requested address
     this._inbox.on('created', (payload: Collectable) => {
