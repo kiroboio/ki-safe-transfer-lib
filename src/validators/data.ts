@@ -237,7 +237,7 @@ function validateEthTransferRequest(data: EthTransferRequest, argName: string, f
 
   forEach(checkFn, Object.keys(data))
   ;(allowedKeys as (keyof EthTransferRequest)[]).forEach((key) => {
-    if (!data[key]) throw new Error(makeString(ERRORS.validation.missingKey, [key, argName, fnName]))
+    if (!data[key] && key !== 'message') throw new Error(makeString(ERRORS.validation.missingKey, [key, argName, fnName]))
   })
   ;(Object.keys(data) as (keyof EthTransferRequest)[]).forEach((key) => {
     if (not(is(String, data[key])))
