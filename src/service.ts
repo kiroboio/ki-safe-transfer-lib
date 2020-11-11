@@ -1291,7 +1291,7 @@ class Service extends Connect {
     this._useEventBus(EventTypes.ETH_TRANSFER_REQUEST, response)
   }
 
-  public async getTransfers(address: string, options?: QueryOptions): Promise<Maybe<EthTransfer>> {
+  public async getTransfers(address: string, options?: QueryOptions): Promise<Maybe<Results<EthTransfer>>> {
     this._logTechnical(makeString(MESSAGES.technical.running, ['getTransfers']))
 
     /** validate props */
@@ -1318,7 +1318,7 @@ class Service extends Connect {
       throw makePropsResponseError(err)
     }
 
-    let response: EthTransfer
+    let response: Results<EthTransfer>
 
     /** make request */
     try {
