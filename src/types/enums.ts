@@ -32,7 +32,6 @@ enum Responses {
  * @name EventTypes
  */
 enum EventTypes {
-  FOLLOW = 'kirobo_service_follow',
   BUY_KIRO = 'kirobo_service_buy_kiro',
   COLLECT_TRANSACTION = 'kirobo_service_collect_transaction',
   CONNECT = 'kirobo_service_connect',
@@ -40,15 +39,16 @@ enum EventTypes {
   DISCONNECT = 'kirobo_service_disconnect',
   ESTIMATE_FEES = 'kirobo_service_estimate_fees',
   ETH_TRANSFER_REQUEST = 'kirobo_service_eth_transfer_request',
+  FOLLOW = 'kirobo_service_follow',
   GET_BALANCE = 'kirobo_service_get_balance',
   GET_BTC_TO_USD_RATE = 'kirobo_service_get_btc_to_usd_rate',
   GET_BTC_TO_USD_RATES = 'kirobo_service_get_btc_to_usd_rates',
   GET_BY_OWNER_ID = 'kirobo_service_get_by_owner_id',
   GET_COLLECTABLES = 'kirobo_service_get_collectables',
-  GET_IS_CONNECTED = 'kirobo_service_get_is_connected',
   GET_ETH_TO_USD_RATE = 'kirobo_service_get_eth_to_usd_rate',
   GET_ETH_TO_USD_RATES = 'kirobo_service_get_eth_to_usd_rates',
   GET_FRESH = 'kirobo_service_get_fresh',
+  GET_IS_CONNECTED = 'kirobo_service_get_is_connected',
   GET_KIRO_PRICE = 'kirobo_service_get_kiro_price',
   GET_KIRO_STATE = 'kirobo_service_get_kiro_state',
   GET_ONLINE_NETWORKS = 'kirobo_service_get_online_networks',
@@ -58,6 +58,7 @@ enum EventTypes {
   GET_TRANSFERS = 'kirobo_service_get_transfers',
   GET_USED = 'kirobo_service_get_used',
   GET_UTXOS = 'kirobo_service_get_utxos',
+  GET_STATUS = 'kirobo_service_get_status',
   REMOVED_COLLECTABLE = 'kirobo_service_removed_collectable',
   REMOVED_RETRIEVABLE = 'kirobo_service_removed_retrievable',
   RETRIEVE = 'kirobo_service_retrieve',

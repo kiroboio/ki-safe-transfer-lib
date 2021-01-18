@@ -1,13 +1,8 @@
 import { Connect } from './connect';
-import {
-  ConnectProps,
-  AnyValue,
-  Maybe,
-  InstanceOptions,
-} from './types';
-import {
-  Type,
-} from './tools';
+import { ConnectProps, AnyValue, Maybe, InstanceOptions, QueryOptions, Endpoints, EventTypes } from './types';
+import { makeOptions, makeString, Type } from './tools';
+import { validateOptions } from './validators/options';
+import { MESSAGES } from './text';
 
 class Service extends Connect {
   private static instance: Service;
@@ -56,44 +51,41 @@ class Service extends Connect {
     super(props, options);
   }
 
-  // public async getOnlineNetworks(
-  //   options?: QueryOptions,
-  // ): Promise<Maybe<Results<(typeof currency extends Currencies.Bitcoin ? BtcNetworkItem : EthNetworkItem)[]>>> {
-  //
-  //   /** validate options, if present */
-  //   try {
-  //     if (options) {
-  //       validateOptions(options, 'getOnlineNetworks')
-  //     }
-  //   } catch (err) {
-  //
-  //     /** log error */
-  //     this._logError('Service (getOnlineNetworks) caught [validation] error.', err)
-  //
-  //     /** throw appropriate error */
-  //     throw makePropsResponseError(err)
-  //   }
-  //
-  //   let response: Results<(typeof currency extends Currencies.Bitcoin ? BtcNetworkItem : EthNetworkItem)[]>
-  //
-  //   /** make request */
-  //   try {
-  //     response = await this._networks.find({
-  //       query: {
-  //         online: true,
-  //         ...makeOptions(options, this._watch),
-  //       },
-  //     })
-  //   } catch (err) {
-  //     throw makeReturnError(err.message, err)
-  //   }
-  //
-  //   /** return results */
-  //
-  //   if (shouldReturnDirect(options, this._respondAs)) return response
-  //
-  //   this._useEventBus(EventTypes.GET_ONLINE_NETWORKS, response)
-  // }
+  // TODO: add description
+  public async getOnlineNetworks(options?: QueryOptions) {
+    this._logTechnical(makeString(MESSAGES.technical.running, ['getOnlineNetworks']));
+
+    /** validate options, if present */
+    try {
+      if (options) {
+        validateOptions(options, 'getOnlineNetworks', true);
+      }
+    } catch (err) {
+      this._processValidationError(err, 'getOnlineNetworks');
+    }
+
+    /** make request */
+    try {
+      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getOnlineNetworks']));
+
+      const currencyNetwork = this.getCurrencyNetwork(options?.currency, options?.network);
+
+      const service = this._retrieveServiceOrMakeNew(currencyNetwork, Endpoints.Networks);
+
+      const response = await service.request.find({
+        query: {
+          online: true,
+          ...makeOptions(options, this._watch),
+        },
+      });
+
+      if (service.isNew) this._storeService(currencyNetwork, Endpoints.Networks, service.request);
+
+      this._returnResults(options, response, 'getOnlineNetworks', EventTypes.GET_ONLINE_NETWORKS);
+    } catch (err) {
+      this._processApiError(err, 'getOnlineNetworks');
+    }
+  }
 
   // TODO: merge with collectEth
   // public async collect(

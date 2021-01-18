@@ -639,6 +639,24 @@ class Connect extends Base {
     return;
   }
 
+  // TODO: add description
+  protected _retrieveServiceOrMakeNew(
+    currencyNetwork: { currency: Currencies; network: Networks },
+    endpoint: Endpoints,
+  ): RequestedService {
+    const service = findInServices(this._services, currencyNetwork, endpoint);
+
+    if (!!service) return { request: service, isNew: false };
+
+    return {
+      request: this._getService({
+        ...currencyNetwork,
+        endpoint,
+      }),
+      isNew: true,
+    };
+  }
+
   /*
    * Get status for network; response varies for different currencies
    *
@@ -679,28 +697,10 @@ class Connect extends Base {
         this._storeService(currencyNetwork, Endpoints.Networks, service.request);
       }
 
-      this._returnResults(options, response.data[0], 'getStatusFor', EventTypes.GET_ONLINE_NETWORKS);
+      this._returnResults(options, response.data[0], 'getStatusFor', EventTypes.GET_STATUS);
     } catch (err) {
       this._processApiError(err, 'getStatusFor');
     }
-  }
-
-  // TODO: add description
-  protected _retrieveServiceOrMakeNew(
-    currencyNetwork: { currency: Currencies; network: Networks },
-    endpoint: Endpoints,
-  ): RequestedService {
-    const service = findInServices(this._services, currencyNetwork, endpoint);
-
-    if (!!service) return { request: service, isNew: false };
-
-    return {
-      request: this._getService({
-        ...currencyNetwork,
-        endpoint,
-      }),
-      isNew: true,
-    };
   }
 
   /*
