@@ -1,70 +1,13 @@
 import { Connect } from './connect';
 import {
-  Results,
-  EventTypes,
-  QueryOptions,
-  CollectRequest,
-  Message,
-  Retrievable,
-  Collectable,
-  Utxo,
-  ExchangeRate,
-  GetRatesProps,
-  Address,
-  SendRequest,
-  Transfer,
-  RetrieveRequest,
-  RequestOptions,
   ConnectProps,
-  RatesSources,
-  RawTransaction,
-  Currencies,
-  KiroState,
-  KiroPrice,
-  EstimateFeeRequest,
   AnyValue,
   Maybe,
-  Balance,
-  EstimatedFee,
-  BuyKiroWithEthRequest,
   InstanceOptions,
-  BtcNetworkItem,
-  EthNetworkItem,
-  EthTransferRequest,
-  EthTransferResponse,
-  TxHash,
-  EthTransfer,
-  Txid,
 } from './types';
 import {
-  validateOptions,
-  validateObjectWithStrings,
-  // validateSend,
-  validateObject,
-  validatePropsAddresses,
-  validatePropsArray,
-  validatePropsString,
-  validateRetrieve,
-  validateAddress,
-  validateEstimateFeesRequest,
-  validateBuyKiroRequest,
-  validateEthTransferRequest,
-  validateHex,
-} from './validators';
-import {
-  checkOwnerId,
-  flattenAddresses,
-  makeOptions,
-  makeString,
-  makePropsResponseError,
-  makeReturnError,
-  makeApiResponseError,
-  shouldReturnDirect,
   Type,
 } from './tools';
-import { isNil, join, assoc, filter, isEmpty } from 'ramda';
-import { TEXT } from './data';
-import { ERRORS, MESSAGES } from './text';
 
 class Service extends Connect {
   private static instance: Service;

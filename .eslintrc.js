@@ -35,10 +35,20 @@ module.exports = {
     'prettier',
   ],
   rules: {
+    'import/no-unused-modules': [1, { unusedExports: true }],
     'no-var': 'error',
+    'no-unused-vars': 'off',
     '@typescript-eslint/member-ordering': 'off',
     '@typescript-eslint/no-explicit-any': ['error', { ignoreRestArgs: false }],
     '@typescript-eslint/quotes': ['error', 'single', { avoidEscape: true, allowTemplateLiterals: true }],
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      {
+        vars: 'all',
+        args: 'all',
+        ignoreRestSiblings: false,
+      },
+    ],
     '@typescript-eslint/semi': ['off', null],
     'async-await/space-after-async': 2,
     'async-await/space-after-await': 2,

@@ -15,7 +15,6 @@ import {
 import { LogError, LogApiWarning, LogInfo, LogApiError } from './tools/log';
 import { authDetailsDefaults } from './defaults';
 import { version } from './config';
-import { makeString } from './tools';
 import { ERRORS } from './text';
 
 class Base {

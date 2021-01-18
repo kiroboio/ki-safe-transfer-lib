@@ -15,36 +15,29 @@ import {
   Type,
   makeOptions,
   makeApiResponseError,
-  makeReturnError,
   makePropsResponseError,
   shouldReturnDirect,
-  isDirect,
   buildEndpointPath,
 } from './tools';
-import { validateOptions, validateSettings } from './validators';
+import { validateOptions } from './validators';
 import {
   AuthDetails,
   ConnectProps,
-  QueryOptions,
   Status,
   NetworkTip,
   ApiService,
   Endpoints,
   EventTypes,
-  Collectable,
-  Transfer,
   RequestOptions,
   Results,
-  Currencies,
   AnyValue,
-  Networks,
   InstanceOptions,
   Maybe,
   Either,
   Responses,
 } from './types';
 
-import { apiUrl as apiUrlFromConfig, version, endpoints, connectionTriesMax, connectionTimeout } from './config';
+import { apiUrl as apiUrlFromConfig, connectionTriesMax, connectionTimeout } from './config';
 import { WARNINGS, ERRORS, MESSAGES } from './text';
 import { StorageWrapper } from '@feathersjs/authentication-client/lib/storage';
 import { MakeServiceParameters } from './types/fns';
@@ -530,7 +523,7 @@ class Connect extends Base {
       });
   }
 
-  private _authSocket(): Promise<AuthenticationResult | void> | undefined {
+  private _authSocket(): Either<Promise<Either<AuthenticationResult, void>>, undefined> {
     this._logTechnical(makeString(MESSAGES.technical.running, ['authSocket']));
 
     // if no lastConnect or it's been over 10 seconds since last time
@@ -560,6 +553,7 @@ class Connect extends Base {
       this._connectionCounter = connectionTriesMax + 1;
       this._logTechnical('Set lastConnect timestamp.');
       this._lastConnect = getTime();
+      return;
     }
     // }
   }
@@ -567,9 +561,10 @@ class Connect extends Base {
   private _onConnect(): void {
     this._log('Service (connect) is ON, requesting latest status...');
 
-    // this.getStatus().catch(err => {
-    //   this._logApiError('Service (onConnect) caught error when calling (getStatus).', err);
-    // });
+    if (this._globalNetwork && this._globalCurrency)
+      this.getStatusFor().catch(err => {
+        this._logApiError('Service (onConnect) caught error when calling (getStatus).', err);
+      });
 
     // TODO: which inbox? should it even be cached at all? which items to be cached?
     // this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['onConnect', 'refreshInbox']))
@@ -652,8 +647,8 @@ class Connect extends Base {
     });
   }
 
-  public async getStatusFor(options?: RequestOptions) {
-    this._logTechnical(makeString(MESSAGES.technical.running, ['getStatus']));
+  public async getStatusFor(options?: RequestOptions): Promise<Either<Status, void>> {
+    this._logTechnical(makeString(MESSAGES.technical.running, ['getStatusFor']));
 
     /** validate options, if present */
     try {
@@ -675,9 +670,6 @@ class Connect extends Base {
 
       const currencyNetwork = this.getCurrencyNetwork(options?.currency, options?.network);
 
-      // eslint-disable-next-line no-console
-      console.log(options, this._respondAs);
-
       response = await this._getService({ ...currencyNetwork, endpoint: Endpoints.Networks }).find({
         query: { netId: currencyNetwork.network, ...makeOptions(options, this._watch) },
       });
@@ -689,8 +681,6 @@ class Connect extends Base {
 
     /** return results */
     this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getStatusFor', 'return']));
-
-    this._logTechnical('>>>', { options, r: this._respondAs });
 
     if (shouldReturnDirect(options, this._respondAs)) return response.data[0];
 
