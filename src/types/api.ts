@@ -1,4 +1,4 @@
-import { BtcNetworkItem, EthNetworkItem } from '.';
+import { BtcNetworkItem, Currencies, EthNetworkItem, Networks } from '.';
 
 /**
  * Base interface for Results, providing the pagination details
@@ -45,6 +45,8 @@ export enum Watch {
 export interface RequestOptions {
   respondDirect?: boolean;
   watch?: Watch;
+  network?: Networks;
+  currency?: Currencies;
 }
 
 /**

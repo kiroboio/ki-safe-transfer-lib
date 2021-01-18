@@ -44,6 +44,9 @@ export function buildEndpointPath({ currency, network, endpoint }: MakeServicePa
  *
  */
 function shouldReturnDirect(options: QueryOptions | undefined, respondAs: Responses): boolean {
+  // eslint-disable-next-line no-console
+  console.log('>>>>', options, respondAs);
+
   if (options?.respondDirect) return true;
 
   if (!respondAs) return true;

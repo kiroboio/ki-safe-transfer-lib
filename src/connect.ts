@@ -41,6 +41,7 @@ import {
   InstanceOptions,
   Maybe,
   Either,
+  Responses,
 } from './types';
 
 import { apiUrl as apiUrlFromConfig, version, endpoints, connectionTriesMax, connectionTimeout } from './config';
@@ -245,17 +246,17 @@ class Connect extends Base {
   // protected _follow: ApiService
 
   constructor(props: ConnectProps, options: Maybe<InstanceOptions>) {
-    super(debugLevelSelector(props?.debug));
+    super(debugLevelSelector(options?.debug));
 
     this._logTechnical("Service (connect > constructor) sent 'debug' setting to super, validating props");
 
     // this._validateProps(props)
 
-    const { authDetails, eventBus, respondAs, watch } = props;
+    const { authDetails, eventBus, watch } = props;
 
     this._logTechnical('Service (connect > constructor) assigns instance variables...');
 
-    if (respondAs && respondAs !== this._respondAs) this._respondAs = respondAs;
+    this._respondAs = eventBus ? Responses.Callback : Responses.Direct;
 
     if (watch && watch !== this._watch) this._watch = watch;
 
@@ -267,6 +268,10 @@ class Connect extends Base {
 
     // setup
     this._logTechnical('Service is configuring connection...');
+
+    if (options?.globalCurrency) this._globalCurrency = options.globalCurrency;
+
+    if (options?.globalNetwork) this._globalNetwork = options.globalNetwork;
 
     // if authentication process is required for external url, set it globally
     if (options?.withAuth && options?.url) apiUrl = options?.url;
@@ -562,9 +567,9 @@ class Connect extends Base {
   private _onConnect(): void {
     this._log('Service (connect) is ON, requesting latest status...');
 
-    this.getStatus().catch(err => {
-      this._logApiError('Service (onConnect) caught error when calling (getStatus).', err);
-    });
+    // this.getStatus().catch(err => {
+    //   this._logApiError('Service (onConnect) caught error when calling (getStatus).', err);
+    // });
 
     // TODO: which inbox? should it even be cached at all? which items to be cached?
     // this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['onConnect', 'refreshInbox']))
@@ -647,27 +652,18 @@ class Connect extends Base {
     });
   }
 
-  public async getStatusFor(
-    args: { currency: Currencies; network: Networks },
-    options?: RequestOptions,
-  ): Promise<Either<Status, void>> {
-    // const result =
-  }
-
-  public async getStatus(options?: RequestOptions): Promise<Status | void> {
+  public async getStatusFor(options?: RequestOptions) {
     this._logTechnical(makeString(MESSAGES.technical.running, ['getStatus']));
 
     /** validate options, if present */
     try {
       if (options) {
-        this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['getStatus', 'options']));
-        validateOptions(options, 'getStatus', true);
+        this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['getStatusFor', 'options']));
+        validateOptions(options, 'getStatusFor', true);
       }
     } catch (err) {
-      /** log error */
-      this._logError(makeString(ERRORS.service.gotError, ['getStatus', 'validation']), err);
+      this._logError(makeString(ERRORS.service.gotError, ['getStatusFor', 'validation']), err);
 
-      /** throw appropriate error */
       throw makePropsResponseError(err);
     }
 
@@ -675,27 +671,76 @@ class Connect extends Base {
 
     /** make request */
     try {
-      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getStatus']));
-      // response = await this._networks.find({ query: { netId: this._network, ...makeOptions(options, this._watch) } })
-      // this._log(makeString(MESSAGES.technical.gotResponse, ['getStatus']), response)
-    } catch (err) {
-      /** log error */
-      this._logApiError(makeString(ERRORS.service.gotError, ['getStatus', 'request']), err);
+      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getStatusFor']));
 
-      /** throw appropriate error */
+      const currencyNetwork = this.getCurrencyNetwork(options?.currency, options?.network);
+
+      // eslint-disable-next-line no-console
+      console.log(options, this._respondAs);
+
+      response = await this._getService({ ...currencyNetwork, endpoint: Endpoints.Networks }).find({
+        query: { netId: currencyNetwork.network, ...makeOptions(options, this._watch) },
+      });
+    } catch (err) {
+      this._logApiError(makeString(ERRORS.service.gotError, ['getStatusFor', 'request']), err);
+
       throw makeApiResponseError(err);
     }
 
     /** return results */
+    this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getStatusFor', 'return']));
 
-    this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getStatus', 'return']));
+    this._logTechnical('>>>', { options, r: this._respondAs });
 
-    // if (shouldReturnDirect(options, this._respondAs)) return response.data[0]
+    if (shouldReturnDirect(options, this._respondAs)) return response.data[0];
 
-    this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getStatus']));
+    this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getStatusFor']));
 
-    // this._useEventBus(EventTypes.UPDATE_STATUS, response.data[0])
+    this._useEventBus(EventTypes.UPDATE_STATUS, response.data[0]);
   }
+
+  // public async getStatus(options?: RequestOptions): Promise<Status | void> {
+  //   this._logTechnical(makeString(MESSAGES.technical.running, ['getStatus']));
+  //
+  //   /** validate options, if present */
+  //   try {
+  //     if (options) {
+  //       this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['getStatus', 'options']));
+  //       validateOptions(options, 'getStatus', true);
+  //     }
+  //   } catch (err) {
+  //     /** log error */
+  //     this._logError(makeString(ERRORS.service.gotError, ['getStatus', 'validation']), err);
+  //
+  //     /** throw appropriate error */
+  //     throw makePropsResponseError(err);
+  //   }
+  //
+  //   let response: Results<NetworkTip>;
+  //
+  //   /** make request */
+  //   try {
+  //     this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getStatus']));
+  //     // response = await this._networks.find({ query: { netId: this._network, ...makeOptions(options, this._watch) } })
+  //     // this._log(makeString(MESSAGES.technical.gotResponse, ['getStatus']), response)
+  //   } catch (err) {
+  //     /** log error */
+  //     this._logApiError(makeString(ERRORS.service.gotError, ['getStatus', 'request']), err);
+  //
+  //     /** throw appropriate error */
+  //     throw makeApiResponseError(err);
+  //   }
+  //
+  //   /** return results */
+  //
+  //   this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getStatus', 'return']));
+  //
+  //   // if (shouldReturnDirect(options, this._respondAs)) return response.data[0]
+  //
+  //   this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getStatus']));
+  //
+  //   // this._useEventBus(EventTypes.UPDATE_STATUS, response.data[0])
+  // }
 
   // public getConnectionStatus(options?: Omit<QueryOptions, 'limit' | 'skip' | 'watch'>): boolean | void {
   //   this._logTechnical(makeString(MESSAGES.technical.running, ['getConnectionStatus']))

@@ -26,6 +26,7 @@ const ERRORS = {
     missingKey: 'Required key %1 in %2 argument of [%3] function is missing.',
     wrongTypeArgument: 'Type of argument (%1) in function [%2] is wrong - %3. Should be %4.',
     wrongTypeKey: 'Type of key %1 in function [%2] is wrong - %3. Should be %4.',
+    missingCurrencyNetwork: 'Currency and/or network is missing. Set globally on init or provide explicitly',
   },
 };
 

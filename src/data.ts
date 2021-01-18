@@ -81,6 +81,8 @@ export const optionsValidValues: ValidType = {
 export const optionsRequestValidValues: ValidType = {
   watch: { type: 'string' },
   respondDirect: { type: 'boolean' },
+  currency: { type: 'string' },
+  network: { type: 'string' },
 };
 
 export const SEND_DATA_SPEC: DataSpec = {

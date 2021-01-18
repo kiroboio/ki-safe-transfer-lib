@@ -10,13 +10,20 @@ import {
   AuthDetails,
   LastAddresses,
   Watch,
+  Maybe,
 } from './types';
 import { LogError, LogApiWarning, LogInfo, LogApiError } from './tools/log';
 import { authDetailsDefaults } from './defaults';
 import { version } from './config';
+import { makeString } from './tools';
+import { ERRORS } from './text';
 
 class Base {
   #debug: DebugLevels = DebugLevels.MUTE;
+
+  protected _globalCurrency: Maybe<Currencies>;
+
+  protected _globalNetwork: Maybe<Networks>;
 
   protected _eventBus: EventBus | undefined;
 
@@ -111,9 +118,19 @@ class Base {
       lastAddresses: this._lastAddresses,
       respondAs: this._respondAs,
       version: version,
+      globalCurrency: this._globalCurrency,
+      globalNetwork: this._globalNetwork,
     };
   }
 
+  protected getCurrencyNetwork(currency: Maybe<Currencies>, network: Maybe<Networks>) {
+    if (currency && network) return { currency, network };
+
+    if (this._globalCurrency && this._globalNetwork)
+      return { currency: this._globalCurrency, network: this._globalNetwork };
+
+    throw new Error(ERRORS.validation.missingCurrencyNetwork);
+  }
   // get last addresses
   // public getLastAddresses = (): LastAddresses => this._lastAddresses
 

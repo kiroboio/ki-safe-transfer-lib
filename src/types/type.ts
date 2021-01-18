@@ -27,16 +27,6 @@ interface AuthDetails {
 
 type Status = NetworkTip;
 
-interface ConnectProps {
-  debug?: DebugLevels;
-  currency?: Currencies;
-  network?: Networks;
-  authDetails: AuthDetails;
-  eventBus?: EventBus;
-  respondAs?: Responses;
-  watch?: Watch;
-}
-
 interface NetworkTip {
   height: number;
   online: boolean;
@@ -142,9 +132,18 @@ interface TransferFees {
   };
 }
 
+export interface ConnectProps {
+  authDetails: AuthDetails;
+  eventBus?: EventBus;
+  watch?: Watch;
+}
+
 export interface InstanceOptions {
   url?: string;
   withAuth?: boolean;
+  globalNetwork?: Networks;
+  globalCurrency?: Currencies;
+  debug?: DebugLevels;
 }
 
 export {
@@ -154,7 +153,6 @@ export {
   LastAddresses,
   ApiService,
   AuthDetails,
-  ConnectProps,
   Event,
   EventBus,
   NetworkTip,
