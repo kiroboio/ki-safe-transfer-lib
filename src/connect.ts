@@ -18,6 +18,7 @@ import {
   makePropsResponseError,
   shouldReturnDirect,
   buildEndpointPath,
+  makeReturnError,
 } from './tools';
 import { validateOptions } from './validators';
 import {
@@ -647,6 +648,14 @@ class Connect extends Base {
     });
   }
 
+  /*
+   * Get status for network; response varies for different currencies
+   *
+   * @params { RequestOptions } [options] - optional parameters
+   *
+   * @returns Status - only in case of direct response
+   *
+   */
   public async getStatusFor(options?: RequestOptions): Promise<Either<Status, void>> {
     this._logTechnical(makeString(MESSAGES.technical.running, ['getStatusFor']));
 
@@ -689,93 +698,51 @@ class Connect extends Base {
     this._useEventBus(EventTypes.UPDATE_STATUS, response.data[0]);
   }
 
-  // public async getStatus(options?: RequestOptions): Promise<Status | void> {
-  //   this._logTechnical(makeString(MESSAGES.technical.running, ['getStatus']));
-  //
-  //   /** validate options, if present */
-  //   try {
-  //     if (options) {
-  //       this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['getStatus', 'options']));
-  //       validateOptions(options, 'getStatus', true);
-  //     }
-  //   } catch (err) {
-  //     /** log error */
-  //     this._logError(makeString(ERRORS.service.gotError, ['getStatus', 'validation']), err);
-  //
-  //     /** throw appropriate error */
-  //     throw makePropsResponseError(err);
-  //   }
-  //
-  //   let response: Results<NetworkTip>;
-  //
-  //   /** make request */
-  //   try {
-  //     this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getStatus']));
-  //     // response = await this._networks.find({ query: { netId: this._network, ...makeOptions(options, this._watch) } })
-  //     // this._log(makeString(MESSAGES.technical.gotResponse, ['getStatus']), response)
-  //   } catch (err) {
-  //     /** log error */
-  //     this._logApiError(makeString(ERRORS.service.gotError, ['getStatus', 'request']), err);
-  //
-  //     /** throw appropriate error */
-  //     throw makeApiResponseError(err);
-  //   }
-  //
-  //   /** return results */
-  //
-  //   this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getStatus', 'return']));
-  //
-  //   // if (shouldReturnDirect(options, this._respondAs)) return response.data[0]
-  //
-  //   this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getStatus']));
-  //
-  //   // this._useEventBus(EventTypes.UPDATE_STATUS, response.data[0])
-  // }
+  /*
+   * Get ws connection status
+   *
+   * @params { Object } [options] - respondDirect option only
+   *
+   * @returns Boolean - only in case of direct response
+   *
+   */
+  public getIsConnected(options?: { respondDirect: boolean }): boolean | void {
+    this._logTechnical(makeString(MESSAGES.technical.running, ['getIsConnected']));
 
-  // public getConnectionStatus(options?: Omit<QueryOptions, 'limit' | 'skip' | 'watch'>): boolean | void {
-  //   this._logTechnical(makeString(MESSAGES.technical.running, ['getConnectionStatus']))
-  //
-  //   /** validate options, if present */
-  //   try {
-  //     if (options) {
-  //       this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['getConnectionStatus', 'options']))
-  //       validateOptions(options, 'getConnectionStatus')
-  //     }
-  //   } catch (err) {
-  //
-  //     /** log error */
-  //     this._logError(makeString(ERRORS.service.gotError, ['getConnectionStatus', 'validation']), err)
-  //
-  //     /** throw appropriate error */
-  //     throw makePropsResponseError(err)
-  //   }
-  //
-  //   let response: boolean
-  //
-  //   /** make request */
-  //   try {
-  //     this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getConnectionStatus']))
-  //     response = this.#connect.io.io.readyState === 'open'
-  //     this._log(makeString(MESSAGES.technical.gotResponse, ['getConnectionStatus']), response)
-  //   } catch (err) {
-  //
-  //     /** log error */
-  //     this._logApiError(makeString(ERRORS.service.gotError, ['getConnectionStatus', 'request']), err)
-  //
-  //     /** throw appropriate error */
-  //     throw makeReturnError(err.message, err)
-  //   }
-  //
-  //   /** return results */
-  //
-  //   this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getConnectionStatus', 'return']))
-  //
-  //   if (shouldReturnDirect(options, this._respondAs)) return response
-  //
-  //   this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getConnectionStatus']))
-  //
-  //   this._useEventBus(EventTypes.GET_CONNECTION_STATUS, response)
-  // }
+    /** validate options, if present */
+    try {
+      if (options) {
+        validateOptions(options, 'getIsConnected');
+      }
+    } catch (err) {
+      this._logError(makeString(ERRORS.service.gotError, ['getIsConnected', 'validation']), err);
+
+      throw makePropsResponseError(err);
+    }
+
+    let response: boolean;
+
+    /** make request */
+    try {
+      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getIsConnected']));
+      response = this.#connect.io.io.readyState === 'open';
+      this._log(makeString(MESSAGES.technical.gotResponse, ['getIsConnected']), response);
+    } catch (err) {
+      this._logApiError(makeString(ERRORS.service.gotError, ['getIsConnected', 'request']), err);
+
+      throw makeReturnError(err.message, err);
+    }
+
+    /** return results */
+
+    this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getIsConnected', 'return']));
+
+    if (shouldReturnDirect(options, this._respondAs)) return response;
+
+    this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getIsConnected']));
+
+    this._useEventBus(EventTypes.GET_IS_CONNECTED, response);
+  }
 
   // public connect(options?: Omit<QueryOptions, 'limit' | 'skip' | 'watch'>): boolean | void {
   //   this._logTechnical(makeString(MESSAGES.technical.running, ['connect']))
