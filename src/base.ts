@@ -1,4 +1,4 @@
-import { isEmpty } from 'ramda';
+import { assocPath, isEmpty } from 'ramda';
 import {
   DebugLevels,
   ApiError,
@@ -11,11 +11,15 @@ import {
   LastAddresses,
   Watch,
   Maybe,
+  ApiService,
+  Endpoints,
 } from './types';
 import { LogError, LogApiWarning, LogInfo, LogApiError } from './tools/log';
 import { authDetailsDefaults } from './defaults';
 import { version } from './config';
-import { ERRORS } from './text';
+import { ERRORS, MESSAGES } from './text';
+import { makeString } from './tools/other';
+import { findInServices } from './tools/connect';
 
 class Base {
   #debug: DebugLevels = DebugLevels.MUTE;
@@ -35,6 +39,8 @@ class Base {
   protected _auth: AuthDetails = authDetailsDefaults;
 
   protected _watch: Watch | undefined = undefined;
+
+  protected _services: Record<string, Record<string, Record<string, ApiService>>> = {};
 
   public isAuthed = false;
 
@@ -119,6 +125,7 @@ class Base {
       version: version,
       globalCurrency: this._globalCurrency,
       globalNetwork: this._globalNetwork,
+      storedServices: this._services,
     };
   }
 
@@ -130,6 +137,37 @@ class Base {
 
     throw new Error(ERRORS.validation.missingCurrencyNetwork);
   }
+
+  // TODO: add description
+  protected _storeService(
+    currencyNetwork: { currency: Currencies; network: Networks },
+    endpoint: Endpoints,
+    service: ApiService,
+  ) {
+    const isPresent = findInServices(this._services, currencyNetwork, endpoint);
+
+    if (!isPresent) {
+      this._logTechnical(
+        makeString(MESSAGES.technical.custom, [
+          'storeService',
+          `storing service ${currencyNetwork.currency}:${currencyNetwork.network}:${endpoint}`,
+        ]),
+      );
+
+      this._services = assocPath(
+        [currencyNetwork.currency, currencyNetwork.network, endpoint],
+        service,
+        this._services,
+      );
+    } else
+      this._logTechnical(
+        makeString(MESSAGES.technical.custom, [
+          'storeService',
+          `no need to store service ${currencyNetwork.currency}:${currencyNetwork.network}:${endpoint}`,
+        ]),
+      );
+  }
+
   // get last addresses
   // public getLastAddresses = (): LastAddresses => this._lastAddresses
 

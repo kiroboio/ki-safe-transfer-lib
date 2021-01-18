@@ -146,6 +146,13 @@ export interface InstanceOptions {
   debug?: DebugLevels;
 }
 
+export type ServicesCollection = Record<string, Record<string, Record<string, ApiService>>>;
+
+export interface RequestedService {
+  request: ApiService;
+  isNew: boolean;
+}
+
 export {
   AnyValue,
   Either,

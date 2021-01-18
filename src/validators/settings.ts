@@ -1,4 +1,4 @@
-import { TEXT, listOfSettingsKeys, typeOfSettingsKeys, valuesForSettings } from '../data';
+import { TEXT, listOfSettingsKeys, typeOfSettingsKeys } from '../data';
 import { validateObject, validateAuthDetails } from '.';
 import { makeString } from '../tools';
 
@@ -26,11 +26,6 @@ export const validateSettings = (settings: unknown): void => {
       const value = setObj[key] as string | [] | unknown;
 
       if (typeof value !== type) throw new TypeError(makeString(TEXT.errors.validation.wrongValueType, [key, type]));
-
-      const values = valuesForSettings[key] as string[] | number[] | undefined;
-
-      if (values && !values.includes(value as never))
-        throw new TypeError(makeString(TEXT.errors.validation.wrongValue, [value as string, key, values.join(', ')]));
     }
   });
 };

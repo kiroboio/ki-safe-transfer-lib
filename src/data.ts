@@ -47,19 +47,8 @@ export const typeOfStatusValues: Record<string, string> = {
 export const listOfSettingsKeys = ['debug', 'currency', 'network', 'eventBus', 'respondAs', 'authDetails'];
 
 export const typeOfSettingsKeys: Record<string, string> = {
-  debug: 'number',
-  currency: 'string',
-  network: 'string',
   eventBus: 'function',
-  respondAs: 'string',
   authDetails: 'object',
-};
-
-export const valuesForSettings: Record<string, (string | number)[]> = {
-  currency: ['btc', 'eth'],
-  network: ['testnet', 'regtest', 'main', 'rinkeby'],
-  debug: [0, 1, 2, 4],
-  respondAs: ['callback', 'direct'],
 };
 
 export const authDetailsData: Record<string, string> = {

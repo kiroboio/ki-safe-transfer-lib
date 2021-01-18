@@ -1,6 +1,7 @@
 import { endpoints, version } from '../config';
 import { MakeServiceParameters } from '../types/fns';
-import { Endpoints, QueryOptions, Responses } from '..';
+import { Endpoints, QueryOptions, RequestOptions, Responses } from '..';
+import { AnyValue, ApiService, Currencies, Maybe, Networks, ServicesCollection } from '../types';
 
 /**
  * Helper to buildEndpointPath to help create paths for services, that are not relying on 'network' section
@@ -43,7 +44,7 @@ export function buildEndpointPath({ currency, network, endpoint }: MakeServicePa
  * @returns boolean
  *
  */
-function shouldReturnDirect(options: QueryOptions | undefined, respondAs: Responses): boolean {
+function shouldReturnDirect(options: QueryOptions | RequestOptions | undefined, respondAs: Responses): boolean {
   if (options?.respondDirect) return true;
 
   if (!respondAs) return true;
@@ -51,6 +52,25 @@ function shouldReturnDirect(options: QueryOptions | undefined, respondAs: Respon
   if (respondAs === Responses.Direct) return true;
 
   return false;
+}
+
+// TODO: add description
+export function findInServices(
+  services: ServicesCollection,
+  currencyNetwork: { currency: Currencies; network: Networks },
+  endpoint: Endpoints,
+): Maybe<ApiService> {
+  if (!services || !Object.keys(services).length) return undefined;
+
+  let s: AnyValue = services[currencyNetwork.currency];
+
+  if (!s) return undefined;
+
+  s = s[currencyNetwork.network];
+
+  if (!s) return undefined;
+
+  return s[endpoint];
 }
 
 export { isDirect, shouldReturnDirect };

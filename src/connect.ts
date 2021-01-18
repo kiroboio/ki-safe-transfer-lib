@@ -14,13 +14,13 @@ import {
   getTime,
   Type,
   makeOptions,
-  makeApiResponseError,
   makePropsResponseError,
   shouldReturnDirect,
   buildEndpointPath,
   makeReturnError,
+  findInServices,
 } from './tools';
-import { validateOptions } from './validators';
+import { validateOptions, validateSettings } from './validators';
 import {
   AuthDetails,
   ConnectProps,
@@ -36,6 +36,12 @@ import {
   Maybe,
   Either,
   Responses,
+  QueryOptions,
+  ApiError,
+  Watch,
+  Currencies,
+  Networks,
+  RequestedService,
 } from './types';
 
 import { apiUrl as apiUrlFromConfig, connectionTriesMax, connectionTimeout } from './config';
@@ -205,46 +211,12 @@ class Connect extends Base {
 
   protected _manuallyDisconnected = false;
 
-  // services
-
-  // protected _networks: ApiService
-  //
-  // protected _transfers: ApiService
-  //
-  // protected _inbox: ApiService
-  //
-  // protected _collect: ApiService
-  //
-  // protected _utxos: ApiService
-  //
-  // protected _exists: ApiService
-  //
-  // protected _rateBtcToUsd: ApiService
-  //
-  // protected _retrieve: ApiService
-  //
-  // protected _kiroState: ApiService
-  //
-  // protected _kiroPrice: ApiService
-  //
-  // protected _estimateFees: ApiService
-  //
-  // protected _transactions: ApiService
-  //
-  // protected _balance: ApiService
-  //
-  // protected _kiroBuy: ApiService
-  //
-  // protected _ethTransferRequest: ApiService
-  //
-  // protected _follow: ApiService
-
   constructor(props: ConnectProps, options: Maybe<InstanceOptions>) {
     super(debugLevelSelector(options?.debug));
 
     this._logTechnical("Service (connect > constructor) sent 'debug' setting to super, validating props");
 
-    // this._validateProps(props)
+    this._validateProps(props);
 
     const { authDetails, eventBus, watch } = props;
 
@@ -375,26 +347,6 @@ class Connect extends Base {
       this._logApiError(ERRORS.connect.on.disconnect.direct, err);
     }
 
-    // assign services
-    // this._logTechnical(makeString(MESSAGES.technical.serviceIs, ['setting up API services']))
-
-    // this._networks = this._getService(Endpoints.Networks)
-    // this._transfers = this._getService(Endpoints.Transfers)
-    // this._inbox = this._getService(Endpoints.Inbox)
-    // this._collect = this._getService(Endpoints.Collect)
-    // this._utxos = this._getService(Endpoints.Utxos)
-    // this._exists = this._getService(Endpoints.Exists)
-    // this._rateBtcToUsd = this._getService(Endpoints.RateToUsd)
-    // this._retrieve = this._getService(Endpoints.Retrieve)
-    // this._transactions = this._getService(Endpoints.Transactions)
-    // this._kiroState = this._getService(Endpoints.Kiros)
-    // this._kiroPrice = this._getService(Endpoints.KiroPrice)
-    // this._estimateFees = this._getService(Endpoints.EstimateFees)
-    // this._balance = this._getService(Endpoints.Balance)
-    // this._kiroBuy = this._getService(Endpoints.KiroBuy)
-    // this._ethTransferRequest = this._getService(Endpoints.EthTransferRequest)
-    // this._follow = this._getService(Endpoints.Follow)
-
     this._logTechnical(makeString(MESSAGES.technical.serviceIs, ['setting up event listeners...']));
 
     // rates updated
@@ -405,13 +357,13 @@ class Connect extends Base {
     //     decrypt,
     //   )
     // })
-    //
-    // // status updated
+
+    // status updated
     // this._networks.on('patched', (data: NetworkTip) => {
-    //   this._useEventBus(EventTypes.UPDATE_STATUS, data, decrypt)
-    // })
-    //
-    // // transfer updated
+    //   this._useEventBus(EventTypes.UPDATE_STATUS, data, decrypt);
+    // });
+
+    // transfer updated
     // this._transfers.on('patched', (payload: Transfer) => {
     //   this._useEventBus(EventTypes.UPDATED_RETRIEVABLE, payload, decrypt)
     // })
@@ -491,16 +443,20 @@ class Connect extends Base {
     if (this.#connect) this.#connect.io.destroy();
   }
 
-  // private _validateProps(settings: unknown): void {
-  //   try {
-  //     this._logTechnical(makeString(MESSAGES.technical.serviceIs, ['validating settings provided']))
-  //     validateSettings(settings)
-  //   } catch (err) {
-  //     this._logError(makeString(ERRORS.service.gotError, ['validateProps', 'err.message']), err)
-  //
-  //     throw new TypeError(err.message)
-  //   }
-  // }
+  // TODO: add options validation
+  /*
+   * Validate props for service
+   */
+  private _validateProps(settings: unknown): void {
+    try {
+      this._logTechnical(makeString(MESSAGES.technical.serviceIs, ['validating settings provided']));
+      validateSettings(settings);
+    } catch (err) {
+      this._logError(makeString(ERRORS.service.gotError, ['validateProps', 'err.message']), err);
+
+      throw new TypeError(err.message);
+    }
+  }
 
   private _runAuth(): void {
     this._logTechnical(makeString(MESSAGES.technical.running, ['runAuth']));
@@ -527,8 +483,6 @@ class Connect extends Base {
   private _authSocket(): Either<Promise<Either<AuthenticationResult, void>>, undefined> {
     this._logTechnical(makeString(MESSAGES.technical.running, ['authSocket']));
 
-    // if no lastConnect or it's been over 10 seconds since last time
-    // if () {
     try {
       this._logTechnical('Service (authSocket) is trying to re-authenticate...');
 
@@ -556,14 +510,13 @@ class Connect extends Base {
       this._lastConnect = getTime();
       return;
     }
-    // }
   }
 
   private _onConnect(): void {
     this._log('Service (connect) is ON, requesting latest status...');
 
     if (this._globalNetwork && this._globalCurrency)
-      this.getStatusFor().catch(err => {
+      this.getStatusFor({ watch: Watch.REPLACE }).catch(err => {
         this._logApiError('Service (onConnect) caught error when calling (getStatus).', err);
       });
 
@@ -649,6 +602,44 @@ class Connect extends Base {
   }
 
   /*
+   * Abstraction for validation errors - log and response
+   */
+  protected _processValidationError(err: Error, fnName: string) {
+    this._logError(makeString(ERRORS.service.gotError, [fnName, 'validation']), err);
+
+    throw makePropsResponseError(err);
+  }
+
+  /*
+   * Abstraction for API request errors - log and response
+   */
+  protected _processApiError(err: ApiError, fnName: string) {
+    this._logApiError(makeString(ERRORS.service.gotError, [fnName, 'request']), err);
+
+    throw makeReturnError(err.message, err);
+  }
+
+  /*
+   * Abstraction for returning results - log, direct vs eventBus
+   */
+  protected _returnResults<T>(
+    options: QueryOptions | RequestOptions | undefined,
+    response: T,
+    fnName: string,
+    event: EventTypes,
+  ) {
+    this._logTechnical(makeString(MESSAGES.technical.proceedingWith, [fnName, 'return']));
+
+    if (shouldReturnDirect(options, this._respondAs)) return response;
+
+    this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, [fnName]));
+
+    this._useEventBus(event, response);
+
+    return;
+  }
+
+  /*
    * Get status for network; response varies for different currencies
    *
    * @params { RequestOptions } [options] - optional parameters
@@ -666,12 +657,8 @@ class Connect extends Base {
         validateOptions(options, 'getStatusFor', true);
       }
     } catch (err) {
-      this._logError(makeString(ERRORS.service.gotError, ['getStatusFor', 'validation']), err);
-
-      throw makePropsResponseError(err);
+      this._processValidationError(err, 'getStatusFor');
     }
-
-    let response: Results<NetworkTip>;
 
     /** make request */
     try {
@@ -679,23 +666,41 @@ class Connect extends Base {
 
       const currencyNetwork = this.getCurrencyNetwork(options?.currency, options?.network);
 
-      response = await this._getService({ ...currencyNetwork, endpoint: Endpoints.Networks }).find({
+      const service = this._retrieveServiceOrMakeNew(currencyNetwork, Endpoints.Networks);
+
+      const response: Results<NetworkTip> = await service.request.find({
         query: { netId: currencyNetwork.network, ...makeOptions(options, this._watch) },
       });
+
+      if (service.isNew) {
+        service.request.on('patched', (data: NetworkTip) => {
+          this._useEventBus(EventTypes.UPDATE_STATUS, data, decrypt);
+        });
+        this._storeService(currencyNetwork, Endpoints.Networks, service.request);
+      }
+
+      this._returnResults(options, response.data[0], 'getStatusFor', EventTypes.GET_ONLINE_NETWORKS);
     } catch (err) {
-      this._logApiError(makeString(ERRORS.service.gotError, ['getStatusFor', 'request']), err);
-
-      throw makeApiResponseError(err);
+      this._processApiError(err, 'getStatusFor');
     }
+  }
 
-    /** return results */
-    this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getStatusFor', 'return']));
+  // TODO: add description
+  protected _retrieveServiceOrMakeNew(
+    currencyNetwork: { currency: Currencies; network: Networks },
+    endpoint: Endpoints,
+  ): RequestedService {
+    const service = findInServices(this._services, currencyNetwork, endpoint);
 
-    if (shouldReturnDirect(options, this._respondAs)) return response.data[0];
+    if (!!service) return { request: service, isNew: false };
 
-    this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getStatusFor']));
-
-    this._useEventBus(EventTypes.UPDATE_STATUS, response.data[0]);
+    return {
+      request: this._getService({
+        ...currencyNetwork,
+        endpoint,
+      }),
+      isNew: true,
+    };
   }
 
   /*
@@ -715,81 +720,49 @@ class Connect extends Base {
         validateOptions(options, 'getIsConnected');
       }
     } catch (err) {
-      this._logError(makeString(ERRORS.service.gotError, ['getIsConnected', 'validation']), err);
-
-      throw makePropsResponseError(err);
+      this._processValidationError(err, 'getIsConnected');
     }
-
-    let response: boolean;
 
     /** make request */
     try {
       this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getIsConnected']));
-      response = this.#connect.io.io.readyState === 'open';
+
+      const response = this.#connect.io.io.readyState === 'open';
+
       this._log(makeString(MESSAGES.technical.gotResponse, ['getIsConnected']), response);
+      this._returnResults(options, response, 'getIsConnected', EventTypes.GET_IS_CONNECTED);
     } catch (err) {
-      this._logApiError(makeString(ERRORS.service.gotError, ['getIsConnected', 'request']), err);
-
-      throw makeReturnError(err.message, err);
+      this._processApiError(err, 'getIsConnected');
     }
-
-    /** return results */
-
-    this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getIsConnected', 'return']));
-
-    if (shouldReturnDirect(options, this._respondAs)) return response;
-
-    this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getIsConnected']));
-
-    this._useEventBus(EventTypes.GET_IS_CONNECTED, response);
   }
 
-  // public connect(options?: Omit<QueryOptions, 'limit' | 'skip' | 'watch'>): boolean | void {
-  //   this._logTechnical(makeString(MESSAGES.technical.running, ['connect']))
-  //
-  //   /** validate options, if present */
-  //   try {
-  //     if (options) {
-  //       this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['connect', 'options']))
-  //       validateOptions(options, 'connect')
-  //     }
-  //   } catch (err) {
-  //
-  //     /** log error */
-  //     this._logError(makeString(ERRORS.service.gotError, ['connect', 'validation']), err)
-  //
-  //     /** throw appropriate error */
-  //     throw makePropsResponseError(err)
-  //   }
-  //
-  //   let response: boolean
-  //
-  //   /** make request */
-  //   try {
-  //     this._logTechnical(makeString(MESSAGES.technical.requestingData, ['connect']))
-  //     this.#socket.connect().open()
-  //     response = true
-  //     this._manuallyDisconnected = false
-  //     this._log(makeString(MESSAGES.technical.gotResponse, ['connect']), response)
-  //   } catch (err) {
-  //
-  //     /** log error */
-  //     this._logApiError(makeString(ERRORS.service.gotError, ['connect', 'request']), err)
-  //
-  //     /** throw appropriate error */
-  //     throw makeReturnError(err.message, err)
-  //   }
-  //
-  //   /** return results */
-  //
-  //   this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['connect', 'return']))
-  //
-  //   if (shouldReturnDirect(options, this._respondAs)) return response
-  //
-  //   this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['connect']))
-  //
-  //   this._useEventBus(EventTypes.CONNECT, response)
-  // }
+  public connect(options?: { respondDirect: boolean }): boolean | void {
+    this._logTechnical(makeString(MESSAGES.technical.running, ['connect']));
+
+    /** validate options, if present */
+    try {
+      if (options) {
+        this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['connect', 'options']));
+        validateOptions(options, 'connect');
+      }
+    } catch (err) {
+      this._processValidationError(err, 'connect');
+    }
+
+    /** make request */
+    try {
+      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['connect']));
+      this.#socket.connect().open();
+
+      const response = true;
+
+      this._manuallyDisconnected = false;
+      this._log(makeString(MESSAGES.technical.gotResponse, ['connect']), response);
+      this._returnResults(options, response, 'connect', EventTypes.CONNECT);
+    } catch (err) {
+      this._processApiError(err, 'connect');
+    }
+  }
 }
 
 export { Connect };

@@ -48,6 +48,7 @@ const MESSAGES = {
     requestWithDefault: 'Function (%1) will request data with defaults:',
     endpoint: 'Function (%1) is making endpoint:',
     service: 'Function (%1) gets API service:',
+    custom: 'Function (%1) %2',
     serviceIs: 'Function is %1...',
     isAllowed: 'Function is allowed ッ',
     notAllowed: 'Function is not allowed ꈌ',
