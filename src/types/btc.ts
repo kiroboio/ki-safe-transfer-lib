@@ -5,12 +5,12 @@
  * @name BtcNetworkItem
  */
 interface BtcNetworkItem {
-  height: number
-  online: boolean
-  netId: string
-  timestamp: number
-  fee: number
-  updatedAt: string
+  height: number;
+  online: boolean;
+  netId: string;
+  timestamp: number;
+  fee: number;
+  updatedAt: string;
 }
 
-export type { BtcNetworkItem }
+export type { BtcNetworkItem };

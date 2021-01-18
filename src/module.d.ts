@@ -1,1 +1,1 @@
-declare module 'multicoin-address-validator'
+declare module 'multicoin-address-validator';

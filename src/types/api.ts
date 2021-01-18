@@ -1,4 +1,4 @@
-import { BtcNetworkItem, EthNetworkItem } from '.'
+import { BtcNetworkItem, EthNetworkItem } from '.';
 
 /**
  * Base interface for Results, providing the pagination details
@@ -7,9 +7,9 @@ import { BtcNetworkItem, EthNetworkItem } from '.'
  * @name Paging
  */
 interface Paging {
-  total: number
-  skip: number
-  limit: number
+  total: number;
+  skip: number;
+  limit: number;
 }
 
 /**
@@ -20,7 +20,7 @@ interface Paging {
  * @param T - type of data array content
  */
 interface Results<T> extends Paging {
-  data: Array<T>
+  data: Array<T>;
 }
 
 /**
@@ -43,8 +43,8 @@ export enum Watch {
  * @name RequestOptions
  */
 export interface RequestOptions {
-  respondDirect?: boolean
-  watch?: Watch
+  respondDirect?: boolean;
+  watch?: Watch;
 }
 
 /**
@@ -54,22 +54,22 @@ export interface RequestOptions {
  * @name QueryOptions
  */
 interface QueryOptions extends RequestOptions {
-  limit?: number
-  skip?: number
+  limit?: number;
+  skip?: number;
 }
 
 interface Address {
-  address: string
+  address: string;
 }
 
-type OnlineNetworkResults = Results<BtcNetworkItem | EthNetworkItem>
+type OnlineNetworkResults = Results<BtcNetworkItem | EthNetworkItem>;
 
 interface TxHash {
-  txHash: string
+  txHash: string;
 }
 
 interface Txid {
-  txid: string
+  txid: string;
 }
 
-export type { Txid, Address, TxHash, QueryOptions, Results, Paging, OnlineNetworkResults }
+export type { Txid, Address, TxHash, QueryOptions, Results, Paging, OnlineNetworkResults };

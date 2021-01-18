@@ -1,6 +1,6 @@
 type ValidateReport = {
-  message: string
-  errors: { [index: string]: string[] }
-}
+  message: string;
+  errors: { [index: string]: string[] };
+};
 
-export { ValidateReport }
+export { ValidateReport };

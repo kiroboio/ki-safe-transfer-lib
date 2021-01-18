@@ -1,20 +1,38 @@
-import { Endpoints, QueryOptions, Responses } from '..'
-
+import { endpoints, version } from '../config';
+import { MakeServiceParameters } from '../types/fns';
+import { Endpoints, QueryOptions, Responses } from '..';
 
 /**
- * Helper to makeEndpointPath to help create paths for services, that are not relying on 'network' section
+ * Helper to buildEndpointPath to help create paths for services, that are not relying on 'network' section
  *
- * @param [Endpoints] endpoint - endpoint in question
+ * @param { Endpoints } endpoint - endpoint in question
  *
- * @returns boolean
+ * @returns Boolean
+ *
  */
 function isDirect(endpoint: Endpoints): boolean {
+  if (endpoint === Endpoints.Networks) return true;
 
-  if (endpoint === Endpoints.Networks) return true
+  if (endpoint === Endpoints.RateToUsd) return true;
 
-  if (endpoint === Endpoints.RateToUsd) return true
+  return false;
+}
 
-  return false
+/*
+ * Build endpoint path
+ *
+ * @params { MakeServiceParameters } params - parameters, required to build the
+ * path
+ *
+ * @return String
+ *
+ */
+export function buildEndpointPath({ currency, network, endpoint }: MakeServiceParameters): string {
+  const path = `/${version}/${currency}/`;
+
+  if (isDirect(endpoint)) return path + endpoint;
+
+  return path + `${network}/${endpoints[endpoint]}`;
 }
 
 /**
@@ -26,14 +44,13 @@ function isDirect(endpoint: Endpoints): boolean {
  *
  */
 function shouldReturnDirect(options: QueryOptions | undefined, respondAs: Responses): boolean {
-  if (options?.respondDirect) return true
+  if (options?.respondDirect) return true;
 
-  if (!respondAs) return true
+  if (!respondAs) return true;
 
-  if (respondAs === Responses.Direct) return true
+  if (respondAs === Responses.Direct) return true;
 
-  return false
+  return false;
 }
 
-
-export { isDirect, shouldReturnDirect,}
+export { isDirect, shouldReturnDirect };

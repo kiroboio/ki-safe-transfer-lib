@@ -41,7 +41,5 @@
     "typescript.referencesCodeLens.showOnAllFunctions": true,
     "files.autoSave": "off",
     "peacock.color": "#6be667",
-    "prettier.disableLanguages": [
-      "typescript"
-    ]
+    "editor.formatOnSave": true
 }

@@ -1,7 +1,7 @@
-import { isNil } from 'ramda'
+import { isNil } from 'ramda';
 
 export function isOfType(value: unknown, type: string): boolean {
-  if (isNil(value) || !type) return false
+  if (isNil(value) || !type) return false;
 
-  return typeof value === type
+  return typeof value === type;
 }

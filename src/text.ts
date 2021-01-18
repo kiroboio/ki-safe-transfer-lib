@@ -27,13 +27,13 @@ const ERRORS = {
     wrongTypeArgument: 'Type of argument (%1) in function [%2] is wrong - %3. Should be %4.',
     wrongTypeKey: 'Type of key %1 in function [%2] is wrong - %3. Should be %4.',
   },
-}
+};
 
 const WARNINGS = {
   connect: {
     disconnect: 'Service is disconnected.',
   },
-}
+};
 
 const MESSAGES = {
   technical: {
@@ -51,13 +51,14 @@ const MESSAGES = {
     isAllowed: 'Service is allowed ッ',
     notAllowed: 'Service is not allowed ꈌ',
     connection: {
-      wontReconnect: 'Service was manually disconnected, won\'t reconnect',
+      wontReconnect: "Service was manually disconnected, won't reconnect",
       exceeded: 'Service exceeded connectionTriesMax (%1/%2).',
       willConnect: 'Connection is offline, but service is not - will disconnect.',
       willReConnect: 'Browser connection is online,but service is not - will re-connect.',
-      willNotReconnect:'Browser connection is online, but service is not - service exceeded connectionTriesMax, will not re-connect.'
+      willNotReconnect:
+        'Browser connection is online, but service is not - service exceeded connectionTriesMax, will not re-connect.',
     },
   },
-}
+};
 
-export { ERRORS, WARNINGS,MESSAGES }
+export { ERRORS, WARNINGS, MESSAGES };

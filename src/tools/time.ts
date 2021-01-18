@@ -1,13 +1,13 @@
 function diff(prev: number | undefined, now?: number): number {
-  if (!prev) return 100
+  if (!prev) return 100;
 
-  const nowDate = (): number => (now ? new Date(now).getTime() : new Date().getTime())
+  const nowDate = (): number => (now ? new Date(now).getTime() : new Date().getTime());
 
-  return Math.round((nowDate() - new Date(prev).getTime()) / 1000)
+  return Math.round((nowDate() - new Date(prev).getTime()) / 1000);
 }
 
 function getTime(): number {
-  return new Date().valueOf()
+  return new Date().valueOf();
 }
 
 /**
@@ -15,11 +15,11 @@ function getTime(): number {
  *
  * */
 async function wait(ms: number): Promise<string> {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     setTimeout(() => {
-      resolve('')
-    }, ms)
-  })
+      resolve('');
+    }, ms);
+  });
 }
 
-export { diff, getTime, wait }
+export { diff, getTime, wait };

@@ -1,27 +1,26 @@
 // TODO: split
-export * from './type'
+export * from './type';
 
-export * from './api'
+export * from './api';
 
-export * from './enums'
+export * from './enums';
 
-export * from './collect'
+export * from './collect';
 
-export * from './send'
+export * from './send';
 
-export * from './retrieve'
+export * from './retrieve';
 
-export * from './validate'
+export * from './validate';
 
-export * from './rates'
+export * from './rates';
 
-export * from './error'
+export * from './error';
 
-export * from './transfer'
+export * from './transfer';
 
-export * from './tokens'
+export * from './tokens';
 
-export * from './btc'
+export * from './btc';
 
-export * from './eth'
-
+export * from './eth';

@@ -99,4 +99,4 @@ enum Connection {
   OFF = 'disconnect',
 }
 
-export { Endpoints, EventTypes, Responses, Networks, Currencies, DebugLevels, Connection }
+export { Endpoints, EventTypes, Responses, Networks, Currencies, DebugLevels, Connection };

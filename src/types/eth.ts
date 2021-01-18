@@ -5,8 +5,8 @@
  * @name Contract
  */
 interface Contract {
-  address: string
-  synced: true
+  address: string;
+  synced: true;
 }
 
 /**
@@ -16,37 +16,37 @@ interface Contract {
  * @name EthNetworkItem
  */
 interface EthNetworkItem {
-  height: number
-  online: boolean
-  netId: string
-  timestamp: number
-  updatedAt: string
-  contracts: Record<string, Contract>
+  height: number;
+  online: boolean;
+  netId: string;
+  timestamp: number;
+  updatedAt: string;
+  contracts: Record<string, Contract>;
 }
 
 interface BroadcastConfirmation {
-  broadcasted: number
-  confirmed: number
-  txid: string
+  broadcasted: number;
+  confirmed: number;
+  txid: string;
 }
 
 interface EthTransfer {
-  collect: BroadcastConfirmation
-  createdAt: string
+  collect: BroadcastConfirmation;
+  createdAt: string;
   expires: {
-    at: string
-  }
-  fees: string
-  from: string
-  id: string
-  message: string
-  retrieve: BroadcastConfirmation
-  salt: string
-  secretHash: string
-  state: string
-  to: string
-  updatedAt: string
-  value: string
+    at: string;
+  };
+  fees: string;
+  from: string;
+  id: string;
+  message: string;
+  retrieve: BroadcastConfirmation;
+  salt: string;
+  secretHash: string;
+  state: string;
+  to: string;
+  updatedAt: string;
+  value: string;
 }
 
-export type { EthNetworkItem, Contract, BroadcastConfirmation, EthTransfer }
+export type { EthNetworkItem, Contract, BroadcastConfirmation, EthTransfer };

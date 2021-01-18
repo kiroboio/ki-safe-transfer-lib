@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es6",
     "module": "commonjs",
     "outDir": "./dist",
     "strict": true,
@@ -13,29 +13,18 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "moduleResolution": "node",
-    "lib": [
-      "es2017",
-      "es7",
-      "es6",
-      "dom"
-    ],
+    "lib": ["es2017", "es7", "es6", "dom"],
     "noImplicitAny": true,
     "declaration": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
-     "sourceMap": true
+    "sourceMap": true,
+    "rootDir": "./"
   },
   "typedocOptions": {
     "mode": "modules",
     "out": "docs"
   },
-  "include": [
-    "src/**/*",
-    "tests/**/*",
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "client.ts"
-  ]
+  "include": ["src/**/*", "tests/**/*"],
+  "exclude": ["node_modules", "dist", "client.ts"]
 }

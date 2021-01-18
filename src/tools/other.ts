@@ -1,35 +1,35 @@
-import { assoc, isNil, not, map, keys, includes, forEach } from 'ramda'
-import { v4 as generateId } from 'uuid'
+import { assoc, isNil, not, map, keys, includes, forEach } from 'ramda';
+import { v4 as generateId } from 'uuid';
 
-import { validateArray, validateObject } from '../validators'
-import { SendRequest, QueryOptions, Watch, Address, AnyValue } from '..'
+import { validateArray, validateObject } from '../validators';
+import { SendRequest, QueryOptions, Watch, Address, AnyValue } from '..';
 
-const splitText = (text: string): string[] => text.split('')
+const splitText = (text: string): string[] => text.split('');
 
 const reassign = (group: string[], position: number, newMember: string): string[] => {
-  group.splice(0, 1)
-  return [newMember, ...group]
-}
+  group.splice(0, 1);
+  return [newMember, ...group];
+};
 
 export const capitalize = (text: string): string => {
-  if (typeof text !== 'string') return ''
+  if (typeof text !== 'string') return '';
 
-  return reassign(splitText(text), 0, splitText(text)[0].toUpperCase()).join('')
-}
+  return reassign(splitText(text), 0, splitText(text)[0].toUpperCase()).join('');
+};
 
 export const makeString = (template: string, params: (string | number)[]): string => {
-  if (typeof template !== 'string') return ''
+  if (typeof template !== 'string') return '';
 
-  if (!validateArray(params, ['string', 'number'])) return ''
+  if (!validateArray(params, ['string', 'number'])) return '';
 
-  let result = template
+  let result = template;
 
   params.forEach((param, key) => {
-    result = result.replace(`%${key + 1}`, String(param))
-  })
+    result = result.replace(`%${key + 1}`, String(param));
+  });
 
-  return result
-}
+  return result;
+};
 
 export function checkSettings(settings: Record<string, unknown>): boolean {
   const CONTROL_SET = {
@@ -45,70 +45,70 @@ export function checkSettings(settings: Record<string, unknown>): boolean {
     respondAs: 'direct',
     version: 'v1',
     isAuthed: true,
-  }
+  };
 
   // check if object
-  validateObject(settings)
+  validateObject(settings);
 
   // check keys
-  const settingsKeys = keys(settings)
+  const settingsKeys = keys(settings);
 
-  const controlKeys = keys(CONTROL_SET)
+  const controlKeys = keys(CONTROL_SET);
 
-  if (settingsKeys.length !== controlKeys.length) return false
+  if (settingsKeys.length !== controlKeys.length) return false;
 
   const forEachFn = (key: string | number): void => {
-    if (not(includes(key, controlKeys))) throw new Error(`wrong key: ${key}`)
-  }
+    if (not(includes(key, controlKeys))) throw new Error(`wrong key: ${key}`);
+  };
 
-  forEach(forEachFn, settingsKeys)
+  forEach(forEachFn, settingsKeys);
 
   // check value types and values
 
   if (settings['authDetails'] !== CONTROL_SET.authDetails)
-    throw new Error(`authDetails is wrong: ${settings['authDetails']}`)
+    throw new Error(`authDetails is wrong: ${settings['authDetails']}`);
 
-  if (settings['currency'] !== CONTROL_SET.currency) throw new Error(`currency is wrong: ${settings['currency']}`)
+  if (settings['currency'] !== CONTROL_SET.currency) throw new Error(`currency is wrong: ${settings['currency']}`);
 
-  if (settings['debug'] !== CONTROL_SET.debug) throw new Error(`debug is wrong: ${settings['debug']}`)
+  if (settings['debug'] !== CONTROL_SET.debug) throw new Error(`debug is wrong: ${settings['debug']}`);
 
-  if (settings['eventBus'] !== CONTROL_SET.eventBus) throw new Error(`eventBus is wrong: ${settings['eventBus']}`)
+  if (settings['eventBus'] !== CONTROL_SET.eventBus) throw new Error(`eventBus is wrong: ${settings['eventBus']}`);
 
-  if (settings['network'] !== CONTROL_SET.network) throw new Error(`network is wrong: ${settings['network']}`)
+  if (settings['network'] !== CONTROL_SET.network) throw new Error(`network is wrong: ${settings['network']}`);
 
-  if (settings['respondAs'] !== CONTROL_SET.respondAs) throw new Error(`respondAs is wrong: ${settings['respondAs']}`)
+  if (settings['respondAs'] !== CONTROL_SET.respondAs) throw new Error(`respondAs is wrong: ${settings['respondAs']}`);
 
-  if (settings['version'] !== CONTROL_SET.version) throw new Error(`version is wrong: ${settings['version']}`)
+  if (settings['version'] !== CONTROL_SET.version) throw new Error(`version is wrong: ${settings['version']}`);
 
-  validateObject(settings['lastAddresses'])
+  validateObject(settings['lastAddresses']);
 
   if ((settings['lastAddresses'] as { addresses: string[] })['addresses'].length !== 0)
-    throw new Error(`lastAddresses is wrong: ${settings['lastAddresses']}`)
+    throw new Error(`lastAddresses is wrong: ${settings['lastAddresses']}`);
 
-  return true
+  return true;
 }
 
 export const compareBasicObjects = (objOne: Record<string, unknown>, objTwo: Record<string, unknown>): boolean => {
-  let result = true
+  let result = true;
 
   try {
     // validation
-    validateObject(objOne)
-    validateObject(objTwo)
+    validateObject(objOne);
+    validateObject(objTwo);
 
-    if (Object.keys(objOne).length !== Object.keys(objTwo).length) return false
+    if (Object.keys(objOne).length !== Object.keys(objTwo).length) return false;
 
-    Object.keys(objOne).forEach((key) => {
-      if (objOne[key] !== objTwo[key]) result = false
-    })
+    Object.keys(objOne).forEach(key => {
+      if (objOne[key] !== objTwo[key]) result = false;
+    });
   } catch (e) {
-    result = false
+    result = false;
   }
 
-  return result
-}
+  return result;
+};
 
-const Type = <T = AnyValue>(object: unknown): T => (object as unknown) as T
+const Type = <T = AnyValue>(object: unknown): T => (object as unknown) as T;
 
 // TODO: add test
 /**
@@ -122,32 +122,32 @@ const Type = <T = AnyValue>(object: unknown): T => (object as unknown) as T
  * @returns Sendable
  */
 export function checkOwnerId(transaction: SendRequest): SendRequest {
-  if (transaction.owner) return transaction
+  if (transaction.owner) return transaction;
 
-  return assoc('owner', generateId(), transaction)
+  return assoc('owner', generateId(), transaction);
 }
 
-export { generateId }
+export { generateId };
 
 export function makeOptions(
   options: QueryOptions | undefined,
   globalWatch: Watch | undefined,
 ): Record<string, unknown> {
-  let queryOptions = { $limit: 100, $skip: 0 }
+  let queryOptions = { $limit: 100, $skip: 0 };
 
-  if (!options) return queryOptions
+  if (!options) return queryOptions;
 
-  if (not(isNil(options.limit))) queryOptions = assoc('$limit', options.limit, queryOptions)
+  if (not(isNil(options.limit))) queryOptions = assoc('$limit', options.limit, queryOptions);
 
-  if (not(isNil(options.skip))) queryOptions = assoc('$skip', options.skip, queryOptions)
+  if (not(isNil(options.skip))) queryOptions = assoc('$skip', options.skip, queryOptions);
 
   // if 'watch' is provided -> chose either, prefer inline
   if (options.watch || globalWatch) {
-    if (options.watch) queryOptions = assoc('watch', options.watch, queryOptions)
-    else if (globalWatch) queryOptions = assoc('watch', globalWatch, queryOptions)
+    if (options.watch) queryOptions = assoc('watch', options.watch, queryOptions);
+    else if (globalWatch) queryOptions = assoc('watch', globalWatch, queryOptions);
   }
 
-  return queryOptions
+  return queryOptions;
 }
 
 /**
@@ -165,14 +165,14 @@ export function makeOptions(
  * ```
  */
 export function flattenAddresses(data: Address[]): string[] {
-  const mapperFn = (el: Address): string => el.address
+  const mapperFn = (el: Address): string => el.address;
 
-  return map(mapperFn, data)
+  return map(mapperFn, data);
 }
 
 /** creates 'fnName function's options ' */
 export function makeLocation(fn: string, block: string): string {
-  return `${fn ? '\'' + fn + '\' function\'s ' : ''}${block ? block : ''}`
+  return `${fn ? "'" + fn + "' function's " : ''}${block ? block : ''}`;
 }
 
-export { Type }
+export { Type };
