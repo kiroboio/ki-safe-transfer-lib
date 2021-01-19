@@ -1,6 +1,6 @@
 import { TransferFees } from './type';
 
-interface Transfer {
+export interface BtcTransfer {
   amount: number; // the transfer amount in satoshi,minimum: 0
   collect: {
     broadcasted: number; // blockchain height
@@ -79,4 +79,4 @@ interface EthTransferResponse {
   fees: string;
 }
 
-export type { Transfer, EstimateFeeRequest, EstimatedFee, EthTransferRequest, EthTransferResponse };
+export type { EstimateFeeRequest, EstimatedFee, EthTransferRequest, EthTransferResponse };

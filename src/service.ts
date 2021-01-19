@@ -12,13 +12,19 @@ import {
   EthNetworkItem,
   Either,
   EthTransfer,
+  BtcTransfer,
+  Currencies,
+  CollectRequest,
+  Message,
 } from './types';
 import { makeOptions, makeString, Type } from './tools';
 import { validateOptions } from './validators/options';
-import { MESSAGES } from './text';
+import { ERRORS, MESSAGES } from './text';
 import { validateAddress } from './validators/address';
 import { isEmpty, isNil } from 'ramda';
 import { TEXT } from './data';
+import { invalidAddress } from './tools/validation';
+import { validateObjectWithStrings } from './validators/object';
 
 class Service extends Connect {
   private static instance: Service;
@@ -108,18 +114,28 @@ class Service extends Connect {
     }
   }
 
-  public async getTransfers(address: string, options?: QueryOptions) {
+  /*
+   * Get all available Eth transfers
+   *
+   * @params { String } address - valid Ethereum address
+   * @params [ QueryOptions } options - optional parameters
+   *
+   */
+  public async getEthTransfers(address: string, options?: QueryOptions) {
     this._logTechnical(makeString(MESSAGES.technical.running, ['getTransfers']));
 
+    // validate props
     const currencyNetwork = this.getCurrencyNetwork(options?.currency, options?.network);
 
-    // validate props
-    try {
-      if (isNil(address) || isEmpty(address)) throw new Error(TEXT.errors.validation.missingArgument);
+    if (isNil(address) || isEmpty(address)) throw new Error(TEXT.errors.validation.missingArgument);
 
+    if (currencyNetwork.currency !== Currencies.Ethereum)
+      throw new Error(makeString(ERRORS.validation.exclusiveRequest, [Currencies.Ethereum]));
+
+    try {
       // validate address
       if (!validateAddress({ address, currency: currencyNetwork.currency, networkType: currencyNetwork.network }))
-        throw new TypeError('Invalid address in "to".');
+        throw new TypeError(invalidAddress(currencyNetwork.currency));
 
       // validate options, if present
       if (options) {
@@ -135,7 +151,9 @@ class Service extends Connect {
 
       const service = this._retrieveServiceOrMakeNew(currencyNetwork, Endpoints.Transfers);
 
-      const response: Results<EthTransfer> = await service.request.find({
+      const response: Results<
+        typeof currencyNetwork.currency extends Currencies.Ethereum ? EthTransfer : BtcTransfer
+      > = await service.request.find({
         query: {
           address,
           ...makeOptions(options, this._watch),
@@ -150,54 +168,43 @@ class Service extends Connect {
     }
   }
 
+  /*
+   * Collect transaction
+   *
+   * @params { CollectRequest } request - ID and key of the transaction to collect
+   * @params { QueryOptions } options - optional parameters
+   *
+   */
+  public async collect(request: CollectRequest, options?: Omit<QueryOptions, 'limit' | 'skip'>) {
+    // validate props
+    const currencyNetwork = this.getCurrencyNetwork(options?.currency, options?.network);
+
+    validateObjectWithStrings(Type<Record<string, unknown>>(request), 'request', 'collect');
+
+    try {
+      /** validate options, if present */
+      if (options) validateOptions(options, 'collect');
+    } catch (err) {
+      this._processValidationError(err, 'collect');
+    }
+
+    /** make request */
+    try {
+      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['collect']));
+
+      const service = this._retrieveServiceOrMakeNew(currencyNetwork, Endpoints.Collect);
+
+      const response: Results<Message> = await service.request.create({ ...request });
+
+      return this._returnResults(options, response, 'collect', EventTypes.COLLECT_TRANSACTION);
+    } catch (err) {
+      this._processApiError(err, 'getTransfers');
+    }
+  }
+
   // =====================
   //
   //
-  // TODO: merge with collectEth
-  // public async collect(
-  //   request: CollectRequest,
-  //   options?: Omit<QueryOptions, 'limit' | 'skip'>,
-  // ): Promise<Maybe<Results<Message>>> {
-  //
-  //   /** validate props */
-  //   try {
-  //     validateObjectWithStrings(Type<Record<string, unknown>>(request), 'request', 'collect')
-  //
-  //     /** validate options, if present */
-  //     if (options) {
-  //       validateOptions(options, 'collect')
-  //     }
-  //   } catch (err) {
-  //
-  //     /** log error */
-  //     this._logError('Service (collect) caught [validation] error.', err)
-  //
-  //     /** throw appropriate error */
-  //     throw makePropsResponseError(err)
-  //   }
-  //
-  //   let response
-  //
-  //   /** make request */
-  //   try {
-  //     response = await this._collect.create({ ...request })
-  //   } catch (err) {
-  //
-  //     /** log error */
-  //     this._logApiError('Service (collect) caught [request] error.', err)
-  //
-  //     /** throw error */
-  //     throw makeApiResponseError(err)
-  //   }
-  //
-  //   try {
-  //     if (shouldReturnDirect(options, this._respondAs)) return response
-  //
-  //     this._useEventBus(EventTypes.COLLECT_TRANSACTION, response)
-  //   } catch (err) {
-  //     throw makeReturnError(err.message, err)
-  //   }
-  // }
 
   // TODO: add desc
   // public async send(transaction: SendRequest, options?: QueryOptions): Promise<Maybe<Transfer>> {
