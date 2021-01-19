@@ -129,6 +129,13 @@ class Base {
     };
   }
 
+  public clearStoredServices() {
+    this._logTechnical(makeString(MESSAGES.technical.running, ['clearStoredServices']));
+
+    this._services = {};
+    return true;
+  }
+
   protected getCurrencyNetwork<T extends Currencies>(currency: Maybe<T>, network: Maybe<Networks>) {
     if (currency && network) return { currency, network };
 
