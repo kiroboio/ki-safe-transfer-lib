@@ -114,28 +114,17 @@ class Base {
     return true;
   }
 
-  public getSettings(): Record<string, unknown> {
-    return {
-      authDetails: this._authDetailsIsPresent(),
-      debug: this.#debug,
-      eventBus: !!this._eventBus,
-      isAuthed: this.isAuthed,
-      lastAddresses: this._lastAddresses,
-      respondAs: this._respondAs,
-      version: version,
-      globalCurrency: this._globalCurrency,
-      globalNetwork: this._globalNetwork,
-      storedServices: this._services,
-    };
-  }
-
-  public clearStoredServices() {
-    this._logTechnical(makeString(MESSAGES.technical.running, ['clearStoredServices']));
-
-    this._services = {};
-    return true;
-  }
-
+  /*
+   * Checks through options supplied:
+   *	|	if currency and network specified there -> returns them;
+   *	| if currency and network specified in global on initialization -> returns them;
+   *	| if nothing of above -> throws an error;
+   *
+   *	@params { String } currency
+   *	@params { String } network
+   *
+   *	@returns { Object } - format: { currency: xxx, network: xxx }
+   */
   protected getCurrencyNetwork<T extends Currencies>(currency: Maybe<T>, network: Maybe<Networks>) {
     if (currency && network) return { currency, network };
 
@@ -145,7 +134,16 @@ class Base {
     throw new Error(ERRORS.validation.missingCurrencyNetwork);
   }
 
-  // TODO: add description
+  /*
+   * Store service for re-use; format: { currency: { network: { endpoint: xxx }}}
+   *
+   * @params { Object } currencyNetwork - currency and network - will be
+   * used
+   * @params { Object } endpoint - endpoint for service - will be used for
+   * key
+   * @params { Object } service - configured service to store
+   *
+   */
   protected _storeService(
     currencyNetwork: { currency: Currencies; network: Networks },
     endpoint: Endpoints,
@@ -175,6 +173,33 @@ class Base {
       );
   }
 
+  /*
+   * Returns all settings set
+   */
+  public getSettings(): Record<string, unknown> {
+    return {
+      authDetails: this._authDetailsIsPresent(),
+      debug: this.#debug,
+      eventBus: !!this._eventBus,
+      isAuthed: this.isAuthed,
+      lastAddresses: this._lastAddresses,
+      respondAs: this._respondAs,
+      version: version,
+      globalCurrency: this._globalCurrency,
+      globalNetwork: this._globalNetwork,
+      storedServices: this._services,
+    };
+  }
+
+  /*
+   * Clears all stored services
+   */
+  public clearStoredServices() {
+    this._logTechnical(makeString(MESSAGES.technical.running, ['clearStoredServices']));
+
+    this._services = {};
+    return true;
+  }
   // get last addresses
   // public getLastAddresses = (): LastAddresses => this._lastAddresses
 

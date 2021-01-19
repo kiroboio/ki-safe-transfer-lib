@@ -65,6 +65,7 @@ type Message = {
   data?: unknown;
 };
 
+// TODO: update
 type Settings = {
   debug: DebugLevels;
   currency: Currencies;
@@ -72,6 +73,11 @@ type Settings = {
   version: string;
   respondAs?: Responses;
 };
+
+export interface CurrencyNetwork {
+  currency: Currencies;
+  network: Networks;
+}
 
 /**
  * Describes lastAddresses object, which is props for getCollectables

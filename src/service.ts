@@ -16,15 +16,18 @@ import {
   Currencies,
   CollectRequest,
   Message,
+  SendRequest,
+  Collectable,
 } from './types';
-import { makeOptions, makeString, Type } from './tools';
+import { checkOwnerId, makeOptions, makeString, Type } from './tools';
 import { validateOptions } from './validators/options';
 import { ERRORS, MESSAGES } from './text';
 import { validateAddress } from './validators/address';
 import { isEmpty, isNil } from 'ramda';
 import { TEXT } from './data';
 import { invalidAddress } from './tools/validation';
-import { validateObjectWithStrings } from './validators/object';
+import { validateObject, validateObjectWithStrings } from './validators/object';
+import { validatePropsAddresses } from './validators/array';
 
 class Service extends Connect {
   private static instance: Service;
@@ -72,6 +75,13 @@ class Service extends Connect {
   private constructor(props: ConnectProps, options: Maybe<InstanceOptions>) {
     super(props, options);
   }
+
+  // service structure:
+  // - validate options -> throw if options invalid
+  // - make or get service
+  // - make request -> throw on error
+  // - save service if needed
+  // - return result
 
   /*
    * Get all networks that are online and available to Kirobo API
@@ -196,9 +206,95 @@ class Service extends Connect {
 
       const response: Results<Message> = await service.request.create({ ...request });
 
+      if (service.isNew) this._storeService(currencyNetwork, Endpoints.Transfers, service.request);
+
       return this._returnResults(options, response, 'collect', EventTypes.COLLECT_TRANSACTION);
     } catch (err) {
       this._processApiError(err, 'getTransfers');
+    }
+  }
+
+  /*
+   * Send transaction to Kirobo API
+   *
+   * @params { SendRequest } transaction - transaction details
+   * @params { QueryOptions } [ options ] - optional parameters
+   *
+   */
+  public async send(transaction: SendRequest, options?: QueryOptions) {
+    const currencyNetwork = this.getCurrencyNetwork(options?.currency, options?.network);
+
+    // validate props
+    try {
+      if (isNil(transaction) || isEmpty(transaction)) throw new Error(TEXT.errors.validation.missingArgument);
+
+      validateObject(transaction, 'transaction');
+
+      // validate address
+      if (
+        !validateAddress({
+          address: transaction.to,
+          currency: currencyNetwork.currency,
+          networkType: currencyNetwork.network,
+        })
+      )
+        throw new TypeError('Invalid address in "to".');
+
+      // TODO: update and restore
+      // validateSend(transaction, SEND_DATA_SPEC, 'send')
+
+      // validate options, if present
+      if (options) validateOptions(options, 'send');
+    } catch (err) {
+      this._processValidationError(err, 'send');
+    }
+
+    // make request
+    try {
+      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['send']));
+
+      const service = this._retrieveServiceOrMakeNew(currencyNetwork, Endpoints.Transfers);
+
+      const response: BtcTransfer | EthTransfer = await service.request.create(checkOwnerId(transaction));
+
+      if (service.isNew) this._storeService(currencyNetwork, Endpoints.Transfers, service.request);
+
+      return this._returnResults(options, response, 'send', EventTypes.SEND_TRANSACTION);
+    } catch (err) {
+      this._processApiError(err, 'send');
+    }
+  }
+
+  // get all collectables by recipient address
+  public async getCollectables(addresses: string[], options?: QueryOptions): Promise<Maybe<Results<Collectable>>> {
+    const currencyNetwork = this.getCurrencyNetwork(options?.currency, options?.network);
+
+    try {
+      validatePropsAddresses(addresses, 'addresses', 'getCollectables', currencyNetwork);
+
+      if (options) {
+        validateOptions(options, 'getCollectables');
+      }
+    } catch (err) {
+      this._processValidationError(err, 'collect');
+    }
+
+    try {
+      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getCollectables']));
+
+      const service = this._retrieveServiceOrMakeNew(currencyNetwork, Endpoints.Inbox);
+
+      const response: Results<Collectable> = await service.request.find({
+        query: { to: addresses.join(';'), ...makeOptions(options, this._watch) },
+      });
+
+      if (service.isNew) this._storeService(currencyNetwork, Endpoints.Transfers, service.request);
+
+      this._lastAddresses = { addresses, options };
+
+      return this._returnResults(options, response, 'getCollectables', EventTypes.GET_COLLECTABLES);
+    } catch (err) {
+      this._processApiError(err, 'getCollectables');
     }
   }
 
@@ -206,106 +302,6 @@ class Service extends Connect {
   //
   //
 
-  // TODO: add desc
-  // public async send(transaction: SendRequest, options?: QueryOptions): Promise<Maybe<Transfer>> {
-  //
-  //   /** validate props */
-  //   try {
-  //     if (isNil(transaction) || isEmpty(transaction)) throw new Error(TEXT.errors.validation.missingArgument)
-  //
-  //     validateObject(transaction, 'transaction')
-  //
-  //     // validate address
-  //     if (!validateAddress({ address: transaction.to, currency: this._currency, networkType: this._network }))
-  //       throw new TypeError('Invalid address in "to".')
-  //
-  //     // validateSend(transaction, SEND_DATA_SPEC, 'send')
-  //
-  //     /** validate options, if present */
-  //     if (options) {
-  //       validateOptions(options, 'send')
-  //     }
-  //   } catch (err) {
-  //
-  //     /** log error */
-  //     this._logError('Service (collect) caught [validation] error.', err)
-  //
-  //     /** throw appropriate error */
-  //     throw makePropsResponseError(err)
-  //   }
-  //
-  //   let response: Transfer
-  //
-  //   /** make request */
-  //   try {
-  //     response = await this._transfers.create(checkOwnerId(transaction))
-  //   } catch (err) {
-  //
-  //     /** log error */
-  //     this._logApiError('Service (collect) caught [request] error.', err)
-  //
-  //     /** throw appropriate error */
-  //     throw makeApiResponseError(err)
-  //   }
-  //
-  //   /** return the results */
-  //   if (shouldReturnDirect(options, this._respondAs)) return response
-  //
-  //   this._useEventBus(EventTypes.SEND_TRANSACTION, response)
-  // }
-
-  // get all collectables by recipient address
-  // public async getCollectables(addresses: string[], options?: QueryOptions): Promise<Maybe<Results<Collectable>>> {
-  //
-  //   /** validate props */
-  //   try {
-  //     validatePropsAddresses(addresses, 'addresses', 'getCollectables', this.getSettings())
-  //
-  //     /** validate options, if present */
-  //     if (options) {
-  //       validateOptions(options, 'getCollectables')
-  //     }
-  //   } catch (err) {
-  //
-  //     /** log error */
-  //     this._logError('Service (getCollectables) caught [validation] error.', err)
-  //
-  //     /** throw appropriate error */
-  //     throw makePropsResponseError(err)
-  //   }
-  //
-  //   let response: Results<Collectable>
-  //
-  //   /** make request */
-  //   try {
-  //     response = await this._inbox.find({
-  //       query: { to: addresses.join(';'), ...makeOptions(options, this._watch) },
-  //     })
-  //   } catch (err) {
-  //
-  //     /** log error */
-  //     this._logApiError('Service (getCollectables) caught [request] error.', err)
-  //
-  //     /** throw error */
-  //     throw makeApiResponseError(err)
-  //   }
-  //
-  //   /** cache addresses */
-  //   this._lastAddresses = { addresses, options }
-  //
-  //   try {
-  //
-  //     /** return the results */
-  //     if (shouldReturnDirect(options, this._respondAs)) return response
-  //
-  //     this._useEventBus(EventTypes.GET_COLLECTABLES, response)
-  //   } catch (err) {
-  //     throw makeReturnError(err.message, err)
-  //   }
-  // }
-
-  // TODO: add desc
-  // TODO: add test
   // public async getRawTransaction(
   //   txid: string,
   //   options?: Omit<QueryOptions, 'limit' | 'skip' | 'watch'>,
