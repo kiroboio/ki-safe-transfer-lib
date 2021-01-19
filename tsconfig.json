@@ -12,7 +12,6 @@
     "moduleResolution": "node",
     "noImplicitAny": true,
     "noImplicitThis": true,
-    "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
     "outDir": "./dist",

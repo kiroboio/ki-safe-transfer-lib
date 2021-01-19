@@ -697,7 +697,7 @@ class Connect extends Base {
         this._storeService(currencyNetwork, Endpoints.Networks, service.request);
       }
 
-      this._returnResults(options, response.data[0], 'getStatusFor', EventTypes.GET_STATUS);
+      return this._returnResults(options, response.data[0], 'getStatusFor', EventTypes.GET_STATUS);
     } catch (err) {
       this._processApiError(err, 'getStatusFor');
     }
@@ -730,7 +730,7 @@ class Connect extends Base {
       const response = this.#connect.io.io.readyState === 'open';
 
       this._log(makeString(MESSAGES.technical.gotResponse, ['getIsConnected']), response);
-      this._returnResults(options, response, 'getIsConnected', EventTypes.GET_IS_CONNECTED);
+      return this._returnResults(options, response, 'getIsConnected', EventTypes.GET_IS_CONNECTED);
     } catch (err) {
       this._processApiError(err, 'getIsConnected');
     }
@@ -758,7 +758,7 @@ class Connect extends Base {
 
       this._manuallyDisconnected = false;
       this._log(makeString(MESSAGES.technical.gotResponse, ['connect']), response);
-      this._returnResults(options, response, 'connect', EventTypes.CONNECT);
+      return this._returnResults(options, response, 'connect', EventTypes.CONNECT);
     } catch (err) {
       this._processApiError(err, 'connect');
     }

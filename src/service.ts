@@ -1,8 +1,24 @@
 import { Connect } from './connect';
-import { ConnectProps, AnyValue, Maybe, InstanceOptions, QueryOptions, Endpoints, EventTypes } from './types';
+import {
+  ConnectProps,
+  AnyValue,
+  Maybe,
+  InstanceOptions,
+  QueryOptions,
+  Endpoints,
+  EventTypes,
+  Results,
+  BtcNetworkItem,
+  EthNetworkItem,
+  Either,
+  EthTransfer,
+} from './types';
 import { makeOptions, makeString, Type } from './tools';
 import { validateOptions } from './validators/options';
 import { MESSAGES } from './text';
+import { validateAddress } from './validators/address';
+import { isEmpty, isNil } from 'ramda';
+import { TEXT } from './data';
 
 class Service extends Connect {
   private static instance: Service;
@@ -51,7 +67,12 @@ class Service extends Connect {
     super(props, options);
   }
 
-  // TODO: add description
+  /*
+   * Get all networks that are online and available to Kirobo API
+   *
+   * @params { QueryOptions } [options] - optional parameters
+   *
+   */
   public async getOnlineNetworks(options?: QueryOptions) {
     this._logTechnical(makeString(MESSAGES.technical.running, ['getOnlineNetworks']));
 
@@ -72,7 +93,7 @@ class Service extends Connect {
 
       const service = this._retrieveServiceOrMakeNew(currencyNetwork, Endpoints.Networks);
 
-      const response = await service.request.find({
+      const response: Results<Either<BtcNetworkItem, EthNetworkItem>[]> = await service.request.find({
         query: {
           online: true,
           ...makeOptions(options, this._watch),
@@ -81,12 +102,57 @@ class Service extends Connect {
 
       if (service.isNew) this._storeService(currencyNetwork, Endpoints.Networks, service.request);
 
-      this._returnResults(options, response, 'getOnlineNetworks', EventTypes.GET_ONLINE_NETWORKS);
+      return this._returnResults(options, response, 'getOnlineNetworks', EventTypes.GET_ONLINE_NETWORKS);
     } catch (err) {
       this._processApiError(err, 'getOnlineNetworks');
     }
   }
 
+  public async getTransfers(address: string, options?: QueryOptions) {
+    this._logTechnical(makeString(MESSAGES.technical.running, ['getTransfers']));
+
+    const currencyNetwork = this.getCurrencyNetwork(options?.currency, options?.network);
+
+    // validate props
+    try {
+      if (isNil(address) || isEmpty(address)) throw new Error(TEXT.errors.validation.missingArgument);
+
+      // validate address
+      if (!validateAddress({ address, currency: currencyNetwork.currency, networkType: currencyNetwork.network }))
+        throw new TypeError('Invalid address in "to".');
+
+      // validate options, if present
+      if (options) {
+        validateOptions(options, 'getTransfers');
+      }
+    } catch (err) {
+      this._processValidationError(err, 'getTransfers');
+    }
+
+    /** make request */
+    try {
+      this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getTransfers']));
+
+      const service = this._retrieveServiceOrMakeNew(currencyNetwork, Endpoints.Transfers);
+
+      const response: Results<EthTransfer> = await service.request.find({
+        query: {
+          address,
+          ...makeOptions(options, this._watch),
+        },
+      });
+
+      if (service.isNew) this._storeService(currencyNetwork, Endpoints.Transfers, service.request);
+
+      return this._returnResults(options, response, 'getTransfers', EventTypes.GET_TRANSFERS);
+    } catch (err) {
+      this._processApiError(err, 'getTransfers');
+    }
+  }
+
+  // =====================
+  //
+  //
   // TODO: merge with collectEth
   // public async collect(
   //   request: CollectRequest,
@@ -1025,63 +1091,6 @@ class Service extends Connect {
   //
   //   this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['ethTransferRequest']))
   //   this._useEventBus(EventTypes.ETH_TRANSFER_REQUEST, response)
-  // }
-
-  // public async getTransfers(address: string, options?: QueryOptions): Promise<Maybe<Results<EthTransfer>>> {
-  //   this._logTechnical(makeString(MESSAGES.technical.running, ['getTransfers']))
-  //
-  //   /** validate props */
-  //   try {
-  //     this._logTechnical(makeString(MESSAGES.technical.checkingProps, ['getTransfers']))
-  //
-  //     if (isNil(address) || isEmpty(address)) throw new Error(TEXT.errors.validation.missingArgument)
-  //
-  //     // validate address
-  //     if (!validateAddress({ address, currency: this._currency, networkType: this._network }))
-  //       throw new TypeError('Invalid address in "to".')
-  //
-  //     /** validate options, if present */
-  //     if (options) {
-  //       this._logTechnical(makeString(MESSAGES.technical.foundAndChecking, ['getTransfers', 'options']))
-  //       validateOptions(options, 'getTransfers')
-  //     }
-  //   } catch (err) {
-  //
-  //     /** log error */
-  //     this._logError(makeString(ERRORS.service.gotError, ['getTransfers', 'validation']), err)
-  //
-  //     /** throw appropriate error */
-  //     throw makePropsResponseError(err)
-  //   }
-  //
-  //   let response: Results<EthTransfer>
-  //
-  //   /** make request */
-  //   try {
-  //     this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getTransfers']))
-  //     response = await this._transfers.find({
-  //       query: {
-  //         address,
-  //         ...makeOptions(options, this._watch),
-  //       },
-  //     })
-  //     this._log(makeString(MESSAGES.technical.gotResponse, ['getTransfers']), response)
-  //   } catch (err) {
-  //
-  //     /** log error */
-  //     this._logApiError(makeString(ERRORS.service.gotError, ['getTransfers', 'request']), err)
-  //
-  //     /** throw appropriate error */
-  //     throw makeApiResponseError(err)
-  //   }
-  //
-  //   /** return the results */
-  //   this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getTransfers', 'return']))
-  //
-  //   if (shouldReturnDirect(options, this._respondAs)) return response
-  //
-  //   this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getTransfers']))
-  //   this._useEventBus(EventTypes.GET_TRANSFERS, response)
   // }
 
   // public async collectEth(

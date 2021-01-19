@@ -129,7 +129,7 @@ class Base {
     };
   }
 
-  protected getCurrencyNetwork(currency: Maybe<Currencies>, network: Maybe<Networks>) {
+  protected getCurrencyNetwork<T extends Currencies>(currency: Maybe<T>, network: Maybe<Networks>) {
     if (currency && network) return { currency, network };
 
     if (this._globalCurrency && this._globalNetwork)

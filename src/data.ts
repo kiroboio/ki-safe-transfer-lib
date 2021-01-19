@@ -65,6 +65,8 @@ export const optionsValidValues: ValidType = {
   limit: { type: 'number' },
   watch: { type: 'string' },
   respondDirect: { type: 'boolean' },
+  currency: { type: 'string' },
+  network: { type: 'string' },
 };
 
 export const optionsRequestValidValues: ValidType = {
