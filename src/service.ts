@@ -298,123 +298,6 @@ class Service extends Connect {
     }
   }
 
-  // =====================
-  //
-  //
-
-  // public async getRawTransaction(
-  //   txid: string,
-  //   options?: Omit<QueryOptions, 'limit' | 'skip' | 'watch'>,
-  // ): Promise<Maybe<Results<RawTransaction[]>>> {
-  //
-  //   /** validate props */
-  //   try {
-  //     if (isNil(txid))
-  //       throw new TypeError(makeString(ERRORS.validation.missingArgument, ['txid', '', 'getRawTransaction']))
-  //
-  //     if (typeof txid !== 'string')
-  //       throw new TypeError(
-  //         makeString(ERRORS.validation.wrongTypeArgument, ['txid', 'getRawTransaction', typeof txid, 'string']),
-  //       )
-  //
-  //     /** validate options, if present */
-  //     if (options) {
-  //       validateOptions(options, 'getRawTransaction')
-  //     }
-  //   } catch (err) {
-  //
-  //     /** log error */
-  //     this._logError(makeString(ERRORS.service.gotError, ['getRawTransaction', 'validation']), err)
-  //
-  //     /** throw appropriate error */
-  //     throw makePropsResponseError(err)
-  //   }
-  //
-  //   /** make request */
-  //   let response: Results<RawTransaction[]>
-  //
-  //   try {
-  //     this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getRawTransaction']))
-  //
-  //     response = await this._transactions.get(txid)
-  //
-  //     this._log(makeString(MESSAGES.technical.gotResponse, ['getRawTransaction']), response)
-  //   } catch (err) {
-  //     this._logApiError(makeString(ERRORS.service.gotError, ['getRawTransaction', 'request']), err)
-  //     throw makeReturnError(err.message, err)
-  //   }
-  //
-  //   /** return results */
-  //
-  //   try {
-  //     this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getRawTransaction', 'return']))
-  //
-  //     if (shouldReturnDirect(options, this._respondAs)) return response
-  //
-  //     this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getRawTransaction']))
-  //     this._useEventBus(EventTypes.GET_RAW_TRANSACTIONS, response)
-  //   } catch (err) {
-  //     throw makeReturnError(err.message, err)
-  //   }
-  // }
-
-  // TODO: add desc
-  // TODO: add test
-  // public async getRawTransactions(
-  //   txids: string[],
-  //   options?: Omit<QueryOptions, 'watch'>,
-  // ): Promise<Maybe<Results<RawTransaction[]>>> {
-  //
-  //   /** validate props */
-  //   try {
-  //     validatePropsArray(txids, 'string', 'txids', 'getRawTransactions')
-  //
-  //     /** validate options, if present */
-  //     if (options) {
-  //       validateOptions(options, 'getRawTransactions')
-  //     }
-  //   } catch (err) {
-  //
-  //     /** log error */
-  //     this._logError(makeString(ERRORS.service.gotError, ['getRawTransactions', 'validation']), err)
-  //
-  //     /** throw appropriate error */
-  //     throw makePropsResponseError(err)
-  //   }
-  //
-  //   /** make request */
-  //   let response: Results<RawTransaction[]>
-  //
-  //   try {
-  //     this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getRawTransactions']))
-  //
-  //     response = await this._transactions.find({
-  //       query: {
-  //         txid: join(';', txids),
-  //         ...makeOptions(options, this._watch),
-  //       },
-  //     })
-  //
-  //     this._log(makeString(MESSAGES.technical.gotResponse, ['getRawTransactions']), response)
-  //   } catch (err) {
-  //     this._logApiError(makeString(ERRORS.service.gotError, ['getRawTransactions', 'request']), err)
-  //     throw makeReturnError(err.message, err)
-  //   }
-  //
-  //   /** return results */
-  //
-  //   try {
-  //     this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getRawTransactions', 'return']))
-  //
-  //     if (shouldReturnDirect(options, this._respondAs)) return response
-  //
-  //     this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getRawTransactions']))
-  //     this._useEventBus(EventTypes.GET_RAW_TRANSACTIONS, response)
-  //   } catch (err) {
-  //     throw makeReturnError(err.message, err)
-  //   }
-  // }
-
   // TODO: add desc
   // public async getUtxos(addresses: string[], options?: Omit<QueryOptions, 'watch'>): Promise<Maybe<Results<Utxo>>> {
   //
@@ -563,6 +446,121 @@ class Service extends Connect {
   //     if (shouldReturnDirect(options, this._respondAs)) return assoc('data', freshAddresses, response)
   //
   //     this._useEventBus(EventTypes.GET_FRESH, assoc('data', freshAddresses, response))
+  //   } catch (err) {
+  //     throw makeReturnError(err.message, err)
+  //   }
+  // }
+
+  // =====================
+  //
+  //
+
+  // public async getRawTransaction(
+  //   txid: string,
+  //   options?: Omit<QueryOptions, 'limit' | 'skip' | 'watch'>,
+  // ): Promise<Maybe<Results<RawTransaction[]>>> {
+  //
+  //   /** validate props */
+  //   try {
+  //     if (isNil(txid))
+  //       throw new TypeError(makeString(ERRORS.validation.missingArgument, ['txid', '', 'getRawTransaction']))
+  //
+  //     if (typeof txid !== 'string')
+  //       throw new TypeError(
+  //         makeString(ERRORS.validation.wrongTypeArgument, ['txid', 'getRawTransaction', typeof txid, 'string']),
+  //       )
+  //
+  //     /** validate options, if present */
+  //     if (options) {
+  //       validateOptions(options, 'getRawTransaction')
+  //     }
+  //   } catch (err) {
+  //
+  //     /** log error */
+  //     this._logError(makeString(ERRORS.service.gotError, ['getRawTransaction', 'validation']), err)
+  //
+  //     /** throw appropriate error */
+  //     throw makePropsResponseError(err)
+  //   }
+  //
+  //   /** make request */
+  //   let response: Results<RawTransaction[]>
+  //
+  //   try {
+  //     this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getRawTransaction']))
+  //
+  //     response = await this._transactions.get(txid)
+  //
+  //     this._log(makeString(MESSAGES.technical.gotResponse, ['getRawTransaction']), response)
+  //   } catch (err) {
+  //     this._logApiError(makeString(ERRORS.service.gotError, ['getRawTransaction', 'request']), err)
+  //     throw makeReturnError(err.message, err)
+  //   }
+  //
+  //   /** return results */
+  //
+  //   try {
+  //     this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getRawTransaction', 'return']))
+  //
+  //     if (shouldReturnDirect(options, this._respondAs)) return response
+  //
+  //     this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getRawTransaction']))
+  //     this._useEventBus(EventTypes.GET_RAW_TRANSACTIONS, response)
+  //   } catch (err) {
+  //     throw makeReturnError(err.message, err)
+  //   }
+  // }
+
+  // public async getRawTransactions(
+  //   txids: string[],
+  //   options?: Omit<QueryOptions, 'watch'>,
+  // ): Promise<Maybe<Results<RawTransaction[]>>> {
+  //
+  //   /** validate props */
+  //   try {
+  //     validatePropsArray(txids, 'string', 'txids', 'getRawTransactions')
+  //
+  //     /** validate options, if present */
+  //     if (options) {
+  //       validateOptions(options, 'getRawTransactions')
+  //     }
+  //   } catch (err) {
+  //
+  //     /** log error */
+  //     this._logError(makeString(ERRORS.service.gotError, ['getRawTransactions', 'validation']), err)
+  //
+  //     /** throw appropriate error */
+  //     throw makePropsResponseError(err)
+  //   }
+  //
+  //   /** make request */
+  //   let response: Results<RawTransaction[]>
+  //
+  //   try {
+  //     this._logTechnical(makeString(MESSAGES.technical.requestingData, ['getRawTransactions']))
+  //
+  //     response = await this._transactions.find({
+  //       query: {
+  //         txid: join(';', txids),
+  //         ...makeOptions(options, this._watch),
+  //       },
+  //     })
+  //
+  //     this._log(makeString(MESSAGES.technical.gotResponse, ['getRawTransactions']), response)
+  //   } catch (err) {
+  //     this._logApiError(makeString(ERRORS.service.gotError, ['getRawTransactions', 'request']), err)
+  //     throw makeReturnError(err.message, err)
+  //   }
+  //
+  //   /** return results */
+  //
+  //   try {
+  //     this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['getRawTransactions', 'return']))
+  //
+  //     if (shouldReturnDirect(options, this._respondAs)) return response
+  //
+  //     this._logTechnical(makeString(MESSAGES.technical.willReplyThroughBus, ['getRawTransactions']))
+  //     this._useEventBus(EventTypes.GET_RAW_TRANSACTIONS, response)
   //   } catch (err) {
   //     throw makeReturnError(err.message, err)
   //   }
