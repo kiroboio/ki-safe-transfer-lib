@@ -5,6 +5,8 @@
     "RETRIEVABLES",
     "UTXOS",
     "authdetails",
-    "kirobo"
+    "feathersjs",
+    "kirobo",
+    "socketio"
   ]
 }

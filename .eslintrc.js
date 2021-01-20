@@ -56,7 +56,7 @@ module.exports = {
     'lines-around-comment': [0],
     'lines-between-class-members': ['error', 'always'],
     'max-lines': ['error', { max: 800, skipBlankLines: true, skipComments: true }],
-    'max-nested-callbacks': [2, 3],
+    'max-nested-callbacks': [2, 5],
     // TODO: fix this and all errors
     'max-params': ['error', 4],
     'newline-per-chained-call': ['off'],
