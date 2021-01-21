@@ -452,6 +452,31 @@ class Connect {
   public connect() {
     this.#socket.connect().open();
   }
+
+  public async decrypt(payload: Record<string, unknown>) {
+    if (
+      typeof window === 'undefined' ||
+      typeof _payloadKey[this.#sessionId] === 'undefined' ||
+      typeof payload.encrypted !== 'string'
+    ) {
+      return payload;
+    }
+
+    const ciphertext = await window.crypto.subtle.decrypt(
+      {
+        name: 'AES-CBC',
+        iv: _payloadKey[this.#sessionId].iv,
+      },
+      _payloadKey[this.#sessionId].key,
+      str2ab(window.atob(payload.encrypted)),
+    );
+
+    const buffer = new Uint8Array(ciphertext);
+
+    const decrypted = String.fromCharCode.apply(null, buffer as AnyValue);
+
+    return JSON.parse(decrypted);
+  }
 }
 
 export { Connect };
