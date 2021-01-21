@@ -232,35 +232,7 @@ class Connect {
       }
     }
 
-    this.#connect = connect.configure(auth({ storageKey: 'auth', storage: new safeStorage() })).hooks({
-      before: {
-        all: [
-          async (context: HookContext) => {
-            if (context.params.query) {
-              context.params.query = await encrypt(context.params.query, this.#sessionId);
-            }
-          },
-        ],
-      },
-      after: {
-        all: [
-          async (context: HookContext) => {
-            if (context.result) {
-              context.result = await decrypt(context.result, this.#sessionId);
-            }
-          },
-        ],
-      },
-      error: {
-        all: [
-          async (context: HookContext) => {
-            if (context.error) {
-              context.error = await decrypt(context.error, this.#sessionId);
-            }
-          },
-        ],
-      },
-    });
+    this.#connect = connect.configure(auth({ storageKey: 'auth', storage: new safeStorage() }));
 
     // connect/disconnect event processes
     this._logTechnical('Service is setting up connect/disconnect listeners...');
@@ -442,36 +414,35 @@ class Connect {
   }
 
   public getService(path: string): ApiService {
-    return this.#connect.service(path);
-    //   .hooks({
-    //   before: {
-    //     all: [
-    //       async (context: HookContext) => {
-    //         if (context.params.query) {
-    //           context.params.query = await encrypt(context.params.query, this.#sessionId);
-    //         }
-    //       },
-    //     ],
-    //   },
-    //   after: {
-    //     all: [
-    //       async (context: HookContext) => {
-    //         if (context.result) {
-    //           context.result = await decrypt(context.result, this.#sessionId);
-    //         }
-    //       },
-    //     ],
-    //   },
-    //   error: {
-    //     all: [
-    //       async (context: HookContext) => {
-    //         if (context.error) {
-    //           context.error = await decrypt(context.error, this.#sessionId);
-    //         }
-    //       },
-    //     ],
-    //   },
-    // });
+    return this.#connect.service(path).hooks({
+      before: {
+        all: [
+          async (context: HookContext) => {
+            if (context.params.query) {
+              context.params.query = await encrypt(context.params.query, this.#sessionId);
+            }
+          },
+        ],
+      },
+      after: {
+        all: [
+          async (context: HookContext) => {
+            if (context.result) {
+              context.result = await decrypt(context.result, this.#sessionId);
+            }
+          },
+        ],
+      },
+      error: {
+        all: [
+          async (context: HookContext) => {
+            if (context.error) {
+              context.error = await decrypt(context.error, this.#sessionId);
+            }
+          },
+        ],
+      },
+    });
   }
 
   public issConnected() {
