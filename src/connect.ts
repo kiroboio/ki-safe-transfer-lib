@@ -232,7 +232,16 @@ class Connect {
       }
     }
 
-    this.#connect = connect.configure(auth({ storageKey: 'auth', storage: new safeStorage() }));
+    this.#connect = connect.configure(auth({ storageKey: 'auth', storage: new safeStorage() })).hooks({
+      finally: {
+        all: [
+          async (context: HookContext) => {
+            // eslint-disable-next-line no-console
+            console.log('fin_hook', context.result);
+          },
+        ],
+      },
+    });
 
     // connect/disconnect event processes
     this._logTechnical('Service is setting up connect/disconnect listeners...');
