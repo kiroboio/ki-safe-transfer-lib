@@ -7,7 +7,7 @@ import { AuthenticationResult } from '@feathersjs/authentication';
 import auth, { Storage, MemoryStorage } from '@feathersjs/authentication-client';
 
 import { capitalize, makeString, diff, getTime, Type, LogInfo, LogApiWarning, LogApiError } from './tools';
-import { ApiService, AnyValue, Either, AuthDetails } from './types/types';
+import { ApiService, AnyValue, Either, AuthDetails, EventBusProps, Maybe } from './types/types';
 import { ApiError } from './types/error';
 import { apiUrl as apiUrlFromConfig, connectionTriesMax, connectionTimeout } from './config';
 import { WARNINGS, ERRORS, MESSAGES } from './text';
@@ -413,7 +413,7 @@ class Connect {
     if (this.#connect) this.#connect.io.destroy();
   }
 
-  public getService(path: string): ApiService {
+  public getService(path: string, eventBus?: Maybe<EventBusProps>): ApiService {
     return this.#connect.service(path).hooks({
       before: {
         all: [
@@ -429,6 +429,9 @@ class Connect {
           async (context: HookContext) => {
             if (context.result) {
               context.result = await decrypt(context.result, this.#sessionId);
+
+              if (eventBus?.eventBus && eventBus?.type)
+                eventBus.eventBus({ type: eventBus.type, payload: context.result });
             }
           },
         ],
