@@ -237,7 +237,12 @@ class Connect {
         all: [
           async (context: HookContext) => {
             // eslint-disable-next-line no-console
-            console.log('fin_hook', context.result);
+            console.log('encr', context.result);
+
+            if (context.result.encrypted) context.result = await decrypt(context.result, this.#sessionId);
+
+            // eslint-disable-next-line no-console
+            console.log('ready', context.result);
           },
         ],
       },
