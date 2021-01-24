@@ -147,3 +147,5 @@ export interface Results<T = unknown> {
   skip: number;
   total: number;
 }
+
+export type MessageCallback = (message: string, payload?: unknown) => void;

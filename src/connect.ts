@@ -7,7 +7,7 @@ import { AuthenticationResult } from '@feathersjs/authentication';
 import auth, { Storage, MemoryStorage } from '@feathersjs/authentication-client';
 
 import { capitalize, makeString, diff, getTime, Type, LogInfo, LogApiWarning, LogApiError } from './tools';
-import { ApiService, AnyValue, Either, AuthDetails, EventBusProps, Maybe } from './types/types';
+import { ApiService, AnyValue, Either, AuthDetails, EventBusProps, Maybe, MessageCallback } from './types/types';
 import { ApiError } from './types/error';
 import { apiUrl as apiUrlFromConfig, connectionTriesMax, connectionTimeout } from './config';
 import { WARNINGS, ERRORS, MESSAGES } from './text';
@@ -174,15 +174,17 @@ class Connect {
 
   #connectionCounter = 0;
 
-  #lastConnect: number | undefined = undefined;
+  #lastConnect: Either<number, undefined> = undefined;
 
   #manuallyDisconnected = false;
 
+  #messageCallback: Maybe<MessageCallback>;
+
   public isAuthed = false;
 
-  constructor(authDetails: AuthDetails) {
+  constructor(authDetails: AuthDetails, messageCallback?: MessageCallback) {
     this.#auth = authDetails;
-
+    this.#messageCallback = messageCallback;
     this.#sessionId = ++_payloadCount;
 
     // setup
@@ -232,27 +234,15 @@ class Connect {
       }
     }
 
-    this.#connect = connect.configure(auth({ storageKey: 'auth', storage: new safeStorage() })).hooks({
-      finally: {
-        all: [
-          async (context: HookContext) => {
-            // eslint-disable-next-line no-console
-            console.log('encr', context.result);
-
-            if (context.result.encrypted) context.result = await decrypt(context.result, this.#sessionId);
-
-            // eslint-disable-next-line no-console
-            console.log('ready', context.result);
-          },
-        ],
-      },
-    });
+    this.#connect = connect.configure(auth({ storageKey: 'auth', storage: new safeStorage() }));
 
     // connect/disconnect event processes
     this._logTechnical('Service is setting up connect/disconnect listeners...');
 
     try {
       this.#connect.io.on('connect', (): void => {
+        if (this.#messageCallback) this.#messageCallback('connected');
+
         this._logTechnical(makeString(MESSAGES.technical.proceedingWith, ['is connected', 'authorization']));
 
         this._logTechnical(makeString(MESSAGES.technical.serviceIs, ["checking if it's allowed to proceed:"]));
@@ -296,6 +286,8 @@ class Connect {
     try {
       this.#connect.io.on('disconnect', (payload: string) => {
         this._logApiWarning(WARNINGS.connect.disconnect, capitalize(payload));
+
+        if (this.#messageCallback) this.#messageCallback('disconnected');
       });
     } catch (err) {
       this._logApiError(ERRORS.connect.on.disconnect.direct, err);
@@ -356,6 +348,8 @@ class Connect {
         this.#lastConnect = getTime();
         await this.#connect.get('authentication');
         this.isAuthed = true;
+
+        if (this.#messageCallback) this.#messageCallback('authed');
       })
       .catch(err => {
         this._logTechnical(ERRORS.service.failedAuth);
@@ -443,9 +437,6 @@ class Connect {
           async (context: HookContext) => {
             if (context.result) {
               context.result = await decrypt(context.result, this.#sessionId);
-
-              if (eventBus?.eventBus && eventBus?.type)
-                eventBus.eventBus({ type: eventBus.type, payload: context.result });
             }
           },
         ],
@@ -456,6 +447,14 @@ class Connect {
             if (context.error) {
               context.error = await decrypt(context.error, this.#sessionId);
             }
+          },
+        ],
+      },
+      finally: {
+        all: [
+          async (context: HookContext) => {
+            if (eventBus?.eventBus && eventBus?.type)
+              eventBus.eventBus({ type: eventBus.type, payload: context.result });
           },
         ],
       },
@@ -493,6 +492,10 @@ class Connect {
     const decrypted = String.fromCharCode.apply(null, buffer as AnyValue);
 
     return JSON.parse(decrypted);
+  }
+
+  public setMessageCallback(fn: MessageCallback) {
+    this.#messageCallback = fn;
   }
 }
 
