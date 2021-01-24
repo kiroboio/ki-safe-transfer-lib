@@ -1,4 +1,4 @@
-import feathers, { Application, HookContext } from '@feathersjs/feathers';
+import feathers, { Application, HookContext, Service as FeathersService } from '@feathersjs/feathers';
 import { StorageWrapper } from '@feathersjs/authentication-client/lib/storage';
 import io from 'socket.io-client';
 import crypto from 'crypto-js';
@@ -163,6 +163,92 @@ const decrypt = async (payload: Record<string, unknown>, sessionId: number) => {
   return JSON.parse(decrypted);
 };
 
+type FeathersEventType = 'created' | 'updated' | 'removed' | 'patched';
+
+export class ApiService2 {
+  #service: FeathersService<unknown> | undefined;
+
+  #sessionId: number;
+
+  public get(id: string | number, params?: feathers.Params | undefined): Promise<unknown> {
+    if (!this.#service) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      return new Promise((_resolve, reject) => reject('No Service'));
+    }
+
+    return this.#service?.get(id, params);
+  }
+
+  public find(params?: feathers.Params | undefined): Promise<unknown> {
+    if (!this.#service) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      return new Promise((_resolve, reject) => reject('No Service'));
+    }
+
+    return this.#service.find(params);
+  }
+
+  public on(event: FeathersEventType, listener: (arg2: AnyValue) => AnyValue) {
+    this.#service?.on(event, async (...args: AnyValue[]) => {
+      listener(await decrypt(args[0], this.#sessionId));
+    });
+  }
+
+  static setHooks(service: FeathersService<unknown>, sessionId: number) {
+    service.hooks({
+      before: {
+        all: [
+          async (context: HookContext) => {
+            if (context.params.query) {
+              context.params.query = await encrypt(context.params.query, sessionId);
+            }
+          },
+        ],
+      },
+      after: {
+        all: [
+          async (context: HookContext) => {
+            if (context.result) {
+              context.result = await decrypt(context.result, sessionId);
+            }
+          },
+        ],
+      },
+      error: {
+        all: [
+          async (context: HookContext) => {
+            if (context.error) {
+              context.error = await decrypt(context.error, sessionId);
+            }
+          },
+        ],
+      },
+      finally: {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        all: [async (_context: HookContext) => {}],
+      },
+    });
+  }
+
+  constructor(
+    path: string,
+    app: Application<unknown>,
+    services: { [key: string]: FeathersService<unknown> },
+    sessionId: number,
+  ) {
+    let service = services[path];
+
+    if (!service) {
+      service = app.service(path);
+      services[path] = service;
+      ApiService2.setHooks(service, sessionId);
+    }
+
+    this.#service = service;
+    this.#sessionId = sessionId;
+  }
+}
+
 class Connect {
   #connect: Application<unknown>;
 
@@ -180,12 +266,15 @@ class Connect {
 
   #messageCallback: Maybe<MessageCallback>;
 
+  #services: { [key: string]: FeathersService<AnyValue> };
+
   public isAuthed = false;
 
   constructor(authDetails: AuthDetails, messageCallback?: MessageCallback) {
     this.#auth = authDetails;
     this.#messageCallback = messageCallback;
     this.#sessionId = ++_payloadCount;
+    this.#services = {};
 
     // setup
     this._logTechnical('Service is configuring connection...');
@@ -459,6 +548,10 @@ class Connect {
         ],
       },
     });
+  }
+
+  public getService2(path: string): ApiService2 {
+    return new ApiService2(path, this.#connect, this.#services, this.#sessionId);
   }
 
   public issConnected() {
