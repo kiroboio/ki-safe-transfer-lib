@@ -29,7 +29,7 @@ describe('Authentication', () => {
 
     await wait(2000);
 
-    const r = incorrect.isAuthed;
+    const r = incorrect.isAuthorized();
 
     expect(r).toEqual(false);
   });
