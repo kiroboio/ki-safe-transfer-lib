@@ -36,7 +36,7 @@ export interface EthTransfer {
   retrieve: BroadcastConfirmation;
   salt: string;
   secretHash: string;
-  state: 'waiting-for-deposit' | 'retrieved' | 'ready' | 'collecting' | 'collected' | 'rejected' | 'invalid' | 'new';
+  state: string; // 'waiting-for-deposit' | 'retrieved' | 'ready' | 'collecting' | 'collected' | 'rejected' | 'invalid' | 'new';
   to: string;
   updatedAt: string;
   value: string;
@@ -149,3 +149,15 @@ export interface Results<T = unknown> {
 }
 
 export type MessageCallback = (message: string, payload?: unknown) => void;
+
+export interface EthTransferResponse {
+  from: string;
+  to: string;
+  value: string;
+  secretHash: string;
+  publicSalt: string;
+  createdAt: string;
+  expiresAt: string;
+  id: string;
+  fees: string;
+}
