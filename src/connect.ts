@@ -7,7 +7,7 @@ import { AuthenticationResult } from '@feathersjs/authentication';
 import auth, { Storage, MemoryStorage } from '@feathersjs/authentication-client';
 
 import { capitalize, makeString, diff, getTime, Type, LogInfo, LogApiWarning, LogApiError } from './tools';
-import { ApiService, AnyValue, Either, AuthDetails, EventBusProps, Maybe, MessageCallback } from './types/types';
+import { AnyValue, Either, AuthDetails, Maybe, MessageCallback } from './types/types';
 import { ApiError } from './types/error';
 import { apiUrl as apiUrlFromConfig, connectionTriesMax, connectionTimeout } from './config';
 import { WARNINGS, ERRORS, MESSAGES } from './text';
@@ -165,7 +165,7 @@ const decrypt = async (payload: Record<string, unknown>, sessionId: number) => {
 
 type FeathersEventType = 'created' | 'updated' | 'removed' | 'patched';
 
-export class ApiService2 {
+class ApiService {
   #service: FeathersService<unknown> | undefined;
 
   #sessionId: number;
@@ -241,7 +241,7 @@ export class ApiService2 {
     if (!service) {
       service = app.service(path);
       services[path] = service;
-      ApiService2.setHooks(service, sessionId);
+      ApiService.setHooks(service, sessionId);
     }
 
     this.#service = service;
@@ -510,48 +510,8 @@ class Connect {
     if (this.#connect) this.#connect.io.destroy();
   }
 
-  public getService(path: string, eventBus?: Maybe<EventBusProps>): ApiService {
-    return this.#connect.service(path).hooks({
-      before: {
-        all: [
-          async (context: HookContext) => {
-            if (context.params.query) {
-              context.params.query = await encrypt(context.params.query, this.#sessionId);
-            }
-          },
-        ],
-      },
-      after: {
-        all: [
-          async (context: HookContext) => {
-            if (context.result) {
-              context.result = await decrypt(context.result, this.#sessionId);
-            }
-          },
-        ],
-      },
-      error: {
-        all: [
-          async (context: HookContext) => {
-            if (context.error) {
-              context.error = await decrypt(context.error, this.#sessionId);
-            }
-          },
-        ],
-      },
-      finally: {
-        all: [
-          async (context: HookContext) => {
-            if (eventBus?.eventBus && eventBus?.type)
-              eventBus.eventBus({ type: eventBus.type, payload: context.result });
-          },
-        ],
-      },
-    });
-  }
-
-  public getService2(path: string): ApiService2 {
-    return new ApiService2(path, this.#connect, this.#services, this.#sessionId);
+  public getService(path: string): ApiService {
+    return new ApiService(path, this.#connect, this.#services, this.#sessionId);
   }
 
   public issConnected() {
@@ -562,34 +522,9 @@ class Connect {
     this.#socket.connect().open();
   }
 
-  public async decrypt(payload: Record<string, unknown>) {
-    if (
-      typeof window === 'undefined' ||
-      typeof _payloadKey[this.#sessionId] === 'undefined' ||
-      typeof payload.encrypted !== 'string'
-    ) {
-      return payload;
-    }
-
-    const ciphertext = await window.crypto.subtle.decrypt(
-      {
-        name: 'AES-CBC',
-        iv: _payloadKey[this.#sessionId].iv,
-      },
-      _payloadKey[this.#sessionId].key,
-      str2ab(window.atob(payload.encrypted)),
-    );
-
-    const buffer = new Uint8Array(ciphertext);
-
-    const decrypted = String.fromCharCode.apply(null, buffer as AnyValue);
-
-    return JSON.parse(decrypted);
-  }
-
   public setMessageCallback(fn: MessageCallback) {
     this.#messageCallback = fn;
   }
 }
 
-export { Connect };
+export { Connect, ApiService };

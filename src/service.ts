@@ -1,4 +1,4 @@
-import { Connect, ApiService2 } from './connect';
+import { Connect, ApiService } from './connect';
 import { AnyValue, Maybe, AuthDetails, MessageCallback } from './types/types';
 import { Type } from './tools';
 import { validateAuthDetails } from './validators';
@@ -31,4 +31,4 @@ class Service extends Connect {
   }
 }
 
-export { Service, ApiService2 };
+export { Service, ApiService };
