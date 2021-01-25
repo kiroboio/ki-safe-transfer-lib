@@ -5,6 +5,7 @@
     "RETRIEVABLES",
     "UTXOS",
     "authdetails",
+    "ciphertext",
     "feathersjs",
     "kirobo",
     "socketio"

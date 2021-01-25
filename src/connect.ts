@@ -188,6 +188,42 @@ class ApiService {
     return this.#service.find(params);
   }
 
+  public create(data: Partial<unknown>, params?: feathers.Params): Promise<unknown> {
+    if (!this.#service) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      return new Promise((_resolve, reject) => reject('No Service'));
+    }
+
+    return this.#service.create(data, params);
+  }
+
+  public update(id: feathers.Id, data: Partial<unknown>, params?: feathers.Params): Promise<unknown> {
+    if (!this.#service) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      return new Promise((_resolve, reject) => reject('No Service'));
+    }
+
+    return this.#service.update(id, data, params);
+  }
+
+  public patch(id: feathers.Id, data: Partial<unknown>, params?: feathers.Params): Promise<unknown> {
+    if (!this.#service) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      return new Promise((_resolve, reject) => reject('No Service'));
+    }
+
+    return this.#service.patch(id, data, params);
+  }
+
+  public remove(id: feathers.Id, params?: feathers.Params | undefined): Promise<unknown> {
+    if (!this.#service) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      return new Promise((_resolve, reject) => reject('No Service'));
+    }
+
+    return this.#service.remove(id, params);
+  }
+
   public on(event: FeathersEventType, listener: (arg2: AnyValue) => AnyValue) {
     this.#service?.on(event, async (...args: AnyValue[]) => {
       listener(await decrypt(args[0], this.#sessionId));
