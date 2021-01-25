@@ -304,7 +304,7 @@ class Connect {
 
   #services: { [key: string]: FeathersService<AnyValue> };
 
-  public isAuthed = false;
+  #isAuthed = false;
 
   constructor(authDetails: AuthDetails, messageCallback?: MessageCallback) {
     this.#auth = authDetails;
@@ -472,13 +472,13 @@ class Connect {
         this._logTechnical('Setting lastConnect timestamp.');
         this.#lastConnect = getTime();
         await this.#connect.get('authentication');
-        this.isAuthed = true;
+        this.#isAuthed = true;
 
-        if (this.#messageCallback) this.#messageCallback('authed');
+        if (this.#messageCallback) this.#messageCallback('authorized');
       })
       .catch(err => {
         this._logTechnical(ERRORS.service.failedAuth);
-        this.isAuthed = false;
+        this.#isAuthed = false;
         this.#connectionCounter++;
         this._logTechnical('Setting lastConnect timestamp.');
         this.#lastConnect = getTime();
@@ -550,7 +550,7 @@ class Connect {
     return new ApiService(path, this.#connect, this.#services, this.#sessionId);
   }
 
-  public issConnected() {
+  public isConnected() {
     return this.#connect.io.io.readyState === 'open';
   }
 
@@ -560,6 +560,10 @@ class Connect {
 
   public setMessageCallback(fn: MessageCallback) {
     this.#messageCallback = fn;
+  }
+
+  public isAuthorized() {
+    return this.#isAuthed;
   }
 }
 
