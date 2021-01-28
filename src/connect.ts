@@ -230,6 +230,10 @@ class ApiService {
     });
   }
 
+  public removeAllListeners(event: FeathersEventType) {
+    this.#service?.removeAllListeners(event);
+  }
+
   static setHooks(service: FeathersService<unknown>, sessionId: number) {
     service.hooks({
       before: {
