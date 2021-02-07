@@ -158,7 +158,7 @@ const decrypt = async (payload: Record<string, unknown>, sessionId: number) => {
 
   const buffer = new Uint8Array(ciphertext);
 
-  const decrypted = String.fromCharCode.apply(null, buffer as AnyValue);
+  const decrypted = new TextDecoder().decode(buffer);
 
   return JSON.parse(decrypted);
 };
