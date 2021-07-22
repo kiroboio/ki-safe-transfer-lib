@@ -480,7 +480,8 @@ class Connect {
 
         this.#isAuthed = true;
 
-        if (this.#messageCallback) this.#messageCallback('authorized', await decrypt(payload, this.#sessionId));
+        if (this.#messageCallback)
+          this.#messageCallback('authorized', payload ? await decrypt(payload, this.#sessionId) : payload);
       })
       .catch(err => {
         this._logTechnical(ERRORS.service.failedAuth);
