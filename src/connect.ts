@@ -475,10 +475,12 @@ class Connect {
         this.#connectionCounter = 0;
         this._logTechnical('Setting lastConnect timestamp.');
         this.#lastConnect = getTime();
-        await this.#connect.get('authentication');
+
+        const payload = await this.#connect.get('authentication');
+
         this.#isAuthed = true;
 
-        if (this.#messageCallback) this.#messageCallback('authorized');
+        if (this.#messageCallback) this.#messageCallback('authorized', payload);
       })
       .catch(err => {
         this._logTechnical(ERRORS.service.failedAuth);
