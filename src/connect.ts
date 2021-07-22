@@ -470,13 +470,13 @@ class Connect {
   private _runAuth(): void {
     this._logTechnical(makeString(MESSAGES.technical.running, ['runAuth']));
     Type<Promise<AuthDetails>>(this._authSocket())
-      .then(async () => {
+      .then(async (payload: AuthenticationResult) => {
         this._logTechnical('Service is authed, resetting connectionCounter.');
         this.#connectionCounter = 0;
         this._logTechnical('Setting lastConnect timestamp.');
         this.#lastConnect = getTime();
 
-        const payload = await this.#connect.get('authentication');
+        await this.#connect.get('authentication');
 
         this.#isAuthed = true;
 
