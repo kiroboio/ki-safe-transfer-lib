@@ -501,7 +501,7 @@ class Connect {
 
       return this.#connect.reAuthenticate().catch(async () => {
         this._logTechnical(makeString(ERRORS.service.failedTo, ['authSocket', 're-authenticate', 'authentication']));
-        this.#connect
+        return this.#connect
           .authenticate({
             strategy: 'local',
             ...(await authEncrypt({ ...this.#auth }, this.#sessionId)),
