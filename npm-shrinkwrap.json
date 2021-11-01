@@ -1,5 +1,5 @@
 {
-  "name": "@kiroboio/safe-transfer-lib",
+  "name": "@kiroboio/safe-transfer-lib-lite",
   "version": "3.0.0",
   "lockfileVersion": 1,
   "requires": true,
