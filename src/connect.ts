@@ -52,15 +52,17 @@ function str2ab(str: string) {
   return buf
 }
 
+const isWithoutBrowserCrypto = typeof window === 'undefined' || window?.navigator?.userAgent === 'ReactNative'
+
 const generateKey = async () => {
-  if (typeof window === 'undefined') {
+  if (isWithoutBrowserCrypto) {
     return undefined
   }
 
   const key = await window.crypto.subtle.generateKey(
     {
-        name: 'AES-CBC',
-        length: 128,
+      name: 'AES-CBC',
+      length: 128,
     },
     true,
     ['encrypt', 'decrypt']
@@ -90,7 +92,7 @@ const _payloadKey: { key: CryptoKey, iv: ArrayBuffer }[] = []
 let _payloadCount = 0;
 
 const authEncrypt = async (payload: Record<string, unknown>, sessionId: number) => {
-  if (typeof window === 'undefined') {
+  if (isWithoutBrowserCrypto) {
     return payload
   }
 
@@ -107,7 +109,7 @@ const authEncrypt = async (payload: Record<string, unknown>, sessionId: number) 
     }
   }
 
-  const binaryDer = str2ab(window.atob(window.atob(_authKey || '' )))
+  const binaryDer = str2ab(window.atob(window.atob(_authKey || '')))
 
   const publicKey = await window.crypto.subtle.importKey(
     'spki',
@@ -118,11 +120,11 @@ const authEncrypt = async (payload: Record<string, unknown>, sessionId: number) 
     },
     true,
     ['encrypt'],
-    )
+  )
 
   const chunks = chunkSubstr(JSON.stringify(data), 60)
 
-  const encrypted : string[] = []
+  const encrypted: string[] = []
 
   for (const chunk of chunks) {
     const enc = new TextEncoder()
@@ -141,7 +143,7 @@ const authEncrypt = async (payload: Record<string, unknown>, sessionId: number) 
 }
 
 const encrypt = async (payload: Record<string, unknown>, sessionId: number) => {
-  if (typeof window === 'undefined' || typeof _payloadKey[sessionId] === 'undefined') {
+  if (isWithoutBrowserCrypto || typeof _payloadKey[sessionId] === 'undefined') {
     return payload
   }
 
@@ -151,8 +153,8 @@ const encrypt = async (payload: Record<string, unknown>, sessionId: number) => {
 
   const ciphertext = await window.crypto.subtle.encrypt({
     name: 'AES-CBC',
-    iv:_payloadKey[sessionId].iv
-    },
+    iv: _payloadKey[sessionId].iv
+  },
     _payloadKey[sessionId].key,
     encoded
   )
@@ -166,14 +168,14 @@ const encrypt = async (payload: Record<string, unknown>, sessionId: number) => {
 }
 
 const decrypt = async (payload: Record<string, unknown>, sessionId: number) => {
-  if (typeof window === 'undefined' || typeof _payloadKey[sessionId] === 'undefined' || typeof payload.encrypted !== 'string') {
+  if (isWithoutBrowserCrypto || typeof _payloadKey[sessionId] === 'undefined' || typeof payload.encrypted !== 'string') {
     return payload
   }
 
   const ciphertext = await window.crypto.subtle.decrypt({
     name: 'AES-CBC',
     iv: _payloadKey[sessionId].iv
-    },
+  },
     _payloadKey[sessionId].key,
     str2ab(window.atob(payload.encrypted))
   )
@@ -263,8 +265,8 @@ class Connect extends Base {
       private key: string
 
       constructor(key = Math.random().toString(36)
-.substring(7) + Math.random().toString(36)
-.substring(7)) {
+        .substring(7) + Math.random().toString(36)
+          .substring(7)) {
         this.storage = new MemoryStorage()
         this.key = key
       }
@@ -436,7 +438,7 @@ class Connect extends Base {
     }
   }
 
-  protected _destroySocket():void {
+  protected _destroySocket(): void {
     if (this._connect) this._connect.io.destroy()
   }
 
