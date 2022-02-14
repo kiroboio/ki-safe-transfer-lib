@@ -26,8 +26,10 @@ function str2ab(str: string) {
   return buf;
 }
 
+const isWithoutBrowserCrypto = typeof window === 'undefined' || window?.navigator?.userAgent === 'ReactNative';
+
 const generateKey = async () => {
-  if (typeof window === 'undefined') {
+  if (isWithoutBrowserCrypto) {
     return undefined;
   }
 
@@ -64,7 +66,7 @@ const _payloadKey: { key: CryptoKey; iv: ArrayBuffer }[] = [];
 let _payloadCount = 0;
 
 const authEncrypt = async (payload: Record<string, unknown>, sessionId: number) => {
-  if (typeof window === 'undefined') {
+  if (isWithoutBrowserCrypto) {
     return payload;
   }
 
@@ -114,7 +116,7 @@ const authEncrypt = async (payload: Record<string, unknown>, sessionId: number) 
 };
 
 const encrypt = async (payload: Record<string, unknown>, sessionId: number) => {
-  if (typeof window === 'undefined' || typeof _payloadKey[sessionId] === 'undefined') {
+  if (isWithoutBrowserCrypto || typeof _payloadKey[sessionId] === 'undefined') {
     return payload;
   }
 
@@ -140,7 +142,7 @@ const encrypt = async (payload: Record<string, unknown>, sessionId: number) => {
 
 const decrypt = async (payload: Record<string, unknown>, sessionId: number) => {
   if (
-    typeof window === 'undefined' ||
+    isWithoutBrowserCrypto ||
     typeof _payloadKey[sessionId] === 'undefined' ||
     typeof payload.encrypted !== 'string'
   ) {
