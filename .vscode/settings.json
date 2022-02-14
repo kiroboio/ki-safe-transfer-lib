@@ -2,6 +2,8 @@
     "cSpell.words": [
       "Authed",
       "COINGECKO",
+      "Kiro",
+      "Kiros",
       "Retrievables",
       "SCRIPTHASH",
       "Utxo",
@@ -30,7 +32,8 @@
       "titleBar.inactiveForeground": "#15202b99",
       "statusBar.background": "#6be667",
       "statusBarItem.hoverBackground": "#40df3b",
-      "statusBar.foreground": "#15202b"
+      "statusBar.foreground": "#15202b",
+      "activityBar.activeBackground": "#96ed93"
     },
     "editor.codeLens": true,
     "codemetrics.basics.CodeLensEnabled": true,
@@ -38,5 +41,6 @@
     "typescript.referencesCodeLens.enabled": true,
     "typescript.referencesCodeLens.showOnAllFunctions": true,
     "files.autoSave": "off",
-    "peacock.color": "#6be667"
+    "peacock.color": "#6be667",
+    "editor.formatOnSave": true
 }

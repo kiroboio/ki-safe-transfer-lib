@@ -1,5 +1,79 @@
 # Changelog
 
+
+#### v2.25.0 2020-11-10
+
+  Feat:
+
+  4ce0211 - add message to eth transfers
+  600e79f - follow, libs update
+  ae34520 - add ethTransfer type
+  a7cbac6 - collect eth transaction
+  beb0df7 - install types for web3
+  063b1f4 - collectEth
+  c7892dc - types, api endpoint incorrect
+  68c0bde - gettransfers fn
+  2b0cd9e - add Eth transfer request API
+  44918d9 - exact type for getonlinenetworks
+  5bbe94b - separate instance methods, updated networks type, contract type
+  4701457 - change estimateFees server call
+  b933b58 - change estimateFees to create
+  b56e868 - estimateFees
+  17aa8bf - add transaction count to KiroState
+  57aef48 - add TransferFees and update token state
+
+  Fix:
+
+  0ccb549 - add EthTransferRequest to create argument type
+  bb562ae - ethTransferRequest enum
+  8584d56 - ethTransferRequest endpoint
+  101140a - ethTransferRequest function call, enum, config
+  eb8532a - client sample incorrect service call
+  cc311a1 - revert timeout change
+  e65a1d2 - fix estimateFees
+  72d37c4 - increase timeout for KIRO buy transaction mining
+  6e6594c - update KiroState format
+  38e03dc - increase socket timeout for KIRO buy
+  b046d3d - hardcode eth path for token calls
+
+  Test:
+
+  a8a98a8 - tests don't work with new create/get instance
+
+#### v2.23.1 2020-10-15
+
+  Chore:
+
+  `1314d7f` - temp disable send verification
+
+#### v2.23.0 2020-10-12
+
+  Feat:
+
+  `206746d` - getBalance
+  `1dca393` - estimateFees
+  `bbaac3f` - getKiroPrice
+  `a5771da` - getKiroState
+  `8c22dd3` - license GPLv3
+
+#### v2.22.2 2020-09-31
+
+  Fix:
+
+  - naming of the response for rate/rates doesn't include ETH option
+
+#### v2.22.1 2020-08-31
+
+  Fix:
+
+  - minor correction
+
+#### v2.22.0 2020-08-31
+
+	New:
+
+	- support for Ethereum
+
 #### v2.21.0 2020-06-30
 
   New:

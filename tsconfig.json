@@ -1,41 +1,34 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
-    "outDir": "./dist",
-    "strict": true,
     "allowJs": true,
-    "checkJs": false,
-    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "maxNodeModuleJsDepth": 15,
     "baseUrl": ".",
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "moduleResolution": "node",
-    "lib": [
-      "es2017",
-      "es7",
-      "es6",
-      "dom"
-    ],
-    "noImplicitAny": true,
+    "checkJs": false,
     "declaration": true,
-    "strictNullChecks": true,
+    "esModuleInterop": true,
+    "lib": ["es2017", "es7", "es6", "dom"],
+    "maxNodeModuleJsDepth": 15,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "outDir": "./dist",
+    "resolveJsonModule": true,
+    "rootDir": "./",
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": true,
     "strictFunctionTypes": true,
-     "sourceMap": true
+    "strictNullChecks": true,
+    "strictPropertyInitialization": true,
+    "target": "es6"
   },
   "typedocOptions": {
     "mode": "modules",
     "out": "docs"
   },
-  "include": [
-    "src/**/*",
-    "tests/**/*",
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "client.ts"
-  ]
+  "include": ["src/**/*", "tests/**/*"],
+  "exclude": ["node_modules", "dist", "client.ts"]
 }

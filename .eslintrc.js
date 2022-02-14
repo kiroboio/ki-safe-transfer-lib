@@ -3,51 +3,72 @@ module.exports = {
     browser: true,
   },
   extends: [
-    'eslint:recommended',
     'plugin:json/recommended',
     'plugin:eslint-comments/recommended',
-    'prettier/@typescript-eslint', // Uses eslint-config-prettier to disable ESLint rules from @typescript-eslint/eslint-plugin that would conflict with prettier
     'plugin:import/errors',
     'plugin:import/warnings',
-    'plugin:@typescript-eslint/eslint-recommended',
-    'plugin:@typescript-eslint/recommended',
-    // 'plugin:prettier/recommended', // Enables eslint-plugin-prettier and eslint-config-prettier. This will display prettier errors as ESLint errors. Make sure this is always the last configuration in the extends array.
+    'prettier/@typescript-eslint',
+    'prettier',
+    'plugin:prettier/recommended',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     project: 'tsconfig.json',
     sourceType: 'module',
   },
+  settings: {
+    'import/resolver': {
+      node: {
+        extensions: ['.js', '.jsx', '.ts', '.tsx'],
+        moduleDirectory: ['node_modules', 'src/'],
+      },
+    },
+  },
   plugins: [
     '@typescript-eslint',
-    'react-hooks',
     'promise',
     'eslint-comments',
     'json',
     'markdown',
     'async-await',
     'import',
+    'prettier',
   ],
   rules: {
-    'import/no-unresolved': [0],
+    'import/no-unused-modules': [1, { unusedExports: true }],
+    'no-var': 'error',
+    'no-unused-vars': 'off',
+    '@typescript-eslint/member-ordering': 'off',
+    '@typescript-eslint/no-explicit-any': ['error', { ignoreRestArgs: false }],
+    '@typescript-eslint/quotes': ['error', 'single', { avoidEscape: true, allowTemplateLiterals: true }],
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      {
+        vars: 'all',
+        args: 'all',
+        ignoreRestSiblings: false,
+      },
+    ],
+    '@typescript-eslint/semi': ['off', null],
+    'async-await/space-after-async': 2,
+    'async-await/space-after-await': 2,
     'block-spacing': ['error', 'always'],
-    camelcase: ['error'],
-    'import/no-default-export': ['error'],
-    'lines-around-comment': ['error'],
+    'lines-around-comment': [0],
     'lines-between-class-members': ['error', 'always'],
-    'no-console': ['error', { allow: ['warn', 'error'] }],
+    'max-lines': ['error', { max: 800, skipBlankLines: true, skipComments: true }],
+    'max-nested-callbacks': [2, 5],
+    // TODO: fix this and all errors
+    'max-params': ['error', 4],
+    'newline-per-chained-call': ['off'],
     'no-mixed-spaces-and-tabs': ['error'],
     'no-multi-spaces': ['error'],
+    'no-console': ['error', { allow: ['warn', 'error'] }],
     'no-multiple-empty-lines': ['error'],
     'no-spaced-func': ['error'],
     'no-whitespace-before-property': ['error'],
-    '@typescript-eslint/no-var-requires': [0],
+    'prettier/prettier': 'error',
     'space-before-blocks': ['error', 'always'],
     'spaced-comment': ['error', 'always', { markers: ['/'] }],
-    'newline-per-chained-call': ['error', { ignoreChainWithDepth: 2 }],
-    // 'no-unused-vars': ['error'],
-    // 'one-var': ["error", "always"],
-    quotes: 'off',
     'padding-line-between-statements': [
       'error',
       { blankLine: 'always', prev: 'const', next: '*' },
@@ -65,43 +86,6 @@ module.exports = {
       { blankLine: 'always', prev: 'export', next: '*' },
       { blankLine: 'always', prev: '*', next: 'export' },
     ],
-    // 'max-lines-per-function': [
-    //   'error',
-    //   { max: 20, skipBlankLines: true, skipComments: true, IIFEs: true },
-    // ],
-    // 'max-lines': ['error', { max: 300, skipBlankLines: true, skipComments: true }],
-    '@typescript-eslint/explicit-member-accessibility': [
-      'off',
-      {
-        accessibility: 'explicit',
-      },
-    ],
-    '@typescript-eslint/interface-name-prefix': 'off',
-    '@typescript-eslint/member-delimiter-style': [
-      'off',
-      {
-        multiline: {
-          delimiter: 'none',
-          requireLast: true,
-        },
-        singleline: {
-          delimiter: 'semi',
-          requireLast: false,
-        },
-      },
-    ],
-    '@typescript-eslint/member-ordering': 'off',
-    '@typescript-eslint/quotes': ['error', 'single'],
-    '@typescript-eslint/semi': ['off', null],
-    '@typescript-eslint/no-explicit-any': ['error', { ignoreRestArgs: false }],
-    'arrow-parens': ['off', 'as-needed'],
-    'import/order': 'off',
-    'max-len': [
-      'error',
-      {
-        code: 150,
-      },
-    ],
     'no-restricted-imports': [
       'error',
       {
@@ -114,8 +98,6 @@ module.exports = {
         patterns: ['!styled-components/macro'],
       },
     ],
-    'async-await/space-after-async': 2,
-    'async-await/space-after-await': 2,
     'eslint-comments/disable-enable-pair': [
       'error',
       {
@@ -123,4 +105,4 @@ module.exports = {
       },
     ],
   },
-}
+};

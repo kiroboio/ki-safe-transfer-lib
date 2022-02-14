@@ -1,62 +1,55 @@
-import { not } from 'ramda'
+import { makeApiResponseError } from '.';
+import { ApiError } from '../types/error';
 
-import { modeIs } from './mode'
-import { makeApiResponseError } from '.'
-import { ApiError } from '..'
-
-
-enum LogTypes {
+export enum LogTypes {
   ERROR = 'error',
   INFO = 'info',
   WARNING = 'warn',
 }
-class Log {
-  private _payload: unknown | undefined
 
-  private _message: string
+export class Log {
+  private _payload: unknown | undefined;
 
-  private _type: LogTypes
+  private _message: string;
 
-  private readonly _log = console
+  private _type: LogTypes;
+
+  private readonly _log = console;
 
   constructor(type: LogTypes, message: string, payload?: unknown) {
-    this._type = type
-    this._message = message
+    this._type = type;
+    this._message = message;
 
-    if (payload) this._payload = payload
+    if (payload) this._payload = payload;
   }
 
   public make(): void {
     try {
-      if (not(modeIs('test'))) this._log[this._type](this._message, this._payload ?? '')
+      if (process.env.NODE_ENV !== 'test') this._log[this._type](this._message, this._payload ?? '');
     } catch (err) {
-      return
-     }
+      return;
+    }
   }
 }
 
-class LogError extends Log {
-  constructor(message: string, error?: Error | undefined) {
-    super(LogTypes.ERROR, message || 'Unknown Error', makeApiResponseError(error || null /* need this null for obfuscator*/))
-  }
-}
-
-class LogApiError extends Log {
+export class LogApiError extends Log {
   constructor(message: string, error?: ApiError | undefined) {
-    super(LogTypes.ERROR, message || 'Unknown API Error', makeApiResponseError(error || null /* need this null for obfuscator*/))
+    super(
+      LogTypes.ERROR,
+      message || 'Unknown API Error',
+      makeApiResponseError(error || null /* need this null for obfuscator*/),
+    );
   }
 }
 
-class LogApiWarning extends Log {
+export class LogApiWarning extends Log {
   constructor(message: string, payload: unknown | undefined) {
-    super(LogTypes.WARNING, message || 'Unknown Warning', payload)
+    super(LogTypes.WARNING, message || 'Unknown Warning', payload);
   }
 }
 
-class LogInfo extends Log {
+export class LogInfo extends Log {
   constructor(message: string, payload: unknown | undefined) {
-    super(LogTypes.INFO, message || '', payload)
+    super(LogTypes.INFO, message || '', payload);
   }
 }
-
-export { LogError, LogApiError, LogApiWarning, LogInfo }
