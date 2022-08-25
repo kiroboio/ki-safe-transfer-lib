@@ -10,12 +10,12 @@ class Service extends Connect {
     return Service.instance;
   }
 
-  public static createInstance(authDetails: AuthDetails, messageCallback?: MessageCallback): Service {
+  public static createInstance(authDetails: AuthDetails, url?: string, messageCallback?: MessageCallback): Service {
     validateAuthDetails(authDetails);
 
     if (Service.instance) this.disconnect();
 
-    Service.instance = new Service(authDetails, messageCallback);
+    Service.instance = new Service(authDetails, url, messageCallback);
 
     return Service.instance;
   }
@@ -26,8 +26,8 @@ class Service extends Connect {
     delete Type<AnyValue>(Service)?.instance;
   }
 
-  private constructor(authDetails: AuthDetails, messageCallback?: MessageCallback) {
-    super(authDetails, messageCallback);
+  private constructor(authDetails: AuthDetails, url?: string, messageCallback?: MessageCallback) {
+    super(authDetails, url, messageCallback);
   }
 }
 

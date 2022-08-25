@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import feathers, { Application, HookContext, Service as FeathersService } from '@feathersjs/feathers';
 import { StorageWrapper } from '@feathersjs/authentication-client/lib/storage';
 import io from 'socket.io-client';
@@ -312,8 +313,9 @@ class Connect {
 
   #isAuthed = false;
 
-  constructor(authDetails: AuthDetails, messageCallback?: MessageCallback) {
+  constructor(authDetails: AuthDetails, url?: string, messageCallback?: MessageCallback) {
     this.#auth = authDetails;
+    // this.#hostUrl = url;
     this.#messageCallback = messageCallback;
     this.#sessionId = ++_payloadCount;
     this.#services = {};
@@ -322,7 +324,8 @@ class Connect {
     this._logTechnical('Service is configuring connection...');
 
     // choose url to use
-    this.#socket = io.connect(apiUrl) as never;
+    let hosturl = url ? url : apiUrl;
+    this.#socket = io.connect(hosturl) as never;
 
     this.#socket.on('encrypt', (publicKey: string) => {
       if (typeof window !== 'undefined') {
@@ -410,7 +413,7 @@ class Connect {
           }
         }
       });
-    } catch (err) {
+    } catch (err: any) {
       this._logApiError(ERRORS.connect.on.connect.direct, err);
     }
 
@@ -420,7 +423,7 @@ class Connect {
 
         if (this.#messageCallback) this.#messageCallback('disconnected');
       });
-    } catch (err) {
+    } catch (err: any) {
       this._logApiError(ERRORS.connect.on.disconnect.direct, err);
     }
 
@@ -517,7 +520,7 @@ class Connect {
             this.#lastConnect = getTime();
           });
       });
-    } catch (err) {
+    } catch (err: any) {
       this._logApiError(ERRORS.connect.reAuthenticate, err);
       this._logTechnical('Set connectionCounter to MAX+1.');
       this.#connectionCounter = connectionTriesMax + 1;
