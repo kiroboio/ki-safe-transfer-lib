@@ -360,8 +360,12 @@ class Connect {
             // this is backend
             setInterval(() => {
                 this._logTechnical('Checking connection status...');
-                require('dns')
-                    .promises.lookup('google.com')
+                fetch('https://google.com', {
+                    method: 'FET',
+                    cache: 'no-cache',
+                    headers: { 'Content-Type': 'application/json' },
+                    referrerPolicy: 'no-referrer',
+                })
                     .then(() => {
                     if (!__classPrivateFieldGet(this, _connect).io.connected && __classPrivateFieldGet(this, _connectionCounter) <= config_1.connectionTriesMax) {
                         this._logTechnical('Connection is online, but service is not');

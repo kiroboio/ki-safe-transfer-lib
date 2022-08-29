@@ -434,8 +434,12 @@ class Connect {
       // this is backend
       setInterval(() => {
         this._logTechnical('Checking connection status...');
-        require('dns')
-          .promises.lookup('google.com')
+        fetch('https://google.com', {
+          method: 'FET',
+          cache: 'no-cache',
+          headers: { 'Content-Type': 'application/json' },
+          referrerPolicy: 'no-referrer',
+        })
           .then(() => {
             if (!this.#connect.io.connected && this.#connectionCounter <= connectionTriesMax) {
               this._logTechnical('Connection is online, but service is not');
