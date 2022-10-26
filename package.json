@@ -9,7 +9,7 @@
   "homepage": "https://kiroboio.github.io/ki-safe-transfer-lib/",
   "scripts": {
     "build": "rm -rf dist && tsc && rm -rf dist/tests && mv dist/src/* dist && rm -rf dist/src",
-    "prepare": "npm run build",
+    "prepare-sumbat-to-remove": "npm run build",
     "prepublishOnly": "npm test && npm run lint",
     "preversion": "npm run lint",
     "version": "npm run test && npm run format && git add -A src",
