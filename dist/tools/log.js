@@ -30,7 +30,7 @@ class Log {
 exports.Log = Log;
 class LogApiError extends Log {
     constructor(message, error) {
-        super(LogTypes.ERROR, message || 'Unknown API Error', _1.makeApiResponseError(error || null /* need this null for obfuscator*/));
+        super(LogTypes.ERROR, message || 'Unknown API Error', (0, _1.makeApiResponseError)(error || null /* need this null for obfuscator*/));
     }
 }
 exports.LogApiError = LogApiError;
