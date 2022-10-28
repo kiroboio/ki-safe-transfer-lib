@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -27,24 +31,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, privateMap, value) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to set private field on non-instance");
-    }
-    privateMap.set(receiver, value);
-    return value;
+var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
 };
-var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, privateMap) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to get private field on non-instance");
-    }
-    return privateMap.get(receiver);
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 var _a;
-var _service, _sessionId, _connect, _socket, _auth, _sessionId_1, _connectionCounter, _lastConnect, _manuallyDisconnected, _messageCallback, _services, _isAuthed;
+var _ApiService_service, _ApiService_sessionId, _Connect_connect, _Connect_socket, _Connect_auth, _Connect_sessionId, _Connect_connectionCounter, _Connect_lastConnect, _Connect_manuallyDisconnected, _Connect_messageCallback, _Connect_services, _Connect_isAuthed;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ApiService = exports.Connect = void 0;
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -147,69 +149,69 @@ const decrypt = (payload, sessionId) => __awaiter(void 0, void 0, void 0, functi
 });
 class ApiService {
     constructor(path, app, services, sessionId) {
-        _service.set(this, void 0);
-        _sessionId.set(this, void 0);
+        _ApiService_service.set(this, void 0);
+        _ApiService_sessionId.set(this, void 0);
         let service = services[path];
         if (!service) {
             service = app.service(path);
             services[path] = service;
             ApiService.setHooks(service, sessionId);
         }
-        __classPrivateFieldSet(this, _service, service);
-        __classPrivateFieldSet(this, _sessionId, sessionId);
+        __classPrivateFieldSet(this, _ApiService_service, service, "f");
+        __classPrivateFieldSet(this, _ApiService_sessionId, sessionId, "f");
     }
     get(id, params) {
         var _a;
-        if (!__classPrivateFieldGet(this, _service)) {
+        if (!__classPrivateFieldGet(this, _ApiService_service, "f")) {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             return new Promise((_resolve, reject) => reject('No Service'));
         }
-        return (_a = __classPrivateFieldGet(this, _service)) === null || _a === void 0 ? void 0 : _a.get(id, params);
+        return (_a = __classPrivateFieldGet(this, _ApiService_service, "f")) === null || _a === void 0 ? void 0 : _a.get(id, params);
     }
     find(params) {
-        if (!__classPrivateFieldGet(this, _service)) {
+        if (!__classPrivateFieldGet(this, _ApiService_service, "f")) {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             return new Promise((_resolve, reject) => reject('No Service'));
         }
-        return __classPrivateFieldGet(this, _service).find(params);
+        return __classPrivateFieldGet(this, _ApiService_service, "f").find(params);
     }
     create(data, params) {
-        if (!__classPrivateFieldGet(this, _service)) {
+        if (!__classPrivateFieldGet(this, _ApiService_service, "f")) {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             return new Promise((_resolve, reject) => reject('No Service'));
         }
-        return __classPrivateFieldGet(this, _service).create(data, params);
+        return __classPrivateFieldGet(this, _ApiService_service, "f").create(data, params);
     }
     update(id, data, params) {
-        if (!__classPrivateFieldGet(this, _service)) {
+        if (!__classPrivateFieldGet(this, _ApiService_service, "f")) {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             return new Promise((_resolve, reject) => reject('No Service'));
         }
-        return __classPrivateFieldGet(this, _service).update(id, data, params);
+        return __classPrivateFieldGet(this, _ApiService_service, "f").update(id, data, params);
     }
     patch(id, data, params) {
-        if (!__classPrivateFieldGet(this, _service)) {
+        if (!__classPrivateFieldGet(this, _ApiService_service, "f")) {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             return new Promise((_resolve, reject) => reject('No Service'));
         }
-        return __classPrivateFieldGet(this, _service).patch(id, data, params);
+        return __classPrivateFieldGet(this, _ApiService_service, "f").patch(id, data, params);
     }
     remove(id, params) {
-        if (!__classPrivateFieldGet(this, _service)) {
+        if (!__classPrivateFieldGet(this, _ApiService_service, "f")) {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             return new Promise((_resolve, reject) => reject('No Service'));
         }
-        return __classPrivateFieldGet(this, _service).remove(id, params);
+        return __classPrivateFieldGet(this, _ApiService_service, "f").remove(id, params);
     }
     on(event, listener) {
         var _a;
-        (_a = __classPrivateFieldGet(this, _service)) === null || _a === void 0 ? void 0 : _a.on(event, (...args) => __awaiter(this, void 0, void 0, function* () {
-            listener(yield decrypt(args[0], __classPrivateFieldGet(this, _sessionId)));
+        (_a = __classPrivateFieldGet(this, _ApiService_service, "f")) === null || _a === void 0 ? void 0 : _a.on(event, (...args) => __awaiter(this, void 0, void 0, function* () {
+            listener(yield decrypt(args[0], __classPrivateFieldGet(this, _ApiService_sessionId, "f")));
         }));
     }
     removeAllListeners(event) {
         var _a;
-        (_a = __classPrivateFieldGet(this, _service)) === null || _a === void 0 ? void 0 : _a.removeAllListeners(event);
+        (_a = __classPrivateFieldGet(this, _ApiService_service, "f")) === null || _a === void 0 ? void 0 : _a.removeAllListeners(event);
     }
     static setHooks(service, sessionId) {
         service.hooks({
@@ -248,35 +250,35 @@ class ApiService {
     }
 }
 exports.ApiService = ApiService;
-_service = new WeakMap(), _sessionId = new WeakMap();
+_ApiService_service = new WeakMap(), _ApiService_sessionId = new WeakMap();
 class Connect {
     constructor(authDetails, url, messageCallback) {
-        _connect.set(this, void 0);
-        _socket.set(this, void 0);
-        _auth.set(this, void 0);
-        _sessionId_1.set(this, 0);
-        _connectionCounter.set(this, 0);
-        _lastConnect.set(this, undefined);
-        _manuallyDisconnected.set(this, false);
-        _messageCallback.set(this, void 0);
-        _services.set(this, void 0);
-        _isAuthed.set(this, false);
-        __classPrivateFieldSet(this, _auth, authDetails);
+        _Connect_connect.set(this, void 0);
+        _Connect_socket.set(this, void 0);
+        _Connect_auth.set(this, void 0);
+        _Connect_sessionId.set(this, 0);
+        _Connect_connectionCounter.set(this, 0);
+        _Connect_lastConnect.set(this, undefined);
+        _Connect_manuallyDisconnected.set(this, false);
+        _Connect_messageCallback.set(this, void 0);
+        _Connect_services.set(this, void 0);
+        _Connect_isAuthed.set(this, false);
+        __classPrivateFieldSet(this, _Connect_auth, authDetails, "f");
         // this.#hostUrl = url;
-        __classPrivateFieldSet(this, _messageCallback, messageCallback);
-        __classPrivateFieldSet(this, _sessionId_1, ++_payloadCount);
-        __classPrivateFieldSet(this, _services, {});
+        __classPrivateFieldSet(this, _Connect_messageCallback, messageCallback, "f");
+        __classPrivateFieldSet(this, _Connect_sessionId, ++_payloadCount, "f");
+        __classPrivateFieldSet(this, _Connect_services, {}, "f");
         // setup
         this._logTechnical('Service is configuring connection...');
         // choose url to use
         let hosturl = url ? url : apiUrl;
-        __classPrivateFieldSet(this, _socket, socket_io_client_1.default.connect(hosturl));
-        __classPrivateFieldGet(this, _socket).on('encrypt', (publicKey) => {
+        __classPrivateFieldSet(this, _Connect_socket, socket_io_client_1.default.connect(hosturl), "f");
+        __classPrivateFieldGet(this, _Connect_socket, "f").on('encrypt', (publicKey) => {
             if (typeof window !== 'undefined') {
                 _authKey = publicKey;
             }
         });
-        const connect = feathers_1.default().configure(socketio_client_1.default(__classPrivateFieldGet(this, _socket), {
+        const connect = (0, feathers_1.default)().configure((0, socketio_client_1.default)(__classPrivateFieldGet(this, _Connect_socket, "f"), {
             timeout: 20000,
         }));
         class safeStorage {
@@ -288,7 +290,7 @@ class Connect {
                 return __awaiter(this, void 0, void 0, function* () {
                     const cipherText = yield this.storage.getItem(key);
                     const bytes = crypto_js_1.default.AES.encrypt(cipherText, this.key);
-                    return JSON.parse(bytes.toString(tools_1.Type(crypto_js_1.default.enc.Utf8)));
+                    return JSON.parse(bytes.toString((0, tools_1.Type)(crypto_js_1.default.enc.Utf8)));
                 });
             }
             setItem(key, value) {
@@ -303,37 +305,37 @@ class Connect {
                 });
             }
         }
-        __classPrivateFieldSet(this, _connect, connect.configure(authentication_client_1.default({ storageKey: 'auth', storage: new safeStorage() })));
+        __classPrivateFieldSet(this, _Connect_connect, connect.configure((0, authentication_client_1.default)({ storageKey: 'auth', storage: new safeStorage() })), "f");
         // connect/disconnect event processes
         this._logTechnical('Service is setting up connect/disconnect listeners...');
         try {
-            __classPrivateFieldGet(this, _connect).io.on('connect', () => {
-                if (__classPrivateFieldGet(this, _messageCallback))
-                    __classPrivateFieldGet(this, _messageCallback).call(this, 'connected');
-                this._logTechnical(tools_1.makeString(text_1.MESSAGES.technical.proceedingWith, ['is connected', 'authorization']));
-                this._logTechnical(tools_1.makeString(text_1.MESSAGES.technical.serviceIs, ["checking if it's allowed to proceed:"]));
-                this._logTechnical(`➜ connectionCounter: ${__classPrivateFieldGet(this, _connectionCounter)}`);
-                this._logTechnical(`➜ lastConnect: ${__classPrivateFieldGet(this, _lastConnect)}`);
-                if (__classPrivateFieldGet(this, _connectionCounter) <= config_1.connectionTriesMax &&
-                    (!__classPrivateFieldGet(this, _lastConnect) || tools_1.diff(__classPrivateFieldGet(this, _lastConnect)) > config_1.connectionTimeout)) {
+            __classPrivateFieldGet(this, _Connect_connect, "f").io.on('connect', () => {
+                if (__classPrivateFieldGet(this, _Connect_messageCallback, "f"))
+                    __classPrivateFieldGet(this, _Connect_messageCallback, "f").call(this, 'connected');
+                this._logTechnical((0, tools_1.makeString)(text_1.MESSAGES.technical.proceedingWith, ['is connected', 'authorization']));
+                this._logTechnical((0, tools_1.makeString)(text_1.MESSAGES.technical.serviceIs, ["checking if it's allowed to proceed:"]));
+                this._logTechnical(`➜ connectionCounter: ${__classPrivateFieldGet(this, _Connect_connectionCounter, "f")}`);
+                this._logTechnical(`➜ lastConnect: ${__classPrivateFieldGet(this, _Connect_lastConnect, "f")}`);
+                if (__classPrivateFieldGet(this, _Connect_connectionCounter, "f") <= config_1.connectionTriesMax &&
+                    (!__classPrivateFieldGet(this, _Connect_lastConnect, "f") || (0, tools_1.diff)(__classPrivateFieldGet(this, _Connect_lastConnect, "f")) > config_1.connectionTimeout)) {
                     this._logTechnical(text_1.MESSAGES.technical.isAllowed);
                     this._runAuth();
                 }
                 else {
                     this._logTechnical(text_1.MESSAGES.technical.notAllowed);
                     // show tech message, that exceed connection qty
-                    if (__classPrivateFieldGet(this, _connectionCounter) > config_1.connectionTriesMax) {
+                    if (__classPrivateFieldGet(this, _Connect_connectionCounter, "f") > config_1.connectionTriesMax) {
                         this._exceededQtyLog(config_1.connectionTriesMax);
-                        __classPrivateFieldGet(this, _socket).disconnect().close();
-                        __classPrivateFieldSet(this, _manuallyDisconnected, true);
+                        __classPrivateFieldGet(this, _Connect_socket, "f").disconnect().close();
+                        __classPrivateFieldSet(this, _Connect_manuallyDisconnected, true, "f");
                     }
                     else {
-                        if (tools_1.diff(__classPrivateFieldGet(this, _lastConnect)) <= config_1.connectionTimeout) {
-                            this._tooEarlyToConnectLog(__classPrivateFieldGet(this, _lastConnect), config_1.connectionTimeout);
-                            __classPrivateFieldGet(this, _socket).disconnect().close();
-                            __classPrivateFieldSet(this, _manuallyDisconnected, true);
+                        if ((0, tools_1.diff)(__classPrivateFieldGet(this, _Connect_lastConnect, "f")) <= config_1.connectionTimeout) {
+                            this._tooEarlyToConnectLog(__classPrivateFieldGet(this, _Connect_lastConnect, "f"), config_1.connectionTimeout);
+                            __classPrivateFieldGet(this, _Connect_socket, "f").disconnect().close();
+                            __classPrivateFieldSet(this, _Connect_manuallyDisconnected, true, "f");
                             setTimeout(() => {
-                                __classPrivateFieldSet(this, _manuallyDisconnected, false);
+                                __classPrivateFieldSet(this, _Connect_manuallyDisconnected, false, "f");
                                 this._runAuth();
                             }, config_1.connectionTimeout * 1000);
                         }
@@ -345,16 +347,16 @@ class Connect {
             this._logApiError(text_1.ERRORS.connect.on.connect.direct, err);
         }
         try {
-            __classPrivateFieldGet(this, _connect).io.on('disconnect', (payload) => {
-                this._logApiWarning(text_1.WARNINGS.connect.disconnect, tools_1.capitalize(payload));
-                if (__classPrivateFieldGet(this, _messageCallback))
-                    __classPrivateFieldGet(this, _messageCallback).call(this, 'disconnected');
+            __classPrivateFieldGet(this, _Connect_connect, "f").io.on('disconnect', (payload) => {
+                this._logApiWarning(text_1.WARNINGS.connect.disconnect, (0, tools_1.capitalize)(payload));
+                if (__classPrivateFieldGet(this, _Connect_messageCallback, "f"))
+                    __classPrivateFieldGet(this, _Connect_messageCallback, "f").call(this, 'disconnected');
             });
         }
         catch (err) {
             this._logApiError(text_1.ERRORS.connect.on.disconnect.direct, err);
         }
-        this._logTechnical(tools_1.makeString(text_1.MESSAGES.technical.serviceIs, ['setting up event listeners...']));
+        this._logTechnical((0, tools_1.makeString)(text_1.MESSAGES.technical.serviceIs, ['setting up event listeners...']));
         // set internet connection check
         if (typeof window === 'undefined') {
             // this is backend
@@ -367,82 +369,84 @@ class Connect {
                     referrerPolicy: 'no-referrer',
                 })
                     .then(() => {
-                    if (!__classPrivateFieldGet(this, _connect).io.connected && __classPrivateFieldGet(this, _connectionCounter) <= config_1.connectionTriesMax) {
+                    if (!__classPrivateFieldGet(this, _Connect_connect, "f").io.connected && __classPrivateFieldGet(this, _Connect_connectionCounter, "f") <= config_1.connectionTriesMax) {
                         this._logTechnical('Connection is online, but service is not');
-                        if (__classPrivateFieldGet(this, _manuallyDisconnected))
+                        if (__classPrivateFieldGet(this, _Connect_manuallyDisconnected, "f"))
                             this._logTechnical(text_1.MESSAGES.technical.connection.wontReconnect);
                         else {
                             this._logTechnical('Reconnecting');
-                            __classPrivateFieldGet(this, _connect).io.connect();
+                            __classPrivateFieldGet(this, _Connect_connect, "f").io.connect();
                         }
                     }
-                    if (__classPrivateFieldGet(this, _connectionCounter) > config_1.connectionTriesMax)
-                        this._logApiWarning(tools_1.makeString(text_1.MESSAGES.technical.connection.exceeded, [__classPrivateFieldGet(this, _connectionCounter), config_1.connectionTriesMax]));
+                    if (__classPrivateFieldGet(this, _Connect_connectionCounter, "f") > config_1.connectionTriesMax)
+                        this._logApiWarning((0, tools_1.makeString)(text_1.MESSAGES.technical.connection.exceeded, [__classPrivateFieldGet(this, _Connect_connectionCounter, "f"), config_1.connectionTriesMax]));
                 })
                     .catch(() => {
-                    if (__classPrivateFieldGet(this, _connect).io.connected) {
+                    if (__classPrivateFieldGet(this, _Connect_connect, "f").io.connected) {
                         this._logTechnical(text_1.MESSAGES.technical.connection.willConnect);
-                        __classPrivateFieldGet(this, _connect).io.disconnect();
+                        __classPrivateFieldGet(this, _Connect_connect, "f").io.disconnect();
                     }
                 });
             }, 3000);
         }
         else {
             window.addEventListener('online', () => {
-                if (!__classPrivateFieldGet(this, _connect).io.connected && __classPrivateFieldGet(this, _connectionCounter) <= config_1.connectionTriesMax) {
+                if (!__classPrivateFieldGet(this, _Connect_connect, "f").io.connected && __classPrivateFieldGet(this, _Connect_connectionCounter, "f") <= config_1.connectionTriesMax) {
                     this._logTechnical(text_1.MESSAGES.technical.connection.willReConnect);
-                    __classPrivateFieldGet(this, _connect).io.connect();
+                    __classPrivateFieldGet(this, _Connect_connect, "f").io.connect();
                 }
-                if (!__classPrivateFieldGet(this, _connect).io.connected && __classPrivateFieldGet(this, _connectionCounter) > config_1.connectionTriesMax)
+                if (!__classPrivateFieldGet(this, _Connect_connect, "f").io.connected && __classPrivateFieldGet(this, _Connect_connectionCounter, "f") > config_1.connectionTriesMax)
                     this._logApiWarning(text_1.MESSAGES.technical.connection.willNotReconnect);
             });
         }
     }
     _runAuth() {
-        this._logTechnical(tools_1.makeString(text_1.MESSAGES.technical.running, ['runAuth']));
-        tools_1.Type(this._authSocket())
+        this._logTechnical((0, tools_1.makeString)(text_1.MESSAGES.technical.running, ['runAuth']));
+        (0, tools_1.Type)(this._authSocket())
             .then(( /* payload: AuthenticationResult */) => __awaiter(this, void 0, void 0, function* () {
             this._logTechnical('Service is authed, resetting connectionCounter.');
-            __classPrivateFieldSet(this, _connectionCounter, 0);
+            __classPrivateFieldSet(this, _Connect_connectionCounter, 0, "f");
             this._logTechnical('Setting lastConnect timestamp.');
-            __classPrivateFieldSet(this, _lastConnect, tools_1.getTime());
-            const payload = yield __classPrivateFieldGet(this, _connect).get('authentication');
-            __classPrivateFieldSet(this, _isAuthed, true);
-            if (__classPrivateFieldGet(this, _messageCallback))
-                __classPrivateFieldGet(this, _messageCallback).call(this, 'authorized', payload ? yield decrypt(payload, __classPrivateFieldGet(this, _sessionId_1)) : payload);
+            __classPrivateFieldSet(this, _Connect_lastConnect, (0, tools_1.getTime)(), "f");
+            const payload = yield __classPrivateFieldGet(this, _Connect_connect, "f").get('authentication');
+            __classPrivateFieldSet(this, _Connect_isAuthed, true, "f");
+            if (__classPrivateFieldGet(this, _Connect_messageCallback, "f"))
+                __classPrivateFieldGet(this, _Connect_messageCallback, "f").call(this, 'authorized', payload ? yield decrypt(payload, __classPrivateFieldGet(this, _Connect_sessionId, "f")) : payload);
         }))
             .catch(err => {
+            var _a;
             this._logTechnical(text_1.ERRORS.service.failedAuth);
-            __classPrivateFieldSet(this, _isAuthed, false);
-            __classPrivateFieldSet(this, _connectionCounter, +__classPrivateFieldGet(this, _connectionCounter) + 1);
+            __classPrivateFieldSet(this, _Connect_isAuthed, false, "f");
+            __classPrivateFieldSet(this, _Connect_connectionCounter, (_a = __classPrivateFieldGet(this, _Connect_connectionCounter, "f"), _a++, _a), "f");
             this._logTechnical('Setting lastConnect timestamp.');
-            __classPrivateFieldSet(this, _lastConnect, tools_1.getTime());
+            __classPrivateFieldSet(this, _Connect_lastConnect, (0, tools_1.getTime)(), "f");
             this._logApiError(text_1.ERRORS.connect.on.connect.authSocket, err);
         });
     }
     _authSocket() {
-        this._logTechnical(tools_1.makeString(text_1.MESSAGES.technical.running, ['authSocket']));
+        this._logTechnical((0, tools_1.makeString)(text_1.MESSAGES.technical.running, ['authSocket']));
         try {
             this._logTechnical('Service (authSocket) is trying to re-authenticate...');
-            return __classPrivateFieldGet(this, _connect).reAuthenticate().catch(() => __awaiter(this, void 0, void 0, function* () {
-                this._logTechnical(tools_1.makeString(text_1.ERRORS.service.failedTo, ['authSocket', 're-authenticate', 'authentication']));
-                return __classPrivateFieldGet(this, _connect).authenticate(Object.assign({ strategy: 'local' }, (yield authEncrypt(Object.assign({}, __classPrivateFieldGet(this, _auth)), __classPrivateFieldGet(this, _sessionId_1)))))
+            return __classPrivateFieldGet(this, _Connect_connect, "f").reAuthenticate().catch(() => __awaiter(this, void 0, void 0, function* () {
+                this._logTechnical((0, tools_1.makeString)(text_1.ERRORS.service.failedTo, ['authSocket', 're-authenticate', 'authentication']));
+                return __classPrivateFieldGet(this, _Connect_connect, "f")
+                    .authenticate(Object.assign({ strategy: 'local' }, (yield authEncrypt(Object.assign({}, __classPrivateFieldGet(this, _Connect_auth, "f")), __classPrivateFieldGet(this, _Connect_sessionId, "f")))))
                     .catch(err => {
                     // if not
                     this._logApiError(text_1.ERRORS.connect.authenticate, err);
                     this._logTechnical('Set connectionCounter to MAX+1.');
-                    __classPrivateFieldSet(this, _connectionCounter, config_1.connectionTriesMax + 1);
+                    __classPrivateFieldSet(this, _Connect_connectionCounter, config_1.connectionTriesMax + 1, "f");
                     this._logTechnical('Set lastConnect timestamp.');
-                    __classPrivateFieldSet(this, _lastConnect, tools_1.getTime());
+                    __classPrivateFieldSet(this, _Connect_lastConnect, (0, tools_1.getTime)(), "f");
                 });
             }));
         }
         catch (err) {
             this._logApiError(text_1.ERRORS.connect.reAuthenticate, err);
             this._logTechnical('Set connectionCounter to MAX+1.');
-            __classPrivateFieldSet(this, _connectionCounter, config_1.connectionTriesMax + 1);
+            __classPrivateFieldSet(this, _Connect_connectionCounter, config_1.connectionTriesMax + 1, "f");
             this._logTechnical('Set lastConnect timestamp.');
-            __classPrivateFieldSet(this, _lastConnect, tools_1.getTime());
+            __classPrivateFieldSet(this, _Connect_lastConnect, (0, tools_1.getTime)(), "f");
             return;
         }
     }
@@ -465,25 +469,25 @@ class Connect {
         this._logTechnical(`Service (connect) recently (${last}) tried to connect. Will wait for ${timeout}s and try again.`);
     }
     _disconnect() {
-        if (__classPrivateFieldGet(this, _connect))
-            __classPrivateFieldGet(this, _connect).io.destroy();
+        if (__classPrivateFieldGet(this, _Connect_connect, "f"))
+            __classPrivateFieldGet(this, _Connect_connect, "f").io.destroy();
     }
     getService(path) {
-        return new ApiService(path, __classPrivateFieldGet(this, _connect), __classPrivateFieldGet(this, _services), __classPrivateFieldGet(this, _sessionId_1));
+        return new ApiService(path, __classPrivateFieldGet(this, _Connect_connect, "f"), __classPrivateFieldGet(this, _Connect_services, "f"), __classPrivateFieldGet(this, _Connect_sessionId, "f"));
     }
     isConnected() {
-        return __classPrivateFieldGet(this, _connect).io.io.readyState === 'open';
+        return __classPrivateFieldGet(this, _Connect_connect, "f").io.io.readyState === 'open';
     }
     connect() {
-        __classPrivateFieldGet(this, _socket).connect().open();
+        __classPrivateFieldGet(this, _Connect_socket, "f").connect().open();
     }
     setMessageCallback(fn) {
-        __classPrivateFieldSet(this, _messageCallback, fn);
+        __classPrivateFieldSet(this, _Connect_messageCallback, fn, "f");
     }
     isAuthorized() {
-        return __classPrivateFieldGet(this, _isAuthed);
+        return __classPrivateFieldGet(this, _Connect_isAuthed, "f");
     }
 }
 exports.Connect = Connect;
-_connect = new WeakMap(), _socket = new WeakMap(), _auth = new WeakMap(), _sessionId_1 = new WeakMap(), _connectionCounter = new WeakMap(), _lastConnect = new WeakMap(), _manuallyDisconnected = new WeakMap(), _messageCallback = new WeakMap(), _services = new WeakMap(), _isAuthed = new WeakMap();
+_Connect_connect = new WeakMap(), _Connect_socket = new WeakMap(), _Connect_auth = new WeakMap(), _Connect_sessionId = new WeakMap(), _Connect_connectionCounter = new WeakMap(), _Connect_lastConnect = new WeakMap(), _Connect_manuallyDisconnected = new WeakMap(), _Connect_messageCallback = new WeakMap(), _Connect_services = new WeakMap(), _Connect_isAuthed = new WeakMap();
 //# sourceMappingURL=connect.js.map

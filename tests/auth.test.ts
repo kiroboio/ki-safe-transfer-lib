@@ -19,7 +19,7 @@ describe('Authentication', () => {
       // @ts-ignore
       Service.createInstance({ test: 'test' });
     } catch (err) {
-      expect(err.message).toEqual('Data is malformed. [authDetails] has less or extra keys.');
+      expect((err as Error).message).toEqual('Data is malformed. [authDetails] has less or extra keys.');
     }
   });
   /*  // TODO: fix
