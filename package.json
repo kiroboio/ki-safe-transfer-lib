@@ -8,7 +8,8 @@
   "types": "./dist/index.d.ts",
   "homepage": "https://kiroboio.github.io/ki-safe-transfer-lib/",
   "scripts": {
-    "build": "rm -rf dist && tsc && rm -rf dist/tests && mv dist/src/* dist && rm -rf dist/src",
+    "build-old": "rm -rf dist && tsc && rm -rf dist/tests && mv dist/src/* dist && rm -rf dist/src",
+    "build": "tsc --project tsconfig.build.json",
     "prepare": "npm run build",
     "prepublishOnly": "npm test && npm run lint",
     "preversion": "npm run lint",
