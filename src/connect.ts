@@ -6,8 +6,6 @@ import feathers, { Application, HookContext, Service as FeathersService } from '
 import socket from '@feathersjs/socketio-client';
 import crypto from 'crypto-js';
 import io from 'socket.io-client';
-
-import isOnline from 'is-online';
 import { apiUrl as apiUrlFromConfig, connectionTimeout, connectionTriesMax } from './config';
 import { ERRORS, MESSAGES, WARNINGS } from './text';
 import { capitalize, diff, getTime, LogApiError, LogApiWarning, LogInfo, makeString, Type } from './tools';
@@ -446,7 +444,7 @@ class Connect {
       // this is backend
       setInterval(() => {
         this._logTechnical('Checking connection status...');
-        isOnline()
+        require('is-online')
           .then(() => {
             if (!this.#connect.io.connected && this.#connectionCounter <= connectionTriesMax) {
               this._logTechnical('Connection is online, but service is not');
