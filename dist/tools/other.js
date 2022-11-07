@@ -16,7 +16,7 @@ exports.capitalize = capitalize;
 const makeString = (template, params) => {
     if (typeof template !== 'string')
         return '';
-    if (!(0, validators_1.validateArray)(params, ['string', 'number']))
+    if (!validators_1.validateArray(params, ['string', 'number']))
         return '';
     let result = template;
     params.forEach((param, key) => {

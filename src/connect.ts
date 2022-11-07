@@ -1,17 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import feathers, { Application, HookContext, Service as FeathersService } from '@feathersjs/feathers';
-import { StorageWrapper } from '@feathersjs/authentication-client/lib/storage';
-import io from 'socket.io-client';
-import crypto from 'crypto-js';
-import socket from '@feathersjs/socketio-client';
 import { AuthenticationResult } from '@feathersjs/authentication';
-import auth, { Storage, MemoryStorage } from '@feathersjs/authentication-client';
+import auth, { MemoryStorage, Storage } from '@feathersjs/authentication-client';
+import { StorageWrapper } from '@feathersjs/authentication-client/lib/storage';
+import feathers, { Application, HookContext, Service as FeathersService } from '@feathersjs/feathers';
+import socket from '@feathersjs/socketio-client';
+import crypto from 'crypto-js';
+import io from 'socket.io-client';
 
-import { capitalize, makeString, diff, getTime, Type, LogInfo, LogApiWarning, LogApiError } from './tools';
-import { AnyValue, Either, AuthDetails, Maybe, MessageCallback } from './types/types';
+import isOnline from 'is-online';
+import { apiUrl as apiUrlFromConfig, connectionTimeout, connectionTriesMax } from './config';
+import { ERRORS, MESSAGES, WARNINGS } from './text';
+import { capitalize, diff, getTime, LogApiError, LogApiWarning, LogInfo, makeString, Type } from './tools';
 import { ApiError } from './types/error';
-import { apiUrl as apiUrlFromConfig, connectionTriesMax, connectionTimeout } from './config';
-import { WARNINGS, ERRORS, MESSAGES } from './text';
+import { AnyValue, AuthDetails, Either, Maybe, MessageCallback } from './types/types';
 
 let apiUrl = apiUrlFromConfig;
 
@@ -295,6 +296,8 @@ class ApiService {
 class Connect {
   #connect: Application<unknown>;
 
+  // #internet: boolean;
+
   #socket: SocketIOClient.Socket;
 
   #auth: AuthDetails;
@@ -368,14 +371,21 @@ class Connect {
       }
     }
 
-    // @ts-expect-error - something wrong with the types
+    // const setInternet = (key: boolean) => {
+    //   this.#internet = key;
+    // };
+
+    // // When the internet is off
+    // window.addEventListener('offline', () => setInternet(false));
+    // // When the internet is on
+    // window.addEventListener('online', () => setInternet(true));
+
     this.#connect = connect.configure(auth({ storageKey: 'auth', storage: new safeStorage() }));
 
     // connect/disconnect event processes
     this._logTechnical('Service is setting up connect/disconnect listeners...');
 
     try {
-      // @ts-expect-error - something wrong with the types
       this.#connect.io.on('connect', (): void => {
         if (this.#messageCallback) this.#messageCallback('connected');
 
@@ -420,7 +430,6 @@ class Connect {
     }
 
     try {
-      // @ts-expect-error - something wrong with the types
       this.#connect.io.on('disconnect', (payload: string) => {
         this._logApiWarning(WARNINGS.connect.disconnect, capitalize(payload));
 
@@ -437,21 +446,14 @@ class Connect {
       // this is backend
       setInterval(() => {
         this._logTechnical('Checking connection status...');
-        fetch('https://google.com', {
-          method: 'FET',
-          cache: 'no-cache',
-          headers: { 'Content-Type': 'application/json' },
-          referrerPolicy: 'no-referrer',
-        })
+        isOnline()
           .then(() => {
-            // @ts-expect-error - something wrong with the types
             if (!this.#connect.io.connected && this.#connectionCounter <= connectionTriesMax) {
               this._logTechnical('Connection is online, but service is not');
 
               if (this.#manuallyDisconnected) this._logTechnical(MESSAGES.technical.connection.wontReconnect);
               else {
                 this._logTechnical('Reconnecting');
-                // @ts-expect-error - something wrong with the types
                 this.#connect.io.connect();
               }
             }
@@ -462,24 +464,19 @@ class Connect {
               );
           })
           .catch(() => {
-            // @ts-expect-error - something wrong with the types
             if (this.#connect.io.connected) {
               this._logTechnical(MESSAGES.technical.connection.willConnect);
-              // @ts-expect-error - something wrong with the types
               this.#connect.io.disconnect();
             }
           });
-      }, 3000);
+      }, 7000);
     } else {
       window.addEventListener('online', () => {
-        // @ts-expect-error - something wrong with the types
         if (!this.#connect.io.connected && this.#connectionCounter <= connectionTriesMax) {
           this._logTechnical(MESSAGES.technical.connection.willReConnect);
-          // @ts-expect-error - something wrong with the types
           this.#connect.io.connect();
         }
 
-        // @ts-expect-error - something wrong with the types
         if (!this.#connect.io.connected && this.#connectionCounter > connectionTriesMax)
           this._logApiWarning(MESSAGES.technical.connection.willNotReconnect);
       });
@@ -518,26 +515,21 @@ class Connect {
     try {
       this._logTechnical('Service (authSocket) is trying to re-authenticate...');
 
-      // @ts-expect-error - something wrong with the types
       return this.#connect.reAuthenticate().catch(async () => {
         this._logTechnical(makeString(ERRORS.service.failedTo, ['authSocket', 're-authenticate', 'authentication']));
-        return (
-          this.#connect
-            // @ts-expect-error - something wrong with the types
-            .authenticate({
-              strategy: 'local',
-              ...(await authEncrypt({ ...this.#auth }, this.#sessionId)),
-            })
-            // @ts-expect-error - something wrong with the types
-            .catch(err => {
-              // if not
-              this._logApiError(ERRORS.connect.authenticate, err);
-              this._logTechnical('Set connectionCounter to MAX+1.');
-              this.#connectionCounter = connectionTriesMax + 1;
-              this._logTechnical('Set lastConnect timestamp.');
-              this.#lastConnect = getTime();
-            })
-        );
+        return this.#connect
+          .authenticate({
+            strategy: 'local',
+            ...(await authEncrypt({ ...this.#auth }, this.#sessionId)),
+          })
+          .catch(err => {
+            // if not
+            this._logApiError(ERRORS.connect.authenticate, err);
+            this._logTechnical('Set connectionCounter to MAX+1.');
+            this.#connectionCounter = connectionTriesMax + 1;
+            this._logTechnical('Set lastConnect timestamp.');
+            this.#lastConnect = getTime();
+          });
       });
     } catch (err: any) {
       this._logApiError(ERRORS.connect.reAuthenticate, err);
@@ -574,7 +566,6 @@ class Connect {
   }
 
   protected _disconnect(): void {
-    // @ts-expect-error - something wrong with the types
     if (this.#connect) this.#connect.io.destroy();
   }
 
@@ -583,7 +574,6 @@ class Connect {
   }
 
   public isConnected() {
-    // @ts-expect-error - something wrong with the types
     return this.#connect.io.io.readyState === 'open';
   }
 

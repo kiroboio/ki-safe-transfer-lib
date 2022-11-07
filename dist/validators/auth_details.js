@@ -7,7 +7,7 @@ const text_1 = require("../text");
 function validateAuthDetails(details) {
     if (!details)
         throw new TypeError(`${text_1.ERRORS.validation.missingArgument}: authDetails.`);
-    (0, _1.validateObject)(details);
+    _1.validateObject(details);
     const objKeys = Object.keys(details);
     if (objKeys.length !== 2) {
         throw new TypeError(`${text_1.ERRORS.validation.malformedData} [authDetails] has less or extra keys.`);

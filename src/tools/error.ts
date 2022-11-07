@@ -1,7 +1,7 @@
-import { assoc, forEach, isNil, isEmpty } from 'ramda';
+import { assoc, forEach, isEmpty, isNil } from 'ramda';
 
-import { ResponseError } from '../types/error';
 import { Type } from '.';
+import { ResponseError } from '../types/error';
 
 export function makeApiResponseError(error: unknown): ResponseError {
   /** set default error object */
@@ -25,12 +25,9 @@ export function makeApiResponseError(error: unknown): ResponseError {
   }
 
   /** assigner function */
-  const assignerFn =
-    (data: Record<string, unknown>) =>
-    (key: string): void => {
-      // @ts-expect-error - something wrong with the types
-      if (shouldAssign(data[key], key)) response = assoc(key, data[key], response);
-    };
+  const assignerFn = (data: Record<string, unknown>) => (key: string): void => {
+    if (shouldAssign(data[key], key)) response = assoc(key, data[key], response);
+  };
 
   /** run for each of default fields */
   forEach(assignerFn(Type<Record<string, unknown>>(error)), ['name', 'message', 'code', 'data', 'errors']);

@@ -13,7 +13,7 @@ class Service extends connect_1.Connect {
         return Service.instance;
     }
     static createInstance(authDetails, url, messageCallback) {
-        (0, validators_1.validateAuthDetails)(authDetails);
+        validators_1.validateAuthDetails(authDetails);
         if (Service.instance)
             this.disconnect();
         Service.instance = new Service(authDetails, url, messageCallback);
@@ -23,7 +23,7 @@ class Service extends connect_1.Connect {
         var _a;
         if (Service.instance)
             Service.instance._disconnect();
-        (_a = (0, tools_1.Type)(Service)) === null || _a === void 0 ? true : delete _a.instance;
+        (_a = tools_1.Type(Service)) === null || _a === void 0 ? true : delete _a.instance;
     }
 }
 exports.Service = Service;

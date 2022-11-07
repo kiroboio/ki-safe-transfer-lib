@@ -1,6 +1,6 @@
 import feathers, { Application, Service as FeathersService } from '@feathersjs/feathers';
-import { AnyValue, AuthDetails, MessageCallback } from './types/types';
 import { ApiError } from './types/error';
+import { AnyValue, AuthDetails, MessageCallback } from './types/types';
 declare type FeathersEventType = 'created' | 'updated' | 'removed' | 'patched';
 declare class ApiService {
     #private;
