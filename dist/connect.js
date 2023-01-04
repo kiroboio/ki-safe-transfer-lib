@@ -44,15 +44,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 var _a;
-var _service, _sessionId, _connect, _socket, _auth, _sessionId_1, _connectionCounter, _lastConnect, _manuallyDisconnected, _messageCallback, _services, _isAuthed;
+var _service, _sessionId, _conn, _connect, _socket, _auth, _sessionId_1, _connectionCounter, _lastConnect, _manuallyDisconnected, _messageCallback, _services, _isAuthed;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ApiService = exports.Connect = void 0;
 const authentication_client_1 = __importStar(require("@feathersjs/authentication-client"));
 const feathers_1 = __importDefault(require("@feathersjs/feathers"));
 const socketio_client_1 = __importDefault(require("@feathersjs/socketio-client"));
 const crypto_js_1 = __importDefault(require("crypto-js"));
-const socket_io_client_1 = __importDefault(require("socket.io-client"));
 const is_online_1 = __importDefault(require("is-online"));
+const socket_io_client_1 = __importDefault(require("socket.io-client"));
 const config_1 = require("./config");
 const text_1 = require("./text");
 const tools_1 = require("./tools");
@@ -146,9 +146,31 @@ const decrypt = (payload, sessionId) => __awaiter(void 0, void 0, void 0, functi
     return JSON.parse(decrypted);
 });
 class ApiService {
-    constructor(path, app, services, sessionId) {
+    constructor({ path, app, services, sessionId, conn, }) {
         _service.set(this, void 0);
         _sessionId.set(this, void 0);
+        _conn.set(this, void 0);
+        this.ensureConnect = (func) => __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve, reject) => {
+                const checkInterval = 1000; // check every 2 seconds
+                const maxChecks = 30; // maximum number of checks to perform
+                let checkCount = 0; // counter for number of checks performed
+                const interval = setInterval(() => __awaiter(this, void 0, void 0, function* () {
+                    // perform check
+                    // console.log(eff.status);
+                    if (__classPrivateFieldGet(this, _conn).isAuthorized()) {
+                        clearInterval(interval);
+                        resolve(yield func());
+                    }
+                    checkCount++;
+                    // stop checking if maximum number of checks has been reached
+                    if (checkCount >= maxChecks) {
+                        clearInterval(interval);
+                        reject('timeout');
+                    }
+                }), checkInterval);
+            });
+        });
         let service = services[path];
         if (!service) {
             service = app.service(path);
@@ -157,49 +179,67 @@ class ApiService {
         }
         __classPrivateFieldSet(this, _service, service);
         __classPrivateFieldSet(this, _sessionId, sessionId);
+        __classPrivateFieldSet(this, _conn, conn);
     }
     get(id, params) {
-        var _a;
         if (!__classPrivateFieldGet(this, _service)) {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             return new Promise((_resolve, reject) => reject('No Service'));
         }
-        return (_a = __classPrivateFieldGet(this, _service)) === null || _a === void 0 ? void 0 : _a.get(id, params);
+        return this.ensureConnect(() => {
+            var _a;
+            return (_a = __classPrivateFieldGet(this, _service)) === null || _a === void 0 ? void 0 : _a.get(id, params);
+        });
     }
     find(params) {
         if (!__classPrivateFieldGet(this, _service)) {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             return new Promise((_resolve, reject) => reject('No Service'));
         }
-        return __classPrivateFieldGet(this, _service).find(params);
+        return this.ensureConnect(() => {
+            var _a;
+            return (_a = __classPrivateFieldGet(this, _service)) === null || _a === void 0 ? void 0 : _a.find(params);
+        });
     }
     create(data, params) {
         if (!__classPrivateFieldGet(this, _service)) {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             return new Promise((_resolve, reject) => reject('No Service'));
         }
-        return __classPrivateFieldGet(this, _service).create(data, params);
+        return this.ensureConnect(() => {
+            var _a;
+            return (_a = __classPrivateFieldGet(this, _service)) === null || _a === void 0 ? void 0 : _a.create(data, params);
+        });
     }
     update(id, data, params) {
         if (!__classPrivateFieldGet(this, _service)) {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             return new Promise((_resolve, reject) => reject('No Service'));
         }
-        return __classPrivateFieldGet(this, _service).update(id, data, params);
+        return this.ensureConnect(() => {
+            var _a;
+            return (_a = __classPrivateFieldGet(this, _service)) === null || _a === void 0 ? void 0 : _a.update(id, data, params);
+        });
     }
     patch(id, data, params) {
         if (!__classPrivateFieldGet(this, _service)) {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             return new Promise((_resolve, reject) => reject('No Service'));
         }
-        return __classPrivateFieldGet(this, _service).patch(id, data, params);
+        return this.ensureConnect(() => {
+            var _a;
+            return (_a = __classPrivateFieldGet(this, _service)) === null || _a === void 0 ? void 0 : _a.patch(id, data, params);
+        });
     }
     remove(id, params) {
         if (!__classPrivateFieldGet(this, _service)) {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             return new Promise((_resolve, reject) => reject('No Service'));
         }
-        return __classPrivateFieldGet(this, _service).remove(id, params);
+        return this.ensureConnect(() => {
+            var _a;
+            return (_a = __classPrivateFieldGet(this, _service)) === null || _a === void 0 ? void 0 : _a.remove(id, params);
+        });
     }
     on(event, listener) {
         var _a;
@@ -248,7 +288,7 @@ class ApiService {
     }
 }
 exports.ApiService = ApiService;
-_service = new WeakMap(), _sessionId = new WeakMap();
+_service = new WeakMap(), _sessionId = new WeakMap(), _conn = new WeakMap();
 class Connect {
     constructor(authDetails, url, messageCallback) {
         _connect.set(this, void 0);
@@ -472,7 +512,13 @@ class Connect {
             __classPrivateFieldGet(this, _connect).io.destroy();
     }
     getService(path) {
-        return new ApiService(path, __classPrivateFieldGet(this, _connect), __classPrivateFieldGet(this, _services), __classPrivateFieldGet(this, _sessionId_1));
+        return new ApiService({
+            path,
+            app: __classPrivateFieldGet(this, _connect),
+            services: __classPrivateFieldGet(this, _services),
+            sessionId: __classPrivateFieldGet(this, _sessionId_1),
+            conn: this,
+        });
     }
     isConnected() {
         return __classPrivateFieldGet(this, _connect).io.io.readyState === 'open';

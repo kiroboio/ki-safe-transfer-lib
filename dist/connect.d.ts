@@ -4,6 +4,7 @@ import { AnyValue, AuthDetails, MessageCallback } from './types/types';
 declare type FeathersEventType = 'created' | 'updated' | 'removed' | 'patched';
 declare class ApiService {
     #private;
+    private ensureConnect;
     get(id: string | number, params?: feathers.Params | undefined): Promise<unknown>;
     find(params?: feathers.Params | undefined): Promise<unknown>;
     create(data: Partial<unknown>, params?: feathers.Params): Promise<unknown>;
@@ -13,9 +14,15 @@ declare class ApiService {
     on(event: FeathersEventType, listener: (arg2: AnyValue) => AnyValue): void;
     removeAllListeners(event: FeathersEventType): void;
     static setHooks(service: FeathersService<unknown>, sessionId: number): void;
-    constructor(path: string, app: Application<unknown>, services: {
-        [key: string]: FeathersService<unknown>;
-    }, sessionId: number);
+    constructor({ path, app, services, sessionId, conn, }: {
+        path: string;
+        app: Application<unknown>;
+        services: {
+            [key: string]: FeathersService<unknown>;
+        };
+        sessionId: number;
+        conn: Connect;
+    });
 }
 declare class Connect {
     #private;

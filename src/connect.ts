@@ -2,13 +2,14 @@
 import { AuthenticationResult } from '@feathersjs/authentication';
 import auth, { MemoryStorage, Storage } from '@feathersjs/authentication-client';
 import { StorageWrapper } from '@feathersjs/authentication-client/lib/storage';
-import feathers, { Application, HookContext, Service as FeathersService } from '@feathersjs/feathers';
+import feathers, { Application, Service as FeathersService, HookContext } from '@feathersjs/feathers';
 import socket from '@feathersjs/socketio-client';
 import crypto from 'crypto-js';
+import isOnline from 'is-online';
 import io from 'socket.io-client';
 import { apiUrl as apiUrlFromConfig, connectionTimeout, connectionTriesMax } from './config';
 import { ERRORS, MESSAGES, WARNINGS } from './text';
-import { capitalize, diff, getTime, LogApiError, LogApiWarning, LogInfo, makeString, Type } from './tools';
+import { LogApiError, LogApiWarning, LogInfo, Type, capitalize, diff, getTime, makeString } from './tools';
 import { ApiError } from './types/error';
 import { AnyValue, AuthDetails, Either, Maybe, MessageCallback } from './types/types';
 
@@ -172,13 +173,45 @@ class ApiService {
 
   #sessionId: number;
 
+  #conn: Connect;
+
+  private ensureConnect = async (func: () => any) => {
+    return new Promise((resolve, reject) => {
+      const checkInterval = 1000; // check every 2 seconds
+
+      const maxChecks = 30; // maximum number of checks to perform
+
+      let checkCount = 0; // counter for number of checks performed
+
+      const interval = setInterval(async () => {
+        // perform check
+        // console.log(eff.status);
+
+        if (this.#conn.isAuthorized()) {
+          clearInterval(interval);
+          resolve(await func());
+        }
+
+        checkCount++;
+
+        // stop checking if maximum number of checks has been reached
+        if (checkCount >= maxChecks) {
+          clearInterval(interval);
+          reject('timeout');
+        }
+      }, checkInterval);
+    });
+  };
+
   public get(id: string | number, params?: feathers.Params | undefined): Promise<unknown> {
     if (!this.#service) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       return new Promise((_resolve, reject) => reject('No Service'));
     }
 
-    return this.#service?.get(id, params);
+    return this.ensureConnect(() => {
+      return this.#service?.get(id, params);
+    });
   }
 
   public find(params?: feathers.Params | undefined): Promise<unknown> {
@@ -187,7 +220,9 @@ class ApiService {
       return new Promise((_resolve, reject) => reject('No Service'));
     }
 
-    return this.#service.find(params);
+    return this.ensureConnect(() => {
+      return this.#service?.find(params);
+    });
   }
 
   public create(data: Partial<unknown>, params?: feathers.Params): Promise<unknown> {
@@ -196,7 +231,9 @@ class ApiService {
       return new Promise((_resolve, reject) => reject('No Service'));
     }
 
-    return this.#service.create(data, params);
+    return this.ensureConnect(() => {
+      return this.#service?.create(data, params);
+    });
   }
 
   public update(id: feathers.Id, data: Partial<unknown>, params?: feathers.Params): Promise<unknown> {
@@ -205,7 +242,9 @@ class ApiService {
       return new Promise((_resolve, reject) => reject('No Service'));
     }
 
-    return this.#service.update(id, data, params);
+    return this.ensureConnect(() => {
+      return this.#service?.update(id, data, params);
+    });
   }
 
   public patch(id: feathers.Id, data: Partial<unknown>, params?: feathers.Params): Promise<unknown> {
@@ -214,7 +253,9 @@ class ApiService {
       return new Promise((_resolve, reject) => reject('No Service'));
     }
 
-    return this.#service.patch(id, data, params);
+    return this.ensureConnect(() => {
+      return this.#service?.patch(id, data, params);
+    });
   }
 
   public remove(id: feathers.Id, params?: feathers.Params | undefined): Promise<unknown> {
@@ -223,7 +264,9 @@ class ApiService {
       return new Promise((_resolve, reject) => reject('No Service'));
     }
 
-    return this.#service.remove(id, params);
+    return this.ensureConnect(() => {
+      return this.#service?.remove(id, params);
+    });
   }
 
   public on(event: FeathersEventType, listener: (arg2: AnyValue) => AnyValue) {
@@ -272,12 +315,19 @@ class ApiService {
     });
   }
 
-  constructor(
-    path: string,
-    app: Application<unknown>,
-    services: { [key: string]: FeathersService<unknown> },
-    sessionId: number,
-  ) {
+  constructor({
+    path,
+    app,
+    services,
+    sessionId,
+    conn,
+  }: {
+    path: string;
+    app: Application<unknown>;
+    services: { [key: string]: FeathersService<unknown> };
+    sessionId: number;
+    conn: Connect;
+  }) {
     let service = services[path];
 
     if (!service) {
@@ -288,6 +338,7 @@ class ApiService {
 
     this.#service = service;
     this.#sessionId = sessionId;
+    this.#conn = conn;
   }
 }
 
@@ -444,7 +495,7 @@ class Connect {
       // this is backend
       setInterval(() => {
         this._logTechnical('Checking connection status...');
-        require('is-online')
+        isOnline()
           .then(() => {
             if (!this.#connect.io.connected && this.#connectionCounter <= connectionTriesMax) {
               this._logTechnical('Connection is online, but service is not');
@@ -568,7 +619,13 @@ class Connect {
   }
 
   public getService(path: string): ApiService {
-    return new ApiService(path, this.#connect, this.#services, this.#sessionId);
+    return new ApiService({
+      path,
+      app: this.#connect,
+      services: this.#services,
+      sessionId: this.#sessionId,
+      conn: this,
+    });
   }
 
   public isConnected() {
