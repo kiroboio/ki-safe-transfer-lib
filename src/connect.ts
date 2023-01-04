@@ -5,8 +5,7 @@ import { StorageWrapper } from '@feathersjs/authentication-client/lib/storage';
 import feathers, { Application, Service as FeathersService, HookContext } from '@feathersjs/feathers';
 import socket from '@feathersjs/socketio-client';
 import crypto from 'crypto-js';
-import * as isOnline from 'is-online';
-
+import isOnline from 'is-online';
 import io from 'socket.io-client';
 import { apiUrl as apiUrlFromConfig, connectionTimeout, connectionTriesMax } from './config';
 import { ERRORS, MESSAGES, WARNINGS } from './text';
@@ -494,9 +493,9 @@ class Connect {
     // set internet connection check
     if (typeof window === 'undefined') {
       // this is backend
-      setInterval(() => {
+      setInterval(async () => {
         this._logTechnical('Checking connection status...');
-        isOnline()
+        await isOnline()
           .then(() => {
             if (!this.#connect.io.connected && this.#connectionCounter <= connectionTriesMax) {
               this._logTechnical('Connection is online, but service is not');
