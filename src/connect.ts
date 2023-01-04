@@ -5,8 +5,9 @@ import { StorageWrapper } from '@feathersjs/authentication-client/lib/storage';
 import feathers, { Application, Service as FeathersService, HookContext } from '@feathersjs/feathers';
 import socket from '@feathersjs/socketio-client';
 import crypto from 'crypto-js';
-import isOnline from 'is-online';
 import io from 'socket.io-client';
+
+import http2 from 'http2';
 import { apiUrl as apiUrlFromConfig, connectionTimeout, connectionTriesMax } from './config';
 import { ERRORS, MESSAGES, WARNINGS } from './text';
 import { LogApiError, LogApiWarning, LogInfo, Type, capitalize, diff, getTime, makeString } from './tools';
@@ -495,7 +496,23 @@ class Connect {
       // this is backend
       setInterval(async () => {
         this._logTechnical('Checking connection status...');
-        await isOnline()
+
+        function isConnected() {
+          return new Promise(resolve => {
+            const client = http2.connect('https://www.google.com');
+
+            client.on('connect', () => {
+              resolve(true);
+              client.destroy();
+            });
+            client.on('error', () => {
+              resolve(false);
+              client.destroy();
+            });
+          });
+        }
+
+        isConnected()
           .then(() => {
             if (!this.#connect.io.connected && this.#connectionCounter <= connectionTriesMax) {
               this._logTechnical('Connection is online, but service is not');
