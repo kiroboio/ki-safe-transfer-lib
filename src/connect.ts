@@ -5,7 +5,8 @@ import { StorageWrapper } from '@feathersjs/authentication-client/lib/storage';
 import feathers, { Application, Service as FeathersService, HookContext } from '@feathersjs/feathers';
 import socket from '@feathersjs/socketio-client';
 import crypto from 'crypto-js';
-import isOnline from 'is-online';
+import * as isOnline from 'is-online';
+
 import io from 'socket.io-client';
 import { apiUrl as apiUrlFromConfig, connectionTimeout, connectionTriesMax } from './config';
 import { ERRORS, MESSAGES, WARNINGS } from './text';
