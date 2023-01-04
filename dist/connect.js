@@ -51,6 +51,7 @@ const authentication_client_1 = __importStar(require("@feathersjs/authentication
 const feathers_1 = __importDefault(require("@feathersjs/feathers"));
 const socketio_client_1 = __importDefault(require("@feathersjs/socketio-client"));
 const crypto_js_1 = __importDefault(require("crypto-js"));
+const is_online_1 = __importDefault(require("is-online"));
 const socket_io_client_1 = __importDefault(require("socket.io-client"));
 const config_1 = require("./config");
 const text_1 = require("./text");
@@ -405,9 +406,9 @@ class Connect {
         // set internet connection check
         if (typeof window === 'undefined') {
             // this is backend
-            setInterval(() => {
+            setInterval(() => __awaiter(this, void 0, void 0, function* () {
                 this._logTechnical('Checking connection status...');
-                require('isOnline')
+                yield is_online_1.default()
                     .then(() => {
                     if (!__classPrivateFieldGet(this, _connect).io.connected && __classPrivateFieldGet(this, _connectionCounter) <= config_1.connectionTriesMax) {
                         this._logTechnical('Connection is online, but service is not');
@@ -427,7 +428,7 @@ class Connect {
                         __classPrivateFieldGet(this, _connect).io.disconnect();
                     }
                 });
-            }, 7000);
+            }), 7000);
         }
         else {
             window.addEventListener('online', () => {
