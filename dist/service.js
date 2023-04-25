@@ -6,9 +6,6 @@ Object.defineProperty(exports, "ApiService", { enumerable: true, get: function (
 const tools_1 = require("./tools");
 const validators_1 = require("./validators");
 class Service extends connect_1.Connect {
-    constructor(authDetails, url, messageCallback) {
-        super(authDetails, url, messageCallback);
-    }
     static getInstance() {
         return Service.instance;
     }
@@ -24,6 +21,9 @@ class Service extends connect_1.Connect {
         if (Service.instance)
             Service.instance._disconnect();
         (_a = (0, tools_1.Type)(Service)) === null || _a === void 0 ? true : delete _a.instance;
+    }
+    constructor(authDetails, url, messageCallback) {
+        super(authDetails, url, messageCallback);
     }
 }
 exports.Service = Service;

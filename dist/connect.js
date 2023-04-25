@@ -31,16 +31,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
 var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
     if (kind === "m") throw new TypeError("Private method is not writable");
     if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
     return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
-};
-var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
-    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -148,18 +148,6 @@ const decrypt = (payload, sessionId) => __awaiter(void 0, void 0, void 0, functi
     return JSON.parse(decrypted);
 });
 class ApiService {
-    constructor(path, app, services, sessionId) {
-        _ApiService_service.set(this, void 0);
-        _ApiService_sessionId.set(this, void 0);
-        let service = services[path];
-        if (!service) {
-            service = app.service(path);
-            services[path] = service;
-            ApiService.setHooks(service, sessionId);
-        }
-        __classPrivateFieldSet(this, _ApiService_service, service, "f");
-        __classPrivateFieldSet(this, _ApiService_sessionId, sessionId, "f");
-    }
     get(id, params) {
         var _a;
         if (!__classPrivateFieldGet(this, _ApiService_service, "f")) {
@@ -247,6 +235,18 @@ class ApiService {
                 all: [(_context) => __awaiter(this, void 0, void 0, function* () { })],
             },
         });
+    }
+    constructor(path, app, services, sessionId) {
+        _ApiService_service.set(this, void 0);
+        _ApiService_sessionId.set(this, void 0);
+        let service = services[path];
+        if (!service) {
+            service = app.service(path);
+            services[path] = service;
+            ApiService.setHooks(service, sessionId);
+        }
+        __classPrivateFieldSet(this, _ApiService_service, service, "f");
+        __classPrivateFieldSet(this, _ApiService_sessionId, sessionId, "f");
     }
 }
 exports.ApiService = ApiService;

@@ -1,6 +1,6 @@
-export declare type AnyValue = any;
-export declare type Either<T, K> = T | K;
-export declare type Maybe<T> = T | undefined | null;
+export type AnyValue = any;
+export type Either<T, K> = T | K;
+export type Maybe<T> = T | undefined | null;
 export interface AuthDetails {
     key: string;
     secret: string;
@@ -111,7 +111,7 @@ export interface EventBusMessage {
     type: string;
     payload: unknown;
 }
-export declare type EventBus = (message: EventBusMessage) => void;
+export type EventBus = (message: EventBusMessage) => void;
 export interface EventBusProps {
     eventBus: EventBus;
     type: string;
@@ -122,7 +122,7 @@ export interface Results<T = unknown> {
     skip: number;
     total: number;
 }
-export declare type MessageCallback = (message: string, payload?: unknown) => void;
+export type MessageCallback = (message: string, payload?: unknown) => void;
 export interface EthTransferResponse {
     from: string;
     to: string;

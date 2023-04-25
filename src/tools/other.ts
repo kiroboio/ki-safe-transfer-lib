@@ -28,4 +28,4 @@ export const makeString = (template: string, params: (string | number)[]): strin
   return result;
 };
 
-export const Type = <T = AnyValue>(object: unknown): T => (object as unknown) as T;
+export const Type = <T = AnyValue>(object: unknown): T => object as unknown as T;

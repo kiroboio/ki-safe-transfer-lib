@@ -1,7 +1,7 @@
 import feathers, { Application, Service as FeathersService } from '@feathersjs/feathers';
 import { AnyValue, AuthDetails, MessageCallback } from './types/types';
 import { ApiError } from './types/error';
-declare type FeathersEventType = 'created' | 'updated' | 'removed' | 'patched';
+type FeathersEventType = 'created' | 'updated' | 'removed' | 'patched';
 declare class ApiService {
     #private;
     get(id: string | number, params?: feathers.Params | undefined): Promise<unknown>;
