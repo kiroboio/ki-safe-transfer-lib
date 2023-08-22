@@ -12,6 +12,7 @@ declare class ApiService {
     remove(id: feathers.Id, params?: feathers.Params | undefined): Promise<unknown>;
     on(event: FeathersEventType, listener: (arg2: AnyValue) => AnyValue): void;
     removeAllListeners(event: FeathersEventType): void;
+    removeListener(event: FeathersEventType, listener: (arg2: AnyValue) => AnyValue): void;
     static setHooks(service: FeathersService<unknown>, sessionId: number): void;
     constructor(path: string, app: Application<unknown>, services: {
         [key: string]: FeathersService<unknown>;

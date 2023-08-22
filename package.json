@@ -1,6 +1,6 @@
 {
   "name": "@kiroboio/fct-service",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Safe Transfer library (light version)",
   "author": "Kirobo",
   "license": "LGPL-3.0-only",
@@ -20,7 +20,7 @@
     "test:push": "CI=true jest --unhandled-rejections=none --testTimeout=15000",
     "dev:production": "export NODE_ENV=production && ts-node-dev ./tests/client.ts",
     "dev": "NODE_ENV='development' ts-node-dev -r tsconfig-paths/register ./tests/client.ts",
-    "lint": "eslint --cache --ext .js,.jsx,.ts,.tsx src"
+    "lint": "eslint --fix --cache --ext .js,.jsx,.ts,.tsx src"
   },
   "files": [
     "/dist"

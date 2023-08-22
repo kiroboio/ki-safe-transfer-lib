@@ -201,6 +201,10 @@ class ApiService {
         var _a;
         (_a = __classPrivateFieldGet(this, _ApiService_service, "f")) === null || _a === void 0 ? void 0 : _a.removeAllListeners(event);
     }
+    removeListener(event, listener) {
+        var _a;
+        (_a = __classPrivateFieldGet(this, _ApiService_service, "f")) === null || _a === void 0 ? void 0 : _a.removeListener(event, listener);
+    }
     static setHooks(service, sessionId) {
         service.hooks({
             before: {
