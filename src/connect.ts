@@ -339,8 +339,9 @@ class Connect {
 
     const connect = feathers().configure(
       socket(this.#socket, {
-        timeout: 20000,
-      }),
+        timeout: 30000,
+        maxHttpBufferSize: 1e8,
+      } as any),
     );
 
     class safeStorage implements Storage {

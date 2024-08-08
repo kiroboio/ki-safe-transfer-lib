@@ -283,7 +283,8 @@ class Connect {
             }
         });
         const connect = (0, feathers_1.default)().configure((0, socketio_client_1.default)(__classPrivateFieldGet(this, _Connect_socket, "f"), {
-            timeout: 20000,
+            timeout: 30000,
+            maxHttpBufferSize: 1e8,
         }));
         class safeStorage {
             constructor(key = Math.random().toString(36).substring(7) + Math.random().toString(36).substring(7)) {
